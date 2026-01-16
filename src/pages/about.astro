@@ -1,0 +1,31 @@
+---
+import Page from '../layouts/Page.astro';
+import { t } from '../utils/i18n';
+---
+
+<Page title={t('about.title', 'en')}>
+  <p>
+    Hi, I'm <strong>Jabriel</strong>, a game engine programmer and game developer.
+  </p>
+
+  <h2>About This Site</h2>
+  <p>
+    <strong>Space Radio</strong> is my personal blog where I share thoughts on game development,
+    programming, and life. The name comes from the idea of sending signals out into the universe —
+    broadcasting ideas, discoveries, and stories into the digital void.
+  </p>
+
+  <h2>What I Do</h2>
+  <ul>
+    <li>Game engine programming (primarily Unreal Engine)</li>
+    <li>Graphics programming and rendering</li>
+    <li>Web development</li>
+    <li>Open source projects</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>
+    Feel free to reach out via <a href="https://github.com/jukrb0x">GitHub</a> or
+    <a href="https://x.com">Twitter</a>.
+  </p>
+</Page>

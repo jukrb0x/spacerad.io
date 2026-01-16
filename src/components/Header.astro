@@ -1,0 +1,87 @@
+---
+import { SITE_TITLE, NAV_LINKS } from '../consts';
+import { getLangFromUrl, t, getLocalizedPath } from '../utils/i18n';
+import ThemeToggle from './ThemeToggle.vue';
+import LanguageSwitch from './LanguageSwitch.vue';
+
+const lang = getLangFromUrl(Astro.url);
+const currentPath = Astro.url.pathname.replace(/^\/(zh)/, '') || '/';
+---
+
+<header class="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+  <nav class="container flex items-center justify-between h-16">
+    <!-- Logo -->
+    <a href={lang === 'zh' ? '/zh' : '/'} class="flex items-center gap-2 font-semibold text-lg hover:no-underline">
+      <span class="i-ph:radio text-2xl text-accent"></span>
+      <span>{SITE_TITLE}</span>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex items-center gap-6">
+      {NAV_LINKS.map(link => (
+        <a
+          href={getLocalizedPath(link.href, lang)}
+          class:list={[
+            'text-secondary hover:text-primary transition-colors',
+            { 'text-primary font-medium': currentPath === link.href || currentPath.startsWith(link.href + '/') }
+          ]}
+        >
+          {lang === 'zh' ? link.labelZh : link.label}
+        </a>
+      ))}
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2">
+      <!-- Search trigger -->
+      <button
+        id="search-trigger"
+        class="btn-ghost p-2 rounded-lg"
+        aria-label={t('search.trigger', lang)}
+      >
+        <span class="i-ph:magnifying-glass text-xl"></span>
+      </button>
+
+      <!-- Theme toggle -->
+      <ThemeToggle client:load />
+
+      <!-- Language switch -->
+      <LanguageSwitch currentLang={lang} currentPath={currentPath} client:load />
+
+      <!-- Mobile menu button -->
+      <button
+        id="mobile-menu-toggle"
+        class="md:hidden btn-ghost p-2 rounded-lg"
+        aria-label="Toggle menu"
+      >
+        <span class="i-ph:list text-xl"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Navigation -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-border">
+    <div class="container py-4 flex flex-col gap-2">
+      {NAV_LINKS.map(link => (
+        <a
+          href={getLocalizedPath(link.href, lang)}
+          class:list={[
+            'py-2 px-4 rounded-lg text-secondary hover:text-primary hover:bg-surface transition-colors',
+            { 'text-primary bg-surface font-medium': currentPath === link.href }
+          ]}
+        >
+          {lang === 'zh' ? link.labelZh : link.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('mobile-menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+
+  toggle?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden');
+  });
+</script>

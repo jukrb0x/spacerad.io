@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import { t } from '../../utils/i18n';
+
+const posts = await getCollection('posts', ({ data }) => {
+  return data.lang === 'zh' && !data.draft;
+});
+
+const recentPosts = posts
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <!-- Hero Section -->
+  <section class="container py-16 md:py-24">
+    <div class="max-w-2xl">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        {t('home.welcome', 'zh')}
+        <span class="i-ph:radio-fill text-accent ml-2"></span>
+      </h1>
+      <p class="text-xl text-secondary">
+        {t('home.description', 'zh')}
+      </p>
+    </div>
+  </section>
+
+  <!-- Recent Posts -->
+  <section class="container pb-16">
+    <h2 class="text-2xl font-bold mb-8">最新文章</h2>
+    <div class="space-y-4">
+      {recentPosts.map(post => (
+        <PostCard post={post} lang="zh" basePath="/zh/blog" />
+      ))}
+    </div>
+    {posts.length > 5 && (
+      <div class="mt-8">
+        <a href="/zh/blog" class="btn-primary">
+          查看所有文章
+          <span class="i-ph:arrow-right ml-2"></span>
+        </a>
+      </div>
+    )}
+  </section>
+</BaseLayout>

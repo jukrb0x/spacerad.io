@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => {
+    return data.lang === 'en' && !data.draft;
+  });
+
+  // Get all unique tags
+  const allTags = [...new Set(posts.flatMap(post => post.data.tag || []))];
+
+  return allTags.map(tag => ({
+    params: { tag: tag.toLowerCase() },
+    props: {
+      tag,
+      posts: posts.filter(post =>
+        post.data.tag?.some(t => t.toLowerCase() === tag.toLowerCase())
+      ),
+    },
+  }));
+}
+
+interface Props {
+  tag: string;
+  posts: Awaited<ReturnType<typeof getCollection<'posts'>>>;
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tag}`} description={`Posts tagged with "${tag}"`}>
+  <div class="container py-8">
+    <header class="mb-12">
+      <a href="/tags" class="text-secondary hover:text-primary text-sm mb-4 inline-flex items-center gap-1">
+        <span class="i-ph:arrow-left"></span>
+        All tags
+      </a>
+      <h1 class="text-3xl md:text-4xl font-bold">#{tag}</h1>
+      <p class="text-secondary mt-2">{posts.length} post{posts.length !== 1 ? 's' : ''}</p>
+    </header>
+
+    <PostList posts={posts} lang="en" basePath="/blog" />
+  </div>
+</BaseLayout>

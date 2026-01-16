@@ -1,0 +1,47 @@
+---
+import { SITE_TITLE, SOCIAL_LINKS } from '../consts';
+import { getLangFromUrl, t } from '../utils/i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border mt-auto">
+  <div class="container py-8">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <!-- Copyright -->
+      <p class="text-secondary text-sm">
+        &copy; {year} {SITE_TITLE}. {t('footer.copyright', lang)}
+      </p>
+
+      <!-- Social Links -->
+      <div class="flex items-center gap-4">
+        <a
+          href={SOCIAL_LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-secondary hover:text-primary transition-colors"
+          aria-label="GitHub"
+        >
+          <span class="i-ph:github-logo text-xl"></span>
+        </a>
+        <a
+          href={SOCIAL_LINKS.twitter}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-secondary hover:text-primary transition-colors"
+          aria-label="Twitter"
+        >
+          <span class="i-ph:twitter-logo text-xl"></span>
+        </a>
+        <a
+          href="/rss.xml"
+          class="text-secondary hover:text-primary transition-colors"
+          aria-label="RSS Feed"
+        >
+          <span class="i-ph:rss text-xl"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
