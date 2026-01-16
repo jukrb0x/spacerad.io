@@ -1,0 +1,35 @@
+---
+import FormattedDate from './FormattedDate.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+  lang?: 'en' | 'zh';
+  basePath?: string;
+}
+
+const { post, lang = 'en', basePath = '/blog' } = Astro.props;
+const { title, date, description, tag = [] } = post.data;
+const slug = post.id.replace(/^(en|zh)\//, '');
+---
+
+<article class="card hover:border-accent transition-colors group">
+  <a href={`${basePath}/${slug}`} class="block hover:no-underline">
+    <h2 class="text-xl font-semibold text-primary group-hover:text-accent transition-colors">
+      {title}
+    </h2>
+    <p class="text-secondary text-sm mt-2">
+      <FormattedDate date={date} lang={lang} />
+    </p>
+    {description && (
+      <p class="text-secondary mt-3 line-clamp-2">{description}</p>
+    )}
+  </a>
+  {tag.length > 0 && (
+    <div class="flex flex-wrap gap-2 mt-4">
+      {tag.slice(0, 3).map(t => (
+        <span class="text-xs text-muted">#{t}</span>
+      ))}
+    </div>
+  )}
+</article>
