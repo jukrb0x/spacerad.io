@@ -6,21 +6,21 @@ const lang = getLangFromUrl(Astro.url);
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t border-border mt-auto">
+<footer class="border-t border-border neon-border-top mt-auto">
   <div class="container py-8">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <!-- Copyright -->
-      <p class="text-secondary text-sm">
-        &copy; {year} {SITE_TITLE}. {t('footer.copyright', lang)}
+      <!-- Copyright with terminal style -->
+      <p class="text-secondary text-sm font-mono tracking-wide">
+        <span class="text-accent">//</span> &copy; {year} {SITE_TITLE}
       </p>
 
-      <!-- Social Links -->
+      <!-- Social Links with neon hover -->
       <div class="flex items-center gap-4">
         <a
           href={SOCIAL_LINKS.github}
           target="_blank"
           rel="noopener noreferrer"
-          class="text-secondary hover:text-primary transition-colors"
+          class="text-secondary hover:text-neon-cyan hover:[filter:drop-shadow(0_0_8px_rgba(0,212,255,0.5))] transition-all duration-300"
           aria-label="GitHub"
         >
           <span class="i-ph:github-logo text-xl"></span>
@@ -29,14 +29,14 @@ const year = new Date().getFullYear();
           href={SOCIAL_LINKS.twitter}
           target="_blank"
           rel="noopener noreferrer"
-          class="text-secondary hover:text-primary transition-colors"
+          class="text-secondary hover:text-neon-magenta hover:[filter:drop-shadow(0_0_8px_rgba(255,0,110,0.5))] transition-all duration-300"
           aria-label="Twitter"
         >
           <span class="i-ph:twitter-logo text-xl"></span>
         </a>
         <a
           href="/rss.xml"
-          class="text-secondary hover:text-primary transition-colors"
+          class="text-secondary hover:text-neon-yellow hover:[filter:drop-shadow(0_0_8px_rgba(255,190,11,0.5))] transition-all duration-300"
           aria-label="RSS Feed"
         >
           <span class="i-ph:rss text-xl"></span>

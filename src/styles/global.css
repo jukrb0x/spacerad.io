@@ -22,32 +22,51 @@ p, h1, h2, h3, h4, h5, h6 {
 
 /* Space Radio Theme Tokens */
 :root {
-  /* Light theme - Modern, clean with accent */
+  /* Light theme - Clean with tech hints */
   --color-primary: #0a0a0a;
   --color-secondary: #525252;
   --color-muted: #a3a3a3;
   --color-background: #fafafa;
   --color-surface: #ffffff;
+  --color-surface-elevated: #f5f5f5;
   --color-border: #e5e5e5;
-  --color-accent: #6366f1;
-  --color-accent-soft: #eef2ff;
+  --color-accent: #0891b2;
+  --color-accent-dim: #0e7490;
+  --color-accent-soft: #ecfeff;
+  --color-accent-glow: rgba(8, 145, 178, 0.3);
 
-  /* Cyberpunk accent colors */
+  /* Neon colors */
   --color-neon-cyan: #00d4ff;
   --color-neon-magenta: #ff006e;
   --color-neon-yellow: #ffbe0b;
+
+  /* Glow intensities */
+  --glow-sm: 0 0 5px;
+  --glow-md: 0 0 10px;
+  --glow-lg: 0 0 20px;
+  --glow-xl: 0 0 40px;
 }
 
 [data-theme='dark'] {
-  /* Dark theme - Spaceship cockpit inspired */
-  --color-primary: #fafafa;
-  --color-secondary: #a3a3a3;
-  --color-muted: #737373;
-  --color-background: #0a0a0a;
-  --color-surface: #171717;
-  --color-border: #262626;
-  --color-accent: #818cf8;
-  --color-accent-soft: #1e1b4b;
+  /* Cyberpunk Dark Theme */
+  --color-primary: #e0e0e0;
+  --color-secondary: #9ca3af;
+  --color-muted: #6b7280;
+  --color-background: #050508;
+  --color-surface: #0d0d12;
+  --color-surface-elevated: #141420;
+  --color-border: #1f1f2e;
+
+  /* Primary Neon - Cyan (Radio Signal Theme) */
+  --color-accent: #00d4ff;
+  --color-accent-dim: #00a8cc;
+  --color-accent-soft: #0a1a1f;
+  --color-accent-glow: rgba(0, 212, 255, 0.5);
+
+  /* Neon colors */
+  --color-neon-cyan: #00d4ff;
+  --color-neon-magenta: #ff006e;
+  --color-neon-yellow: #ffbe0b;
 }
 
 /* Base styles */
@@ -206,4 +225,98 @@ h4:hover .anchor-link {
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+/* ========================================
+   CYBERPUNK ANIMATIONS & EFFECTS
+   ======================================== */
+
+/* Keyframe Animations */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes glow-breathe {
+  0%, 100% {
+    text-shadow: 0 0 5px var(--color-accent-glow),
+                 0 0 10px var(--color-accent-glow);
+  }
+  50% {
+    text-shadow: 0 0 10px var(--color-accent-glow),
+                 0 0 20px var(--color-accent-glow),
+                 0 0 30px var(--color-accent-glow);
+  }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Cyberpunk background effects for dark theme */
+[data-theme='dark'] body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse at top, rgba(0, 212, 255, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(255, 0, 110, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Optional: Subtle grid pattern */
+[data-theme='dark'] body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Cyberpunk Typography */
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3 {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Neon text utility */
+.neon-text {
+  color: var(--color-accent);
+  text-shadow:
+    0 0 5px var(--color-accent-glow),
+    0 0 10px var(--color-accent-glow),
+    0 0 20px var(--color-accent-glow);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Neon border gradient for header/footer */
+.neon-border-bottom {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--color-accent), transparent) 1;
+}
+
+.neon-border-top {
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--color-accent), transparent) 1;
 }
