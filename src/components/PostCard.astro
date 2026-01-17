@@ -13,13 +13,19 @@ const { title, date, description, tag = [] } = post.data;
 const slug = post.id.replace(/^(en|zh)\//, '');
 ---
 
-<article class="card hover:border-accent transition-colors group">
+<article class="card-neon group relative overflow-hidden">
+  <!-- Corner accent decoration -->
+  <div class="absolute top-0 right-0 w-16 h-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+    <div class="absolute top-2 right-2 w-8 h-0.5 bg-accent"></div>
+    <div class="absolute top-2 right-2 w-0.5 h-8 bg-accent"></div>
+  </div>
+
   <a href={`${basePath}/${slug}`} class="block hover:no-underline">
-    <h2 class="text-xl font-semibold text-primary group-hover:text-accent transition-colors">
+    <h2 class="text-xl font-mono font-semibold text-primary group-hover:text-accent group-hover:[text-shadow:0_0_10px_var(--color-accent-glow)] transition-all duration-300">
       {title}
     </h2>
-    <p class="text-secondary text-sm mt-2">
-      <FormattedDate date={date} lang={lang} />
+    <p class="text-secondary text-sm mt-2 font-mono">
+      <span class="text-accent">//</span> <FormattedDate date={date} lang={lang} />
     </p>
     {description && (
       <p class="text-secondary mt-3 line-clamp-2">{description}</p>
@@ -27,9 +33,18 @@ const slug = post.id.replace(/^(en|zh)\//, '');
   </a>
   {tag.length > 0 && (
     <div class="flex flex-wrap gap-2 mt-4">
-      {tag.slice(0, 3).map(t => (
-        <span class="text-xs text-muted">#{t}</span>
-      ))}
+      {tag.slice(0, 3).map((t, i) => {
+        const colorClasses = [
+          'border-neon-cyan/50 text-neon-cyan',
+          'border-neon-magenta/50 text-neon-magenta',
+          'border-neon-yellow/50 text-neon-yellow'
+        ];
+        return (
+          <span class={`text-xs px-2 py-0.5 rounded border font-mono ${colorClasses[i % 3]}`}>
+            #{t}
+          </span>
+        );
+      })}
     </div>
   )}
 </article>

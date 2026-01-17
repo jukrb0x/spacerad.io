@@ -15,32 +15,64 @@ const recentPosts = posts
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
-  <!-- Hero Section -->
-  <section class="container py-16 md:py-24">
-    <div class="max-w-2xl">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">
-        {t('home.welcome', 'zh')}
-        <span class="i-ph:radio-fill text-accent ml-2"></span>
+  <!-- Hero Section - Cyberpunk Style -->
+  <section class="container py-16 md:py-24 relative">
+    <!-- Background glow effect -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-radial from-accent/5 to-transparent blur-3xl"></div>
+    </div>
+
+    <div class="max-w-2xl relative">
+      <!-- Decorative gradient line -->
+      <div class="w-20 h-0.5 bg-gradient-to-r from-accent to-neon-magenta mb-8"></div>
+
+      <!-- Main headline with neon effect -->
+      <h1 class="text-4xl md:text-6xl font-mono font-bold mb-6 tracking-tight">
+        <span class="block text-primary">来自宇宙的</span>
+        <span class="block text-accent neon-text" style="animation: glow-breathe 3s ease-in-out infinite;">
+          信号广播
+        </span>
+        <span class="i-ph:radio-fill text-accent ml-2 inline-block" style="animation: neon-pulse 2s ease-in-out infinite;"></span>
       </h1>
-      <p class="text-xl text-secondary">
-        {t('home.description', 'zh')}
+
+      <!-- Subtitle with terminal style -->
+      <p class="text-xl text-secondary font-mono leading-relaxed">
+        <span class="text-accent">&gt;</span> {t('home.description', 'zh')}
+        <span class="inline-block w-2 h-5 bg-accent ml-1" style="animation: blink 1s steps(1) infinite;"></span>
       </p>
+
+      <!-- Signal status indicator -->
+      <div class="mt-8 flex items-center gap-4 text-sm font-mono text-muted">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-accent" style="animation: neon-pulse 2s ease-in-out infinite;"></span>
+          信号在线
+        </span>
+        <span class="text-border">|</span>
+        <span>频率: 42.42 MHz</span>
+      </div>
     </div>
   </section>
 
-  <!-- Recent Posts -->
+  <!-- Recent Posts Section -->
   <section class="container pb-16">
-    <h2 class="text-2xl font-bold mb-8">最新文章</h2>
+    <div class="flex items-center gap-4 mb-8">
+      <h2 class="text-2xl font-mono font-bold uppercase tracking-wide">
+        <span class="text-accent">//</span> 最新传输
+      </h2>
+      <div class="flex-1 h-px bg-gradient-to-r from-border to-transparent"></div>
+    </div>
+
     <div class="space-y-4">
       {recentPosts.map(post => (
         <PostCard post={post} lang="zh" basePath="/zh/blog" />
       ))}
     </div>
+
     {posts.length > 5 && (
       <div class="mt-8">
-        <a href="/zh/blog" class="btn-primary">
-          查看所有文章
-          <span class="i-ph:arrow-right ml-2"></span>
+        <a href="/zh/blog" class="btn-primary inline-flex items-center gap-2 group">
+          查看所有传输
+          <span class="i-ph:arrow-right group-hover:translate-x-1 transition-transform"></span>
         </a>
       </div>
     )}
