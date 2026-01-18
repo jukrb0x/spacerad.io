@@ -1,18 +1,17 @@
 ---
 interface Props {
-  date: Date;
-  lang?: 'en' | 'zh';
+    date: Date;
 }
 
-const { date, lang = 'en' } = Astro.props;
-
-const formatted = date.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-});
+const { date } = Astro.props;
 ---
 
 <time datetime={date.toISOString()}>
-  {formatted}
+	{
+		date.toLocaleDateString('en-us', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		})
+	}
 </time>

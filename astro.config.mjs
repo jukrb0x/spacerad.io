@@ -1,48 +1,89 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
-import vue from '@astrojs/vue';
-import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
-import vercel from '@astrojs/vercel';
-import UnoCSS from '@unocss/astro';
-import pagefind from 'astro-pagefind';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
+import mdx from "@astrojs/mdx";
+import sitemap from "@astrojs/sitemap";
+import { defineConfig } from "astro/config";
+import UnoCSS from "unocss/astro";
+import icon from "astro-icon";
+import pagefind from "astro-pagefind";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeFigure from "rehype-figure";
+import rehypeImgSize from "rehype-img-size";
+import rehypeMermaid from "rehype-mermaid";
+import rehypePicture from "rehype-picture";
+import rehypeSlug from "rehype-slug";
+import { remarkAlert } from "remark-github-blockquote-alert";
+import { remarkModifiedTime } from "./remark-modified-time.mjs";
+
+// https://astro.build/config
 export default defineConfig({
-  site: 'https://spacerad.io',
-  output: 'static',
-  integrations: [
-    vue(),
-    mdx(),
-    sitemap(),
-    UnoCSS(),
-    pagefind(),
-  ],
-  adapter: vercel({
-    imageService: true,
-  }),
-  markdown: {
-    shikiConfig: {
-      themes: {
-        light: 'github-light',
-        dark: 'dracula',
-      },
-      defaultColor: false,
-    },
-    rehypePlugins: [
-      rehypeSlug,
-      [rehypeAutolinkHeadings, {
-        behavior: 'prepend',
-        properties: { class: 'anchor-link', ariaHidden: true, tabIndex: -1 },
-      }],
+    site: "https://example.com",
+    integrations: [
+        mdx(),
+        sitemap(),
+        UnoCSS({ injectReset: true }),
+        icon({
+            include: {
+                // Only include icons we actually use to reduce bundle size
+                ri: [
+                    "twitter-fill",
+                    "telegram-fill",
+                    "github-fill",
+                    "steam-fill",
+                    "douban-fill",
+                    "mail-fill",
+                    "rss-fill",
+                    "link",
+                    "share-line",
+                    "check-line",
+                    "heart-line",
+                    "heart-fill",
+                    "creative-commons-fill",
+                    "creative-commons-by-fill",
+                    "creative-commons-nc-fill",
+                    "creative-commons-sa-fill",
+                ],
+                "simple-icons": ["folo"],
+            },
+        }),
+        pagefind(),
     ],
-  },
-  i18n: {
-    defaultLocale: 'en',
-    locales: ['en', 'zh'],
-    routing: {
-      prefixDefaultLocale: false,
+    markdown: {
+        remarkPlugins: [remarkAlert, remarkModifiedTime],
+        shikiConfig: {
+            // 双主题配置：通过 CSS 变量控制，无需 !important
+            themes: {
+                light: "github-light",
+                dark: "dracula",
+            },
+            // 禁用默认颜色，让 CSS 完全控制主题切换
+            defaultColor: false,
+        },
+        syntaxHighlight: {
+            excludeLangs: ["mermaid"],
+        },
+        rehypePlugins: [
+            rehypeSlug,
+            [
+                rehypeAutolinkHeadings,
+                {
+                    behavior: "prepend",
+                    properties: {
+                        class: "anchor-link",
+                        ariaHidden: true,
+                        tabIndex: -1,
+                    },
+                },
+            ],
+            [
+                rehypeMermaid,
+                {
+                    strategy: "inline-svg", // 服务端渲染为内联 SVG
+                },
+            ],
+            rehypePicture,
+            [rehypeImgSize, { dir: "./public" }],
+            rehypeFigure,
+        ],
     },
-  },
 });
