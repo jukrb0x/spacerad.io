@@ -1,0 +1,254 @@
+---
+/**
+ * Telegram Channel Display Page
+ *
+ * Redesigned with Apple HIG principles: Clarity, Consistency, Deference
+ * Two-column layout: posts (~600px) + sidebar (channel info)
+ *
+ * @author Niracler
+ */
+
+import BaseHead from "../../components/BaseHead.astro";
+import ChannelSidebar from "../../components/channel/ChannelSidebar.astro";
+import PostCard from "../../components/channel/PostCard.astro";
+import Footer from "../../components/Footer.astro";
+import Header from "../../components/Header.astro";
+import Lightbox from "../../components/Lightbox.astro";
+import type { TelegramChannel } from "../../utils/telegram";
+import { fetchTelegramChannel } from "../../utils/telegram";
+
+// Enable server-side rendering for this dynamic route
+export const prerender = false;
+
+const { cursor } = Astro.params;
+const CHANNEL_USERNAME = "durov";
+const CACHE_SECONDS = 300;
+
+// Parse cursor parameter
+const cursorType = cursor?.startsWith("before-")
+    ? "before"
+    : cursor?.startsWith("after-")
+      ? "after"
+      : null;
+const cursorValue = cursor ? cursor.replace(/^(before-|after-)/, "") : undefined;
+
+let channelData: TelegramChannel | undefined;
+let error: string | null = null;
+
+try {
+    const options: { before?: string; after?: string } = {};
+    if (cursorType === "before" && cursorValue) {
+        options.before = cursorValue;
+    } else if (cursorType === "after" && cursorValue) {
+        options.after = cursorValue;
+    }
+
+    channelData = await fetchTelegramChannel(CHANNEL_USERNAME, options);
+} catch (e) {
+    error = e instanceof Error ? e.message : "Failed to load channel";
+    console.error("Error loading Telegram channel:", e);
+}
+
+// Get first and last post IDs for pagination
+const firstPostId = channelData?.posts?.[0]?.id;
+const lastPostId = channelData?.posts?.[channelData.posts.length - 1]?.id;
+
+// Determine if there are more posts
+const hasNewerPosts = cursorType === "before" || cursorType === "after";
+const hasOlderPosts = !cursorType || (channelData?.posts && channelData.posts.length > 0);
+
+// Set short cache to avoid re-fetching on every refresh
+Astro.response.headers.set(
+    "Cache-Control",
+    `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=30`,
+);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <BaseHead
+      title={channelData?.title ? `${channelData.title} - 动态` : '动态'}
+      description={channelData?.description || '我的最新动态和分享'}
+      image={channelData?.avatar}
+    />
+  </head>
+  <body>
+    <Header />
+    <main class="page-shell">
+      {error ? (
+        <div class="error-message surface-card">
+          <h1>加载频道失败</h1>
+          <p>{error}</p>
+          <p>
+            请访问 <a href={`https://t.me/${CHANNEL_USERNAME}`} target="_blank" rel="noopener noreferrer">
+              Telegram 频道
+            </a>
+          </p>
+        </div>
+      ) : channelData ? (
+        <div class="channel-layout">
+          {/* Main content: posts + pagination */}
+          <div class="channel-main section-stack">
+            {/* Posts list */}
+            <div class="posts-container">
+              {channelData.posts.map((post) => (
+                <PostCard post={post} channelUsername={CHANNEL_USERNAME} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <nav class="pagination">
+              {hasNewerPosts && firstPostId && (
+                <a href={`/channel/after-${firstPostId}`} class="pagination__link pagination__link--prev">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  更新的动态
+                </a>
+              )}
+              <a href="/channel"
+                 class:list={["pagination__link", "pagination__link--home", { "pagination__link--active": !cursor }]}>
+                最新
+              </a>
+              {hasOlderPosts && lastPostId && (
+                <a href={`/channel/before-${lastPostId}`} class="pagination__link pagination__link--next">
+                  更早的动态
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              )}
+            </nav>
+          </div>
+
+          {/* Sidebar: channel info */}
+          <ChannelSidebar
+            title={channelData.title}
+            description={channelData.description}
+            avatar={channelData.avatar}
+            username={CHANNEL_USERNAME}
+          />
+        </div>
+      ) : null}
+    </main>
+    <Footer />
+    <Lightbox id="channel-lightbox" selector=".post-card__content img:not([data-lightbox-skip]), .telegram-post-image" />
+  </body>
+</html>
+
+<script>
+  // Mark channel images for lightbox and lazy load
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.post-card__content img').forEach((element) => {
+      const img = element as HTMLImageElement;
+      img.classList.add('telegram-post-image');
+      img.loading = img.loading || 'lazy';
+    });
+  });
+</script>
+
+<style>
+  .channel-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 600px) 260px;
+    gap: var(--space-6);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .channel-main {
+    min-width: 0;
+  }
+
+  .posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .error-message {
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+    color: var(--color-text-secondary);
+  }
+
+  .error-message h1 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-4);
+  }
+
+  .error-message a {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+    align-items: center;
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border-soft);
+  }
+
+  .pagination__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all var(--transition-base);
+  }
+
+  .pagination__link:hover {
+    background: var(--color-bg-muted);
+    border-color: var(--color-border);
+  }
+
+  .pagination__link--home {
+    background: var(--color-bg-muted);
+  }
+
+  .pagination__link--active {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+  }
+
+  .pagination__link--active:hover {
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+  }
+
+  @media (max-width: 860px) {
+    .channel-layout {
+      grid-template-columns: 1fr;
+      max-width: none;
+    }
+
+    /* Sidebar moves to top on mobile */
+    .channel-layout > :global(.channel-sidebar) {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .pagination {
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .pagination__link {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,5 +1,6 @@
 // @ts-check
 
+import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
@@ -9,7 +10,6 @@ import pagefind from "astro-pagefind";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeFigure from "rehype-figure";
 import rehypeImgSize from "rehype-img-size";
-import rehypeMermaid from "rehype-mermaid";
 import rehypePicture from "rehype-picture";
 import rehypeSlug from "rehype-slug";
 import { remarkAlert } from "remark-github-blockquote-alert";
@@ -17,7 +17,11 @@ import { remarkModifiedTime } from "./remark-modified-time.mjs";
 
 // https://astro.build/config
 export default defineConfig({
+    adapter: cloudflare({
+        imageService: "compile",
+    }),
     site: "https://example.com",
+    output: "static", 
     integrations: [
         mdx(),
         sitemap(),
@@ -48,6 +52,7 @@ export default defineConfig({
         }),
         pagefind(),
     ],
+
     markdown: {
         remarkPlugins: [remarkAlert, remarkModifiedTime],
         shikiConfig: {
@@ -73,12 +78,6 @@ export default defineConfig({
                         ariaHidden: true,
                         tabIndex: -1,
                     },
-                },
-            ],
-            [
-                rehypeMermaid,
-                {
-                    strategy: "inline-svg", // 服务端渲染为内联 SVG
                 },
             ],
             rehypePicture,
