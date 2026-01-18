@@ -6,11 +6,11 @@ export const SITE_DESCRIPTION = "Personal blog and digital garden";
 export const SITE_SOCIAL_IMAGE = "/og-image.png";
 export const DEFAULT_POST_SOCIAL_IMAGE = "/og-image.png";
 
-// Social links
+// Social links - customize these to your own links
 export const SOCIAL_LINKS = {
-    github: "https://github.com",
-    twitter: "https://twitter.com",
-    email: "mailto:hello@example.com",
-    telegram: "https://t.me",
+    github: "https://github.com/yourusername",
+    twitter: "https://twitter.com/yourusername",
+    email: "mailto:hello@spacerad.io",
+    telegram: "https://t.me/yourchannel",
     rss: "/rss.xml",
 } as const;

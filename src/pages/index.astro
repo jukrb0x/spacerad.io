@@ -7,43 +7,274 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes breathe {
+        0%,
+        100% {
+          opacity: 0.95;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .quote-container {
+        animation: fadeIn 1s ease-out;
+        position: relative;
+        width: 100%;
+      }
+
+      .quote-text {
+        color: var(--color-text-secondary);
+        line-height: 1.8;
+        font-size: clamp(1.25rem, 4.5vw, 1.5rem);
+      }
+
+      /* Ghost container maintains stable height */
+      .quote-ghost {
+        visibility: hidden;
+        pointer-events: none;
+        user-select: none;
+        aria-hidden: true;
+      }
+
+      /* Actual typewriter overlays on ghost container */
+      .quote-actual {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .quote-actual.is-ready {
+        opacity: 1;
+      }
+
+      .quote-emphasis {
+        display: inline-block;
+        font-size: clamp(1.75rem, 6.5vw, 2.25rem);
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--color-link);
+        margin: clamp(0.75rem, 2.5vw, 1rem) 0;
+        animation: breathe 4s ease-in-out infinite;
+      }
+
+      .quote-source {
+        transition: all 0.5s ease;
+        opacity: 0;
+      }
+
+      .quote-source.is-visible {
+        opacity: 1;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .quote-container,
+        .quote-source {
+          animation: none;
+        }
+        .quote-emphasis {
+          animation: none;
+        }
+      }
+
+      .quote-source:hover {
+        transform: translateX(-8px);
+      }
+
+      .quote-source a {
+        position: relative;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .quote-source a::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--color-accent);
+        transition: width 0.3s ease;
+      }
+
+      .quote-source a:hover::after {
+        width: 100%;
+      }
+
+      /* Typewriter cursor style */
+      .typewriter-cursor {
+        display: inline-block;
+        width: 1.5px;
+        height: 1.2em;
+        background-color: var(--color-accent);
+        margin-left: 2px;
+        animation: blink 0.75s step-end infinite;
+        vertical-align: middle;
+        position: relative;
+        top: -0.05em;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main
+      class="page-shell flex min-h-[calc(100vh-18rem)] items-center justify-center"
+    >
+      <section
+        class="quote-container mx-auto max-w-3xl space-y-6 sm:space-y-8 text-center px-4"
+      >
+        <!-- Ghost placeholder: used to pre-expand height and fix vertical center point -->
+        <blockquote
+          class="quote-text quote-ghost space-y-4 sm:space-y-6 leading-relaxed"
+        >
+          <p>
+            <span class="block sm:inline">Perhaps everyone is proving their existence,</span>
+            <span class="block sm:inline">longing to be perceived by others.</span>
+          </p>
+          <p>
+            <span class="block sm:inline">Behind all behaviors,</span>
+            <span class="block sm:inline">there is only one simple yet poignant message:</span>
+          </p>
+          <p class="quote-emphasis">「Don't forget me」.</p>
+        </blockquote>
+
+        <!-- Actual displayed and typed Blockquote -->
+        <blockquote
+          class="quote-text quote-actual space-y-4 sm:space-y-6 leading-relaxed"
+          id="typewriter-quote"
+        >
+          <p>
+            <span class="block sm:inline">Perhaps everyone is proving their existence,</span>
+            <span class="block sm:inline">longing to be perceived by others.</span>
+          </p>
+          <p>
+            <span class="block sm:inline">Behind all behaviors,</span>
+            <span class="block sm:inline">there is only one simple yet poignant message:</span>
+          </p>
+          <p class="quote-emphasis">「Don't forget me」.</p>
+        </blockquote>
+        <p
+          class="quote-source text-right text-base text-muted"
+          id="quote-source"
+        >
+          —— From <a
+            href="https://spacerad.io/blog"
+            class="text-secondary hover:text-accent">Spacerad.io</a
+          >
+        </p>
+      </section>
+    </main>
+    <Footer />
+    <script>
+      interface TypeTask {
+        node: Node;
+        text: string;
+        parent: HTMLElement;
+      }
+
+      const quoteElement = document.getElementById("typewriter-quote");
+      const sourceElement = document.getElementById("quote-source");
+
+      if (quoteElement && sourceElement) {
+        const tasks: TypeTask[] = [];
+        const walker = document.createTreeWalker(
+          quoteElement,
+          NodeFilter.SHOW_TEXT,
+          null
+        );
+
+        const cursor = document.createElement("span");
+        cursor.className = "typewriter-cursor";
+
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
+          if (node.parentNode instanceof HTMLElement) {
+            tasks.push({
+              node: node,
+              text: node.nodeValue || "",
+              parent: node.parentNode,
+            });
+            node.nodeValue = "\u200B"; // Use zero-width space as placeholder
+          }
+        }
+
+        // Initialize ready, show quote
+        quoteElement.classList.add("is-ready");
+
+        let currentTaskIndex = 0;
+        let currentCharIndex = 0;
+
+        const type = () => {
+          if (currentTaskIndex < tasks.length) {
+            const { node, text, parent } = tasks[currentTaskIndex];
+
+            if (currentCharIndex < text.length) {
+              const char = text.charAt(currentCharIndex);
+
+              if (node.nodeValue === "\u200B") {
+                node.nodeValue = "";
+                parent.appendChild(cursor);
+              }
+
+              node.nodeValue += char;
+              (node as unknown as ChildNode).after(cursor);
+              currentCharIndex++;
+
+              // Natural rhythm typing speed
+              let delay = 60 + Math.random() * 15; // Stable flow (60ms-75ms)
+
+              // Emphasis: character by character strategy
+              if (text.includes("Don't forget me")) {
+                delay = 80; // Stable and slightly slower, adds solemnity
+              }
+
+              // Logical semantic pause (very short, maintains flow)
+              if (char === "," || char === ":") {
+                delay = 120;
+              } else if (char === "." || char === "!" || char === "?") {
+                delay = 250;
+              }
+
+              setTimeout(type, delay);
+            } else {
+              currentTaskIndex++;
+              currentCharIndex = 0;
+              setTimeout(type, 100); // Very short inter-line transition
+            }
+          } else if (sourceElement) {
+            cursor.remove();
+            sourceElement.classList.add("is-visible");
+          }
+        };
+
+        // Moderate startup speed
+        setTimeout(type, 600);
+      }
+    </script>
+  </body>
 </html>
