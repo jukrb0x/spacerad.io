@@ -175,6 +175,30 @@ const shareLinks = [
     <span class="text-sm text-primary">Link copied</span>
 </div>
 
+<style>
+    /* 点赞动画 */
+    @keyframes pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-2px); }
+        75% { transform: translateX(2px); }
+    }
+    .animate-pop { animation: pop 0.2s ease-out; }
+    .animate-shake { animation: shake 0.3s ease-out; }
+
+    /* 点满后的金色效果 */
+    [data-like-button][data-max-reached] {
+        border-color: #f59e0b !important;
+    }
+    [data-like-button][data-max-reached] svg {
+        color: #f59e0b !important;
+    }
+</style>
+
 <script is:inline>
 (function() {
     const mobileToggle = document.querySelector("[data-share-mobile-toggle]");
@@ -218,6 +242,7 @@ const shareLinks = [
             await navigator.clipboard.writeText(url);
             showToast();
         } catch (err) {
+            // Fallback for older browsers
             const textarea = document.createElement("textarea");
             textarea.value = url;
             textarea.style.position = "fixed";

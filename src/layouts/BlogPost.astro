@@ -11,11 +11,18 @@ import Comments from "../components/Comments.astro";
 import ShareSidebar from "../components/ShareSidebar.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
+import { extractDescription } from "../utils/extractDescription";
 
-type Props = CollectionEntry<"blog">["data"] & {
+type EntryData =
+    | CollectionEntry<"blog">["data"]
+    | CollectionEntry<"monthly">["data"]
+    | CollectionEntry<"til">["data"];
+
+type Props = EntryData & {
     body?: string;
     headings?: MarkdownHeading[];
     lastModified?: string;
+    lastModifiedCommitUrl?: string | null;
 };
 
 const {
@@ -24,14 +31,17 @@ const {
     pubDate,
     updatedDate,
     socialImage,
+    body,
     tags = [],
     headings = [],
-    lastModified,
     commentSystem,
     comment,
+    lastModified,
+    lastModifiedCommitUrl,
 } = Astro.props;
 
-const description = providedDescription || "No description available";
+const description = providedDescription || (body ? extractDescription(body) : "No description available");
+
 const imageSrc = socialImage || DEFAULT_POST_SOCIAL_IMAGE;
 
 // Extract slug from URL path for like API
@@ -58,11 +68,26 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 						<p>
 							<FormattedDate date={pubDate} />
 						</p>
-						{(lastModified || updatedDate) && (
-							<p>
-								Last updated on <FormattedDate date={lastModified ? new Date(lastModified) : updatedDate!} />
-							</p>
-						)}
+						{
+							(lastModified || updatedDate) && (
+								<p>
+									Last updated on {
+										lastModifiedCommitUrl ? (
+											<a
+												href={lastModifiedCommitUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="underline decoration-dotted underline-offset-4 hover:text-accent transition-colors"
+											>
+												<FormattedDate date={lastModified ? new Date(lastModified) : updatedDate!} />
+											</a>
+										) : (
+											<FormattedDate date={lastModified ? new Date(lastModified) : updatedDate!} />
+										)
+									}
+								</p>
+							)
+						}
 					</div>
 					{tags && tags.length > 0 && (
 						<div class="flex flex-wrap justify-center gap-2">
@@ -172,12 +197,17 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 	</body>
 	<script>
 		import { initBlogInteractive } from '../scripts/blog-interactive';
+		import { initMermaid } from '../scripts/mermaid-init';
 		import '../scripts/code-blocks';
 
 		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', initBlogInteractive, { once: true });
+			document.addEventListener('DOMContentLoaded', () => {
+				initBlogInteractive();
+				initMermaid();
+			}, { once: true });
 		} else {
 			initBlogInteractive();
+			initMermaid();
 		}
 	</script>
 </html>
