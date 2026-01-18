@@ -20,6 +20,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.0
         version: 3.7.0
+      '@iconify-json/ri':
+        specifier: ^1.2.7
+        version: 1.2.7
       astro:
         specifier: ^5.16.11
         version: 5.16.11(jiti@2.6.1)(rollup@4.55.1)(typescript@5.9.3)
@@ -49,7 +52,7 @@ importers:
         version: 1.0.1
       rehype-mermaid:
         specifier: ^3.0.0
-        version: 3.0.0
+        version: 3.0.0(playwright@1.57.0)
       rehype-picture:
         specifier: ^5.0.0
         version: 5.0.0
@@ -72,6 +75,9 @@ importers:
       '@unocss/reset':
         specifier: ^66.6.0
         version: 66.6.0
+      playwright:
+        specifier: ^1.57.0
+        version: 1.57.0
       unocss:
         specifier: ^66.6.0
         version: 66.6.0(postcss@8.5.6)(vite@6.4.1(jiti@2.6.1))
@@ -596,6 +602,9 @@ packages:
   '@fortawesome/fontawesome-free@6.7.2':
     resolution: {integrity: sha512-JUOtgFW6k9u4Y+xeIaEiLr3+cjoUPiAuLXoyKOJSia6Duzb7pq+A76P9ZdPDoAoxHdHzq6gE9/jKBGXlZT8FbA==}
     engines: {node: '>=6'}
+
+  '@iconify-json/ri@1.2.7':
+    resolution: {integrity: sha512-j/Fkb8GlWY5y/zLj1BGxWRtDzuJFrI7562zLw+iQVEykieBgew43+r8qAvtSajvb75MfUIHjsNOYQPRD8FfLfw==}
 
   '@iconify/tools@4.2.0':
     resolution: {integrity: sha512-WRxPva/ipxYkqZd1+CkEAQmd86dQmrwH0vwK89gmp2Kh2WyyVw57XbPng0NehP3x4V1LzLsXUneP1uMfTMZmUA==}
@@ -1929,6 +1938,11 @@ packages:
     resolution: {integrity: sha512-piJxbLnkD9Xcyi7dWJRnqszEURixe7CrF/efBfbffe2DPyabmuIuqraruY8cXTs19QoM8VJzx47BDRVNXETM7Q==}
     engines: {node: '>=20'}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2512,6 +2526,16 @@ packages:
 
   pkg-types@2.3.0:
     resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
+
+  playwright-core@1.57.0:
+    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.57.0:
+    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}
@@ -3600,6 +3624,10 @@ snapshots:
     optional: true
 
   '@fortawesome/fontawesome-free@6.7.2': {}
+
+  '@iconify-json/ri@1.2.7':
+    dependencies:
+      '@iconify/types': 2.0.0
 
   '@iconify/tools@4.2.0':
     dependencies:
@@ -5095,6 +5123,9 @@ snapshots:
     dependencies:
       tiny-inflate: 1.0.3
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -5612,10 +5643,12 @@ snapshots:
 
   mdurl@2.0.0: {}
 
-  mermaid-isomorphic@3.0.4:
+  mermaid-isomorphic@3.0.4(playwright@1.57.0):
     dependencies:
       '@fortawesome/fontawesome-free': 6.7.2
       mermaid: 11.12.2
+    optionalDependencies:
+      playwright: 1.57.0
 
   mermaid@11.12.2:
     dependencies:
@@ -6067,6 +6100,14 @@ snapshots:
       exsolve: 1.0.8
       pathe: 2.0.3
 
+  playwright-core@1.57.0: {}
+
+  playwright@1.57.0:
+    dependencies:
+      playwright-core: 1.57.0
+    optionalDependencies:
+      fsevents: 2.3.2
+
   points-on-curve@0.2.0: {}
 
   points-on-path@0.2.1:
@@ -6170,17 +6211,19 @@ snapshots:
       image-size: 1.2.1
       unist-util-visit: 4.1.2
 
-  rehype-mermaid@3.0.0:
+  rehype-mermaid@3.0.0(playwright@1.57.0):
     dependencies:
       '@types/hast': 3.0.4
       hast-util-from-html-isomorphic: 2.0.0
       hast-util-to-text: 4.0.2
-      mermaid-isomorphic: 3.0.4
+      mermaid-isomorphic: 3.0.4(playwright@1.57.0)
       mini-svg-data-uri: 1.4.4
       space-separated-tokens: 2.0.2
       unified: 11.0.5
       unist-util-visit-parents: 6.0.2
       vfile: 6.0.3
+    optionalDependencies:
+      playwright: 1.57.0
 
   rehype-parse@9.0.1:
     dependencies:

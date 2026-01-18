@@ -1,0 +1,243 @@
+---
+/**
+ * Unified Lightbox Component
+ *
+ * A reusable lightbox for displaying images in fullscreen mode.
+ * Supports auto-binding to images via selector, loading states,
+ * navigation, and customizable metadata display.
+ *
+ * Props:
+ * - id: Unique identifier for the lightbox (default: "lightbox")
+ * - selector: CSS selector for images to bind (optional, for auto-binding)
+ * - showCounter: Show image counter (default: true)
+ */
+interface Props {
+    id?: string;
+    selector?: string;
+    showCounter?: boolean;
+}
+
+const { id = "lightbox", selector, showCounter = true } = Astro.props;
+---
+
+<dialog
+	id={id}
+	class="lightbox"
+	aria-label="View image"
+	data-lightbox
+	data-selector={selector}
+>
+	<div class="lightbox__backdrop" data-lightbox-close></div>
+	<div class="lightbox__content">
+		<button
+			class="lightbox__close"
+			type="button"
+			aria-label="Close"
+			data-lightbox-close
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					d="M6 6l12 12M18 6L6 18"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+				/>
+			</svg>
+		</button>
+
+		<button
+			class="lightbox__nav lightbox__nav--prev"
+			type="button"
+			aria-label="Previous"
+			data-lightbox-prev
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					d="M15 6l-6 6 6 6"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+		</button>
+
+		<div class="lightbox__image-container" data-lightbox-container>
+			<img data-lightbox-img alt="" />
+		</div>
+
+		<button
+			class="lightbox__nav lightbox__nav--next"
+			type="button"
+			aria-label="Next"
+			data-lightbox-next
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					d="M9 6l6 6-6 6"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+		</button>
+
+		<div class="lightbox__meta" data-lightbox-meta>
+			<p class="lightbox__caption" data-lightbox-caption></p>
+			{showCounter && <p class="lightbox__counter" data-lightbox-counter></p>}
+		</div>
+	</div>
+</dialog>
+
+<script is:inline>
+	(() => {
+		const lightboxes = document.querySelectorAll("[data-lightbox]");
+		lightboxes.forEach((dialog) => initLightbox(dialog));
+
+		function initLightbox(dialog) {
+			if (dialog.dataset.lightboxInitialized) return;
+			dialog.dataset.lightboxInitialized = "true";
+
+			const selector = dialog.dataset.selector;
+			if (!selector) return;
+
+			const imgEl = dialog.querySelector("[data-lightbox-img]");
+			const captionEl = dialog.querySelector("[data-lightbox-caption]");
+			const counterEl = dialog.querySelector("[data-lightbox-counter]");
+			const container = dialog.querySelector("[data-lightbox-container]");
+			const closeButtons = dialog.querySelectorAll("[data-lightbox-close]");
+			const prevBtn = dialog.querySelector("[data-lightbox-prev]");
+			const nextBtn = dialog.querySelector("[data-lightbox-next]");
+
+			let shots = [];
+			let current = 0;
+			const preloadCache = new Set();
+
+			const preload = (url) => {
+				if (!url || preloadCache.has(url)) return;
+				const img = new Image();
+				img.src = url;
+				preloadCache.add(url);
+			};
+
+			const preloadNeighbors = (index) => {
+				if (!shots.length) return;
+				const next = shots[(index + 1) % shots.length]?.src;
+				const prev = shots[(index - 1 + shots.length) % shots.length]?.src;
+				preload(next);
+				preload(prev);
+			};
+
+			const getShots = () => {
+				const elements = Array.from(document.querySelectorAll(selector));
+				return elements.map((el) => {
+					const isImg = el.tagName === "IMG";
+					const src = isImg
+						? el.currentSrc || el.src
+						: el.dataset.photoUrl || el.dataset.src || "";
+					const caption =
+						el.getAttribute("alt") ||
+						el.dataset.caption ||
+						el.dataset.title ||
+						"";
+					return { el, src, caption };
+				});
+			};
+
+			document.addEventListener("click", (event) => {
+				const target = event.target.closest(selector);
+				if (!target) return;
+
+				event.preventDefault();
+				const allShots = getShots();
+				const index = allShots.findIndex((s) => s.el === target);
+				if (index !== -1) {
+					shots = allShots.map(({ src, caption }) => ({ src, caption }));
+					open(index);
+				}
+			});
+
+			const setLoading = (loading) => {
+				if (container) {
+					container.classList.toggle("is-loading", loading);
+				}
+			};
+
+			const showImage = (index) => {
+				const shot = shots[index];
+				if (!shot) return;
+
+				setLoading(true);
+
+				const loader = new Image();
+				loader.onload = () => {
+					if (imgEl) {
+						imgEl.src = shot.src;
+						imgEl.alt = shot.caption;
+					}
+					if (captionEl) captionEl.textContent = shot.caption || "";
+					if (counterEl) counterEl.textContent = `${index + 1} / ${shots.length}`;
+					current = index;
+					setLoading(false);
+					preloadNeighbors(index);
+				};
+				loader.onerror = () => {
+					setLoading(false);
+				};
+				loader.src = shot.src;
+			};
+
+			const open = (index) => {
+				if (!shots.length) return;
+				current = ((index % shots.length) + shots.length) % shots.length;
+				showImage(current);
+				dialog.showModal();
+				dialog.classList.add("is-open");
+				document.body.classList.add("scroll-locked");
+			};
+
+			const close = () => {
+				dialog.close();
+				dialog.classList.remove("is-open");
+				document.body.classList.remove("scroll-locked");
+			};
+
+			const step = (delta) => {
+				if (!shots.length) return;
+				const atEnd = current === shots.length - 1 && delta > 0;
+				const atStart = current === 0 && delta < 0;
+				const newIndex = atEnd ? 0 : atStart ? shots.length - 1 : current + delta;
+				showImage(newIndex);
+			};
+
+			closeButtons.forEach((btn) => btn.addEventListener("click", close));
+			prevBtn?.addEventListener("click", () => step(-1));
+			nextBtn?.addEventListener("click", () => step(1));
+
+			dialog.addEventListener("click", (event) => {
+				if (event.target === dialog) close();
+			});
+
+			document.addEventListener("keydown", (event) => {
+				if (!dialog.open) return;
+				switch (event.key) {
+					case "Escape": close(); break;
+					case "ArrowLeft": step(-1); break;
+					case "ArrowRight": step(1); break;
+				}
+			});
+
+			// Touch swipe support
+			let touchStartX = 0;
+			dialog.addEventListener("touchstart", (e) => {
+				touchStartX = e.changedTouches[0].screenX;
+			});
+			dialog.addEventListener("touchend", (e) => {
+				const touchEndX = e.changedTouches[0].screenX;
+				const diff = touchEndX - touchStartX;
+				if (Math.abs(diff) > 50) step(diff > 0 ? -1 : 1);
+			});
+		}
+	})();
+</script>

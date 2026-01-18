@@ -1,0 +1,41 @@
+---
+// Remark42 Comment System Component
+// Configure via environment variables:
+// - PUBLIC_REMARK_URL: Your Remark42 server URL
+// - PUBLIC_REMARK_SITE_ID: Your site ID
+
+const REMARK_URL = import.meta.env.PUBLIC_REMARK_URL || "https://remark42.example.com";
+const SITE_ID = import.meta.env.PUBLIC_REMARK_SITE_ID || "default";
+
+// Get current page URL as unique identifier for comments
+const pageUrl = Astro.url.href;
+---
+
+<div class="comments-section">
+	<h2 class="comments-title">Comments</h2>
+	<div
+		id="remark42"
+		data-remark-host={REMARK_URL}
+		data-remark-site-id={SITE_ID}
+		data-remark-url={pageUrl}
+	></div>
+</div>
+
+<script>
+	import "../scripts/remark42.ts";
+</script>
+
+<style>
+	.comments-section {
+		margin-top: var(--space-12);
+		padding-top: var(--space-6);
+		border-top: 1px solid var(--color-border-subtle);
+	}
+
+	.comments-title {
+		margin: 0 0 var(--space-4);
+		font-size: var(--font-size-xl);
+		font-weight: 600;
+		color: var(--color-text-primary);
+	}
+</style>

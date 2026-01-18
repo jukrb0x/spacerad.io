@@ -1,19 +1,36 @@
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
 
-const blog = defineCollection({
-    // Load Markdown and MDX files in the `src/content/blog/` directory.
-    loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
-    // Type-check frontmatter using a schema
-    schema: ({ image }) =>
-        z.object({
-            title: z.string(),
-            description: z.string(),
-            // Transform string to Date object
-            pubDate: z.coerce.date(),
-            updatedDate: z.coerce.date().optional(),
-            heroImage: image().optional(),
-        }),
+const sharedSchema = z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    // Transform string to Date object
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    heroImage: z.string().optional(),
+    socialImage: z.string().optional(),
+    tags: z.array(z.string()).optional().default([]),
+    hidden: z.boolean().optional().default(false),
+    // Comment system override: "cusdis" | "remark42" | false (to disable)
+    commentSystem: z.union([z.literal("cusdis"), z.literal("remark42")]).optional(),
+    comment: z.boolean().optional().default(true),
 });
 
-export const collections = { blog };
+const blog = defineCollection({
+    loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
+    schema: sharedSchema,
+});
+
+const monthly = defineCollection({
+    loader: glob({ base: "./src/content/monthly", pattern: "**/*.{md,mdx}" }),
+    schema: sharedSchema,
+});
+
+const til = defineCollection({
+    loader: glob({ base: "./src/content/til", pattern: "**/*.{md,mdx}" }),
+    schema: sharedSchema,
+});
+
+export const collections = { blog, monthly, til };
+
+export type BlogEntry = z.infer<typeof sharedSchema>;

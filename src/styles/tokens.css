@@ -1,0 +1,172 @@
+/* =============================================
+ * Theme-Invariant Tokens (defined once)
+ * ============================================= */
+:root {
+    /* Typography - Apple HIG compliant (17px base) */
+    --font-size-xs: 0.8125rem;
+    --font-size-sm: 0.9375rem;
+    --font-size-base: 1.0625rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+    --font-size-2xl: 1.875rem;
+    --font-size-3xl: 2.25rem;
+    --line-height-base: 1.75;
+    --line-height-relaxed: 1.65;
+    --line-height-tight: 1.22;
+
+    /* Spacing scale */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* Layout helpers */
+    --layout-max-width: 72rem;
+    --measure: 68ch;
+    --measure-wide: 72ch;
+
+    /* Transition timing */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    /* Overlay tokens - theme-invariant */
+    --color-overlay-dark-35: rgba(0, 0, 0, 0.35);
+    --color-overlay-dark-40: rgba(0, 0, 0, 0.4);
+    --color-overlay-dark-60: rgba(0, 0, 0, 0.6);
+    --color-overlay-light-25: rgba(255, 255, 255, 0.25);
+    --color-overlay-light-35: rgba(255, 255, 255, 0.35);
+    --color-overlay-light-50: rgba(255, 255, 255, 0.5);
+    --color-overlay-light-80: rgba(255, 255, 255, 0.8);
+    --color-overlay-light-90: rgba(255, 255, 255, 0.9);
+}
+
+/* =============================================
+ * Light Theme (default)
+ * ============================================= */
+:root {
+    /* Background palette */
+    --color-bg-page: #fffaf4;
+    --color-bg-surface: #ffffff;
+    --color-bg-muted: #f8efe4;
+
+    /* Text colors - WCAG AA compliant (4.5:1+ contrast) */
+    --color-text-primary: #2a1c17;
+    --color-text-primary-rgb: 42 28 23;
+    --color-text-secondary: #46342a;
+    --color-text-muted: #5f4d42;
+    --color-text-inverse: #fef9f0;
+
+    /* Border tokens */
+    --color-border: #dcc9ba;
+    --color-border-soft: rgba(var(--color-text-primary-rgb), 0.08);
+    --color-border-subtle: rgba(var(--color-text-primary-rgb), 0.12);
+    --color-border-strong: #cbb69d;
+
+    /* Accent + interactive colors */
+    --color-accent: #fb8f68;
+    --color-accent-dark: #d67046;
+    --color-accent-soft: #ffe7dc;
+    --color-accent-rgb: 251 143 104;
+    --color-accent-tint: rgba(var(--color-accent-rgb), 0.16);
+    --color-accent-tint-6: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    --color-accent-tint-8: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    --color-accent-tint-12: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    --color-accent-tint-18: color-mix(in srgb, var(--color-accent) 18%, transparent);
+    --color-link: #c05c3e;
+    --color-link-hover: #9a472f;
+
+    /* State colors */
+    --color-state-success-bg: #e5f7ee;
+    --color-state-success-text: #2e7d50;
+    --color-state-info-bg: #fff4d9;
+    --color-state-info-text: #8c6a1e;
+    --color-success: #4f8b63;
+    --color-warning: #d8871d;
+    --color-danger: #c84c3a;
+    --color-note: #8d7bd6;
+
+    /* Shadow presets */
+    --shadow-soft: 0 6px 18px rgba(47, 37, 25, 0.08);
+    --shadow-strong: 0 16px 36px rgba(47, 37, 25, 0.14);
+
+    /* Lightbox & overlay */
+    --color-backdrop: rgba(0, 0, 0, 0.65);
+    --shadow-lightbox: 0 20px 60px rgba(0, 0, 0, 0.4);
+
+    /* Interactive state */
+    --shadow-button-hover: 0 6px 20px rgba(251, 143, 104, 0.3);
+
+    /* Code block colors */
+    --color-code-bg: #f6f8fa;
+}
+
+/* =============================================
+ * Dark Theme
+ * ============================================= */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Background palette */
+    --color-bg-page: #140e0b;
+    --color-bg-surface: #1b140f;
+    --color-bg-muted: #241914;
+
+    /* Text colors - WCAG AA compliant (4.5:1+ contrast) */
+    --color-text-primary: #f8ede1;
+    --color-text-primary-rgb: 248 237 225;
+    --color-text-secondary: #d7c6b8;
+    --color-text-muted: #b8a090;
+    --color-text-inverse: #1b120c;
+
+    /* Border tokens */
+    --color-border: #3b2b22;
+    --color-border-soft: rgba(var(--color-text-primary-rgb), 0.08);
+    --color-border-subtle: rgba(var(--color-text-primary-rgb), 0.16);
+    --color-border-strong: #4b372d;
+
+    /* Accent + interactive colors */
+    --color-accent: #fb9f74;
+    --color-accent-dark: #f77342;
+    --color-accent-soft: rgba(251, 159, 116, 0.16);
+    --color-accent-rgb: 251 159 116;
+    --color-accent-tint: rgba(var(--color-accent-rgb), 0.22);
+    --color-accent-tint-6: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    --color-accent-tint-8: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    --color-accent-tint-12: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    --color-accent-tint-18: color-mix(in srgb, var(--color-accent) 18%, transparent);
+    --color-link: #ffb088;
+    --color-link-hover: #ffcfb3;
+
+    /* State colors */
+    --color-state-success-bg: rgba(93, 161, 118, 0.16);
+    --color-state-success-text: #9dd8b2;
+    --color-state-info-bg: rgba(237, 189, 104, 0.16);
+    --color-state-info-text: #f2d39a;
+    --color-success: #8bcaa0;
+    --color-warning: #f3b05b;
+    --color-danger: #f18879;
+    --color-note: #a79fe6;
+
+    /* Shadow presets - stronger for dark mode */
+    --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.32);
+    --shadow-strong: 0 24px 42px rgba(0, 0, 0, 0.44);
+
+    /* Lightbox & overlay */
+    --color-backdrop: rgba(0, 0, 0, 0.85);
+    --shadow-lightbox: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+    /* Interactive state */
+    --shadow-button-hover: 0 6px 20px rgba(251, 159, 116, 0.35);
+
+    /* Code block colors */
+    --color-code-bg: #282a36;
+}
