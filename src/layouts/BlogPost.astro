@@ -1,86 +1,183 @@
 ---
-import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import type { MarkdownHeading } from "astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import Header from "../components/Header.astro";
+import Lightbox from "../components/Lightbox.astro";
+import Prose from "../components/Prose.astro";
+import Comments from "../components/Comments.astro";
+import ShareSidebar from "../components/ShareSidebar.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 
-type Props = CollectionEntry<"blog">["data"];
+type Props = CollectionEntry<"blog">["data"] & {
+    body?: string;
+    headings?: MarkdownHeading[];
+    lastModified?: string;
+};
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const {
+    title,
+    description: providedDescription,
+    pubDate,
+    updatedDate,
+    socialImage,
+    tags = [],
+    headings = [],
+    lastModified,
+    commentSystem,
+    comment,
+} = Astro.props;
+
+const description = providedDescription || "No description available";
+const imageSrc = socialImage || DEFAULT_POST_SOCIAL_IMAGE;
+
+// Extract slug from URL path for like API
+const slug = Astro.url.pathname.replace(/^\/|\/$/g, "");
+
+// Only show TOC when article has enough headings (at least 2 h2/h3)
+const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3).length >= 2;
 ---
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
+		<BaseHead title={title} description={description} image={imageSrc} />
 	</head>
 
 	<body>
 		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
+		<main class="page-shell max-w-none relative">
+			<!-- Article main body: always centered -->
+			<article class="mx-auto max-w-[50rem] sm:px-6">
+				<!-- Header section -->
+				<div data-article-header class="space-y-4 border-b border-border-subtle pb-6 text-center">
+					<h1 class="text-3xl font-bold text-primary sm:text-4xl">{title}</h1>
+					<div class="space-y-2 text-sm text-muted">
+						<p>
 							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
+						</p>
+						{(lastModified || updatedDate) && (
+							<p>
+								Last updated on <FormattedDate date={lastModified ? new Date(lastModified) : updatedDate!} />
+							</p>
+						)}
 					</div>
-					<slot />
+					{tags && tags.length > 0 && (
+						<div class="flex flex-wrap justify-center gap-2">
+							{tags.map((tag: string) => (
+								<a
+									href={`/tags/${tag}`}
+									class="pill"
+									data-tone="accent"
+								>
+									{tag}
+								</a>
+							))}
+						</div>
+					)}
+				</div>
+
+				<!-- Mobile TOC -->
+				{showToc && (
+					<>
+						<!-- Mobile: Floating toggle button -->
+						<button
+							data-toc-mobile-toggle
+							class="min-[960px]:hidden fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(251,143,104,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(251,143,104,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(251,143,104,0.95)] hover:shadow-[0_12px_40px_rgba(251,143,104,0.45)] active:scale-95"
+							aria-label="Open table of contents"
+						>
+							<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+								<path d="M3 4h18M3 12h18M3 20h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</button>
+
+						<!-- Mobile: Drawer -->
+						<div
+							data-toc-mobile-drawer
+							class="min-[960px]:hidden fixed inset-0 z-50 pointer-events-none"
+							aria-hidden="true"
+						>
+							<!-- Overlay -->
+							<div
+								data-toc-mobile-overlay
+								class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300 pointer-events-none"
+							></div>
+
+							<!-- Drawer content -->
+							<div
+								data-toc-mobile-content
+								class="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-surface shadow-2xl translate-x-full transition-transform duration-300 pointer-events-auto"
+							>
+								<div class="flex h-full flex-col">
+									<!-- Header -->
+									<div class="flex items-center justify-between border-b border-border-subtle px-6 py-4">
+										<h2 class="text-lg font-semibold text-primary">Contents</h2>
+										<button
+											data-toc-mobile-close
+											class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+											aria-label="Close"
+										>
+											<svg class="h-5 w-5 text-muted" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+												<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+											</svg>
+										</button>
+									</div>
+
+									<!-- TOC content -->
+									<div class="flex-1 overflow-y-auto px-6 pt-4 pb-8">
+										<div class="toc-mobile">
+											<TableOfContents headings={headings} />
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</>
+				)}
+
+				<!-- Content -->
+				<div class="pt-10 space-y-10 text-secondary">
+					<Prose class="max-w-none text-secondary">
+						<slot />
+					</Prose>
+
+					<Comments
+						commentSystem={commentSystem}
+						comment={comment}
+						pageTitle={title}
+					/>
+					<Lightbox id="blog-lightbox" selector=".prose img:not([data-lightbox-skip])" />
 				</div>
 			</article>
+
+			<!-- Desktop TOC: Fixed positioned on right side -->
+			{showToc && (
+				<aside
+					data-toc-sidebar
+					class="hidden min-[900px]:block fixed w-[220px] min-[1100px]:w-[260px] opacity-0 transition-opacity duration-200"
+					style="left: calc(50% + 25rem + 1.5rem); top: 6rem;"
+				>
+					<nav class="toc max-h-[calc(100vh-8rem)] overflow-y-auto">
+						<TableOfContents headings={headings} />
+					</nav>
+				</aside>
+			)}
+
+			<!-- Share sidebar: Desktop left side, Mobile floating button -->
+			<ShareSidebar title={title} description={description} tags={tags} slug={slug} />
 		</main>
 		<Footer />
 	</body>
+	<script>
+		import { initBlogInteractive } from '../scripts/blog-interactive';
+		import '../scripts/code-blocks';
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initBlogInteractive, { once: true });
+		} else {
+			initBlogInteractive();
+		}
+	</script>
 </html>

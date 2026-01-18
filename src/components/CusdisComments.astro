@@ -1,0 +1,58 @@
+---
+// Cusdis Comment System Component
+// Configure via environment variables:
+// - PUBLIC_CUSDIS_APP_ID: Your Cusdis app ID
+// - PUBLIC_CUSDIS_HOST: Your Cusdis host URL (defaults to https://cusdis.com)
+
+interface Props {
+	pageTitle?: string;
+}
+
+const CUSDIS_APP_ID = import.meta.env.PUBLIC_CUSDIS_APP_ID || "";
+const CUSDIS_HOST = import.meta.env.PUBLIC_CUSDIS_HOST || "https://cusdis.com";
+
+const { pageTitle = "" } = Astro.props;
+
+// Use pathname as unique page ID
+const pageId = Astro.url.pathname;
+const title = pageTitle || Astro.url.pathname;
+---
+
+<div class="comments-section">
+	<h2 class="comments-title">Comments</h2>
+	{CUSDIS_APP_ID ? (
+		<div
+			id="cusdis_thread"
+			data-cusdis-host={CUSDIS_HOST}
+			data-cusdis-app-id={CUSDIS_APP_ID}
+			data-cusdis-page-id={pageId}
+			data-cusdis-page-title={title}
+		></div>
+	) : (
+		<p class="comments-disabled">Comments are not configured. Please set PUBLIC_CUSDIS_APP_ID.</p>
+	)}
+</div>
+
+<script>
+	import "../scripts/cusdis.ts";
+</script>
+
+<style>
+	.comments-section {
+		margin-top: var(--space-12);
+		padding-top: var(--space-6);
+		border-top: 1px solid var(--color-border-subtle);
+	}
+
+	.comments-title {
+		margin: 0 0 var(--space-4);
+		font-size: var(--font-size-xl);
+		font-weight: 600;
+		color: var(--color-text-primary);
+	}
+
+	.comments-disabled {
+		color: var(--color-text-muted);
+		font-style: italic;
+	}
+</style>

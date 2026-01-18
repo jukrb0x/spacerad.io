@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
+import { extractDescription } from "../utils/extractDescription";
+
+interface PostMeta {
+    title: string;
+    description: string;
+    image?: string;
+}
+
+interface Props {
+    meta?: Record<string, PostMeta>;
+}
+
+const { meta } = Astro.props as Props;
+
+const normalizeMetaMap = (map: Record<string, PostMeta>): Record<string, PostMeta> =>
+    Object.entries(map).reduce<Record<string, PostMeta>>((acc, [id, value]) => {
+        acc[id] = {
+            ...value,
+            image: value.image || DEFAULT_POST_SOCIAL_IMAGE,
+        };
+        return acc;
+    }, {});
+
+let postMetaMap: Record<string, PostMeta>;
+
+if (meta) {
+    postMetaMap = meta;
+} else {
+    const [blogPosts, monthlyPosts, tilPosts] = await Promise.all([
+        getCollection("blog"),
+        getCollection("monthly"),
+        getCollection("til"),
+    ]);
+
+    const allPosts = [...blogPosts, ...monthlyPosts, ...tilPosts];
+
+    postMetaMap = allPosts.reduce<Record<string, PostMeta>>((acc, post) => {
+        const description = post.data.description || extractDescription(post.body || "");
+        acc[post.id] = {
+            title: post.data.title,
+            description,
+            image: post.data.socialImage || undefined,
+        };
+        return acc;
+    }, {});
+}
+
+postMetaMap = normalizeMetaMap(postMetaMap);
+
+const serializedMeta = JSON.stringify(postMetaMap).replace(/</g, "\\u003c");
+---
+<script id="all-posts-meta" type="application/json" set:html={serializedMeta} is:inline></script>
+<script>
+	import { initPostPreview } from '../scripts/postPreview.ts';
+	initPostPreview(document);
+</script>

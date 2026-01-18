@@ -1,0 +1,85 @@
+---
+export interface Heading {
+    depth: number;
+    slug: string;
+    text: string;
+}
+
+export interface Props {
+    headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Only show h2 and h3, filter out h1
+const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+
+// Build nested structure
+interface NestedHeading extends Heading {
+    children: NestedHeading[];
+}
+
+function buildNestedHeadings(headings: Heading[]): NestedHeading[] {
+    const nested: NestedHeading[] = [];
+    const stack: NestedHeading[] = [];
+
+    headings.forEach((heading) => {
+        const node: NestedHeading = { ...heading, children: [] };
+
+        // Find appropriate parent node
+        while (stack.length > 0 && stack[stack.length - 1].depth >= node.depth) {
+            stack.pop();
+        }
+
+        if (stack.length === 0) {
+            nested.push(node);
+        } else {
+            stack[stack.length - 1].children.push(node);
+        }
+
+        stack.push(node);
+    });
+
+    return nested;
+}
+
+const nestedHeadings = buildNestedHeadings(filteredHeadings);
+---
+
+{nestedHeadings.length > 0 && (
+	<nav class="toc" data-no-preview aria-label="Table of Contents">
+		<h2 class="toc-title">Contents</h2>
+		<ol class="toc-list">
+			{nestedHeadings.map((heading, index) => (
+				<li>
+					<a
+						href={`#${heading.slug}`}
+						data-toc-link
+						data-heading-id={heading.slug}
+						class="toc-link"
+					>
+						<span class="toc-number">{index + 1}</span>
+						<span class="toc-text">{heading.text}</span>
+					</a>
+					{heading.children.length > 0 && (
+						<ol class="toc-sublist">
+							{heading.children.map((child, childIndex) => (
+								<li>
+									<a
+										href={`#${child.slug}`}
+										data-toc-link
+										data-heading-id={child.slug}
+										class="toc-link toc-link-child"
+									>
+										<span class="toc-number">{index + 1}.{childIndex + 1}</span>
+										<span class="toc-text">{child.text}</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					)}
+				</li>
+			))}
+		</ol>
+	</nav>
+)}

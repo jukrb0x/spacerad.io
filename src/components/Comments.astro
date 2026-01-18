@@ -1,0 +1,39 @@
+---
+// Unified Comments Component
+// Supports both Cusdis (default) and Remark42
+//
+// Configure default via:
+// - PUBLIC_COMMENT_SYSTEM: "cusdis" (default) or "remark42"
+//
+// Override per-page via frontmatter:
+// - commentSystem: "cusdis" | "remark42"
+// - comment: false (to disable comments)
+
+import CusdisComments from "./CusdisComments.astro";
+import Remark42Comments from "./Remark42Comments.astro";
+
+interface Props {
+	commentSystem?: "cusdis" | "remark42";
+	comment?: boolean;
+	pageTitle?: string;
+}
+
+const DEFAULT_SYSTEM = (import.meta.env.PUBLIC_COMMENT_SYSTEM as "cusdis" | "remark42") || "cusdis";
+
+const {
+	commentSystem = DEFAULT_SYSTEM,
+	comment = true,
+	pageTitle
+} = Astro.props;
+
+// Don't render if comments are disabled
+const shouldRender = comment !== false;
+---
+
+{shouldRender && (
+	commentSystem === "remark42" ? (
+		<Remark42Comments />
+	) : (
+		<CusdisComments pageTitle={pageTitle} />
+	)
+)}

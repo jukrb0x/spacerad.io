@@ -1,0 +1,43 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Comments from "../components/Comments.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import Lightbox from "../components/Lightbox.astro";
+import Prose from "../components/Prose.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+
+const { frontmatter = {} } = Astro.props as { frontmatter?: Record<string, unknown> };
+const {
+    comment: commentsEnabled,
+    commentSystem,
+    description: pageDescription,
+    title,
+} = frontmatter as {
+    comment?: boolean;
+    commentSystem?: "cusdis" | "remark42";
+    description?: string;
+    title?: string;
+};
+const pageTitle = title ? `${title} · ${SITE_TITLE}` : SITE_TITLE;
+const description = pageDescription || SITE_DESCRIPTION;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={pageTitle} description={description} />
+	</head>
+	<body>
+		<Header />
+		<main class="page-shell max-w-5xl section-stack">
+			<Prose class="max-w-none text-secondary">
+				<slot />
+			</Prose>
+
+			<Comments comment={commentsEnabled} commentSystem={commentSystem} pageTitle={title} />
+			<Lightbox id="page-lightbox" selector=".prose img:not([data-lightbox-skip])" />
+		</main>
+		<Footer />
+	</body>
+</html>
