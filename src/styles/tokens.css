@@ -47,6 +47,29 @@
     --color-overlay-light-50: rgba(255, 255, 255, 0.5);
     --color-overlay-light-80: rgba(255, 255, 255, 0.8);
     --color-overlay-light-90: rgba(255, 255, 255, 0.9);
+
+    /* Z-index scale - Space Radio Design System */
+    --z-base: 0;
+    --z-dropdown: 10;
+    --z-sticky: 20;
+    --z-fixed: 30;
+    --z-modal-backdrop: 40;
+    --z-modal: 50;
+    --z-popover: 60;
+    --z-tooltip: 70;
+
+    /* Typography enhancements */
+    --font-size-4xl: 3rem;
+    --font-size-5xl: 3.75rem;
+    --font-size-6xl: 4.5rem;
+    --font-weight-light: 300;
+    --font-weight-extrabold: 800;
+    --letter-spacing-tighter: -0.02em;
+    --letter-spacing-tight: -0.01em;
+    --letter-spacing-wide: 0.04em;
+    --letter-spacing-wider: 0.12em;
+    --line-height-none: 1;
+    --line-height-extra-tight: 1.1;
 }
 
 /* =============================================
@@ -95,8 +118,13 @@
     --color-note: #8d7bd6;
 
     /* Shadow presets */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
     --shadow-soft: 0 6px 18px rgba(47, 37, 25, 0.08);
     --shadow-strong: 0 16px 36px rgba(47, 37, 25, 0.14);
+    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.18);
+    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.22);
 
     /* Lightbox & overlay */
     --color-backdrop: rgba(0, 0, 0, 0.65);
@@ -105,8 +133,37 @@
     /* Interactive state */
     --shadow-button-hover: 0 6px 20px rgba(251, 143, 104, 0.3);
 
+    /* Glow effects - Space Radio Design System */
+    --glow-accent-soft: 0 0 20px rgba(251, 143, 104, 0.2);
+    --glow-accent-strong: 0 0 32px rgba(251, 143, 104, 0.4);
+    --glow-cool: 0 0 24px rgba(74, 158, 255, 0.3);
+
     /* Code block colors */
     --color-code-bg: #f6f8fa;
+
+    /* Space Radio Color Palettes - Light Theme */
+    --color-accent-warm: #fb8f68;
+    --color-accent-cool: #4a9eff;
+
+    /* Retro radio palette */
+    --color-radio-dial: #d4a574;
+    --color-radio-tube: #ff9966;
+    --color-radio-grill: #8b7355;
+
+    /* Spaceship palette */
+    --color-space-cyan: #6ee7b7;
+    --color-space-purple: #a78bfa;
+    --color-space-blue: #3b82f6;
+    --color-space-silver: #94a3b8;
+
+    /* Gradient tokens - Light Theme */
+    --gradient-warm-to-cool: linear-gradient(135deg, #fb8f68 0%, #4a9eff 100%);
+    --gradient-cosmic: linear-gradient(135deg, #a78bfa 0%, #6ee7b7 50%, #4a9eff 100%);
+    --gradient-radio-glow: radial-gradient(circle, #ff9966 0%, #fb8f68 50%, transparent 100%);
+    --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                          radial-gradient(ellipse at bottom, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+    --gradient-bg-radio: radial-gradient(circle at 20% 20%, rgba(251, 143, 104, 0.08) 0%, transparent 40%),
+                         radial-gradient(circle at 80% 80%, rgba(212, 165, 116, 0.06) 0%, transparent 40%);
 }
 
 /* =============================================
@@ -157,8 +214,13 @@
     --color-note: #a79fe6;
 
     /* Shadow presets - stronger for dark mode */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
     --shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.32);
     --shadow-strong: 0 24px 42px rgba(0, 0, 0, 0.44);
+    --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.5);
+    --shadow-2xl: 0 32px 64px rgba(0, 0, 0, 0.6);
 
     /* Lightbox & overlay */
     --color-backdrop: rgba(0, 0, 0, 0.85);
@@ -167,6 +229,35 @@
     /* Interactive state */
     --shadow-button-hover: 0 6px 20px rgba(251, 159, 116, 0.35);
 
+    /* Glow effects - Space Radio Design System (brighter for dark) */
+    --glow-accent-soft: 0 0 24px rgba(251, 159, 116, 0.3);
+    --glow-accent-strong: 0 0 36px rgba(251, 159, 116, 0.5);
+    --glow-cool: 0 0 28px rgba(96, 165, 250, 0.4);
+
     /* Code block colors */
     --color-code-bg: #282a36;
+
+    /* Space Radio Color Palettes - Dark Theme (brighter, more vivid) */
+    --color-accent-warm: #ff9f74;
+    --color-accent-cool: #60a5fa;
+
+    /* Retro radio palette - adjusted for dark */
+    --color-radio-dial: #e5b882;
+    --color-radio-tube: #ffaa77;
+    --color-radio-grill: #9d8366;
+
+    /* Spaceship palette - adjusted for dark */
+    --color-space-cyan: #7df3c4;
+    --color-space-purple: #b99aff;
+    --color-space-blue: #5b9eff;
+    --color-space-silver: #a8b8cc;
+
+    /* Gradient tokens - Dark Theme (more vivid) */
+    --gradient-warm-to-cool: linear-gradient(135deg, #ff9f74 0%, #60a5fa 100%);
+    --gradient-cosmic: linear-gradient(135deg, #b99aff 0%, #7df3c4 50%, #5b9eff 100%);
+    --gradient-radio-glow: radial-gradient(circle, #ffaa77 0%, #ff9f74 50%, transparent 100%);
+    --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                          radial-gradient(ellipse at bottom, rgba(244, 114, 182, 0.08) 0%, transparent 50%);
+    --gradient-bg-radio: radial-gradient(circle at 20% 20%, rgba(255, 159, 116, 0.12) 0%, transparent 40%),
+                         radial-gradient(circle at 80% 80%, rgba(229, 184, 130, 0.08) 0%, transparent 40%);
 }
