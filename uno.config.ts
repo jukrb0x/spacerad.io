@@ -49,6 +49,8 @@ export default defineConfig({
                 dark: "var(--color-accent-dark)",
                 soft: "var(--color-accent-soft)",
                 tint: "var(--color-accent-tint)",
+                warm: "var(--color-accent-warm)",
+                cool: "var(--color-accent-cool)",
             },
 
             // Link colors
@@ -71,6 +73,19 @@ export default defineConfig({
             danger: "var(--color-danger)",
             note: "var(--color-note)",
 
+            // Space Radio color palettes
+            radio: {
+                dial: "var(--color-radio-dial)",
+                tube: "var(--color-radio-tube)",
+                grill: "var(--color-radio-grill)",
+            },
+            space: {
+                cyan: "var(--color-space-cyan)",
+                purple: "var(--color-space-purple)",
+                blue: "var(--color-space-blue)",
+                silver: "var(--color-space-silver)",
+            },
+
             // Code
             "code-bg": "var(--color-code-bg)",
         },
@@ -80,10 +95,28 @@ export default defineConfig({
             lg: "var(--radius-lg)",
         },
         boxShadow: {
+            xs: "var(--shadow-xs)",
+            sm: "var(--shadow-sm)",
+            md: "var(--shadow-md)",
             soft: "var(--shadow-soft)",
             strong: "var(--shadow-strong)",
+            xl: "var(--shadow-xl)",
+            "2xl": "var(--shadow-2xl)",
             lightbox: "var(--shadow-lightbox)",
             "button-hover": "var(--shadow-button-hover)",
+            "glow-accent-soft": "var(--glow-accent-soft)",
+            "glow-accent-strong": "var(--glow-accent-strong)",
+            "glow-cool": "var(--glow-cool)",
+        },
+        zIndex: {
+            base: "var(--z-base)",
+            dropdown: "var(--z-dropdown)",
+            sticky: "var(--z-sticky)",
+            fixed: "var(--z-fixed)",
+            "modal-backdrop": "var(--z-modal-backdrop)",
+            modal: "var(--z-modal)",
+            popover: "var(--z-popover)",
+            tooltip: "var(--z-tooltip)",
         },
     },
 
@@ -99,6 +132,19 @@ export default defineConfig({
         "transition-fast": "transition-all duration-150 ease-out",
         "transition-base": "transition-all duration-200 ease-out",
         "transition-slow": "transition-all duration-300 ease-out",
+
+        // Layout patterns - Space Radio
+        "flex-center": "flex items-center justify-center",
+        "flex-between": "flex items-center justify-between",
+        "flex-col-center": "flex flex-col items-center justify-center",
+
+        // Gradient text - Space Radio
+        "text-gradient-warm-cool": "bg-clip-text text-transparent bg-gradient-to-r from-accent-warm to-accent-cool",
+        "text-gradient-cosmic": "bg-clip-text text-transparent",
+
+        // Interactive effects - Space Radio
+        "hover-lift": "transition-transform duration-200 hover:(-translate-y-0.5)",
+        "hover-glow": "transition-shadow duration-300 hover:shadow-glow-accent-soft",
 
         // Icon button
         "icon-btn":
@@ -116,9 +162,12 @@ export default defineConfig({
         // Surface card
         "surface-card": "bg-surface rounded-lg border border-border-subtle shadow-soft",
         "surface-card-hover": "hover:(border-accent shadow-strong)",
+        "card-interactive": "surface-card transition-all duration-200 hover:(border-accent shadow-strong -translate-y-0.5)",
 
         // Page shell (main container)
         "page-shell": "max-w-[72rem] mx-auto px-4 py-8 sm:px-6",
+        "container-base": "max-w-[72rem] mx-auto px-4 sm:px-6",
+        "section-padding": "py-12 sm:py-16 lg:py-20",
     },
 
     // Safe list for dynamic classes
@@ -146,8 +195,13 @@ export default defineConfig({
         ["text-xl", { "font-size": "var(--font-size-xl)" }],
         ["text-2xl", { "font-size": "var(--font-size-2xl)" }],
         ["text-3xl", { "font-size": "var(--font-size-3xl)" }],
+        ["text-4xl", { "font-size": "var(--font-size-4xl)" }],
+        ["text-5xl", { "font-size": "var(--font-size-5xl)" }],
+        ["text-6xl", { "font-size": "var(--font-size-6xl)" }],
 
         // Line heights
+        ["leading-none", { "line-height": "var(--line-height-none)" }],
+        ["leading-extra-tight", { "line-height": "var(--line-height-extra-tight)" }],
         ["leading-base", { "line-height": "var(--line-height-base)" }],
         ["leading-relaxed", { "line-height": "var(--line-height-relaxed)" }],
         ["leading-tight", { "line-height": "var(--line-height-tight)" }],
@@ -160,5 +214,21 @@ export default defineConfig({
         ["space-6", { gap: "var(--space-6)" }],
         ["space-8", { gap: "var(--space-8)" }],
         ["space-12", { gap: "var(--space-12)" }],
+
+        // Gradient backgrounds - Space Radio
+        ["bg-gradient-warm-cool", { "background": "var(--gradient-warm-to-cool)" }],
+        ["bg-gradient-cosmic", { "background": "var(--gradient-cosmic)" }],
+        ["bg-gradient-radio-glow", { "background": "var(--gradient-radio-glow)" }],
+        ["bg-gradient-cosmic-subtle", { "background": "var(--gradient-bg-cosmic)" }],
+        ["bg-gradient-radio-subtle", { "background": "var(--gradient-bg-radio)" }],
+
+        // Gradient text utilities - Space Radio
+        [/^text-gradient-(.+)$/, ([, c]) => ({
+            "background-image": `var(--gradient-${c})`,
+            "-webkit-background-clip": "text",
+            "background-clip": "text",
+            "-webkit-text-fill-color": "transparent",
+            "color": "transparent",
+        })],
     ],
 });
