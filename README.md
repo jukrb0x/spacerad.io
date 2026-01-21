@@ -7,6 +7,7 @@ Personal blog based on Astro.
 - Blog Skeleton
 - Theme, made bokushi origin to spaceraid.io styles
 - Telegram Channel
+- Consistency
 - Deploy
 - Migrate comment system to Remark42
 
