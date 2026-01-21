@@ -73,49 +73,50 @@
 }
 
 /* =============================================
- * Light Theme (default)
+ * Light Theme (default) - Modern Spaceship
  * ============================================= */
 :root {
-    /* Background palette */
-    --color-bg-page: #fffaf4;
+    /* Background palette - Cool, clean whites and grays */
+    --color-bg-page: #fafbfc;
     --color-bg-surface: #ffffff;
-    --color-bg-muted: #f8efe4;
+    --color-bg-muted: #f6f8fa;
+    --color-bg-elevated: #ffffff;
 
-    /* Text colors - WCAG AA compliant (4.5:1+ contrast) */
-    --color-text-primary: #2a1c17;
-    --color-text-primary-rgb: 42 28 23;
-    --color-text-secondary: #46342a;
-    --color-text-muted: #5f4d42;
-    --color-text-inverse: #fef9f0;
+    /* Text colors - WCAG AA compliant (4.5:1+ contrast) - Cool grays */
+    --color-text-primary: #0d1117;
+    --color-text-primary-rgb: 13 17 23;
+    --color-text-secondary: #57606a;
+    --color-text-muted: #8b949e;
+    --color-text-inverse: #ffffff;
 
-    /* Border tokens */
-    --color-border: #dcc9ba;
+    /* Border tokens - Cool neutrals */
+    --color-border: #d0d7de;
     --color-border-soft: rgba(var(--color-text-primary-rgb), 0.08);
     --color-border-subtle: rgba(var(--color-text-primary-rgb), 0.12);
-    --color-border-strong: #cbb69d;
+    --color-border-strong: #afb8c1;
 
-    /* Accent + interactive colors */
-    --color-accent: #fb8f68;
-    --color-accent-dark: #d67046;
-    --color-accent-soft: #ffe7dc;
-    --color-accent-rgb: 251 143 104;
+    /* Accent + interactive colors - Electric blue primary */
+    --color-accent: #0969da;
+    --color-accent-dark: #0550ae;
+    --color-accent-soft: #ddf4ff;
+    --color-accent-rgb: 9 105 218;
     --color-accent-tint: rgba(var(--color-accent-rgb), 0.16);
     --color-accent-tint-6: color-mix(in srgb, var(--color-accent) 6%, transparent);
     --color-accent-tint-8: color-mix(in srgb, var(--color-accent) 8%, transparent);
     --color-accent-tint-12: color-mix(in srgb, var(--color-accent) 12%, transparent);
     --color-accent-tint-18: color-mix(in srgb, var(--color-accent) 18%, transparent);
-    --color-link: #c05c3e;
-    --color-link-hover: #9a472f;
+    --color-link: #0969da;
+    --color-link-hover: #0550ae;
 
-    /* State colors */
-    --color-state-success-bg: #e5f7ee;
-    --color-state-success-text: #2e7d50;
-    --color-state-info-bg: #fff4d9;
-    --color-state-info-text: #8c6a1e;
-    --color-success: #4f8b63;
-    --color-warning: #d8871d;
-    --color-danger: #c84c3a;
-    --color-note: #8d7bd6;
+    /* State colors - Modern palette */
+    --color-state-success-bg: #dafbe1;
+    --color-state-success-text: #1a7f37;
+    --color-state-info-bg: #ddf4ff;
+    --color-state-info-text: #0969da;
+    --color-success: #1a7f37;
+    --color-warning: #bf8700;
+    --color-danger: #cf222e;
+    --color-note: #8250df;
 
     /* Shadow presets */
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -130,88 +131,89 @@
     --color-backdrop: rgba(0, 0, 0, 0.65);
     --shadow-lightbox: 0 20px 60px rgba(0, 0, 0, 0.4);
 
-    /* Interactive state */
-    --shadow-button-hover: 0 6px 20px rgba(251, 143, 104, 0.3);
+    /* Interactive state - Modern blue glow */
+    --shadow-button-hover: 0 6px 20px rgba(9, 105, 218, 0.3);
 
-    /* Glow effects - Space Radio Design System */
-    --glow-accent-soft: 0 0 20px rgba(251, 143, 104, 0.2);
-    --glow-accent-strong: 0 0 32px rgba(251, 143, 104, 0.4);
-    --glow-cool: 0 0 24px rgba(74, 158, 255, 0.3);
+    /* Glow effects - Modern Spaceship (cool tones) */
+    --glow-accent-soft: 0 0 20px rgba(9, 105, 218, 0.2);
+    --glow-accent-strong: 0 0 32px rgba(9, 105, 218, 0.4);
+    --glow-cool: 0 0 24px rgba(56, 189, 248, 0.3);
 
     /* Code block colors */
     --color-code-bg: #f6f8fa;
 
-    /* Space Radio Color Palettes - Light Theme */
+    /* Modern Spaceship Color Palettes - Light Theme */
     --color-accent-warm: #fb8f68;
-    --color-accent-cool: #4a9eff;
+    --color-accent-cool: #0969da;
 
-    /* Retro radio palette */
+    /* Retro radio palette (legacy, can be used for accents) */
     --color-radio-dial: #d4a574;
     --color-radio-tube: #ff9966;
     --color-radio-grill: #8b7355;
 
-    /* Spaceship palette */
-    --color-space-cyan: #6ee7b7;
-    --color-space-purple: #a78bfa;
-    --color-space-blue: #3b82f6;
-    --color-space-silver: #94a3b8;
+    /* Spaceship palette - Primary modern colors */
+    --color-space-cyan: #22d3ee;
+    --color-space-purple: #a855f7;
+    --color-space-blue: #0969da;
+    --color-space-silver: #6e7781;
 
-    /* Gradient tokens - Light Theme */
-    --gradient-warm-to-cool: linear-gradient(135deg, #fb8f68 0%, #4a9eff 100%);
-    --gradient-cosmic: linear-gradient(135deg, #a78bfa 0%, #6ee7b7 50%, #4a9eff 100%);
-    --gradient-radio-glow: radial-gradient(circle, #ff9966 0%, #fb8f68 50%, transparent 100%);
-    --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-                          radial-gradient(ellipse at bottom, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
-    --gradient-bg-radio: radial-gradient(circle at 20% 20%, rgba(251, 143, 104, 0.08) 0%, transparent 40%),
-                         radial-gradient(circle at 80% 80%, rgba(212, 165, 116, 0.06) 0%, transparent 40%);
+    /* Gradient tokens - Light Theme (cool, futuristic) */
+    --gradient-warm-to-cool: linear-gradient(135deg, #0969da 0%, #22d3ee 100%);
+    --gradient-cosmic: linear-gradient(135deg, #a855f7 0%, #22d3ee 50%, #0969da 100%);
+    --gradient-radio-glow: radial-gradient(circle, #22d3ee 0%, #0969da 50%, transparent 100%);
+    --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(9, 105, 218, 0.03) 0%, transparent 50%),
+                          radial-gradient(ellipse at bottom, rgba(34, 211, 238, 0.03) 0%, transparent 50%);
+    --gradient-bg-radio: radial-gradient(circle at 20% 20%, rgba(9, 105, 218, 0.04) 0%, transparent 40%),
+                         radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 40%);
 }
 
 /* =============================================
- * Dark Theme
+ * Dark Theme - Modern Spaceship (Deep Space)
  * ============================================= */
 :root[data-theme="dark"] {
     color-scheme: dark;
 
-    /* Background palette */
-    --color-bg-page: #140e0b;
-    --color-bg-surface: #1b140f;
-    --color-bg-muted: #241914;
+    /* Background palette - Deep space blacks with cool tint */
+    --color-bg-page: #0d1117;
+    --color-bg-surface: #161b22;
+    --color-bg-muted: #21262d;
+    --color-bg-elevated: #1c2128;
 
-    /* Text colors - WCAG AA compliant (4.5:1+ contrast) */
-    --color-text-primary: #f8ede1;
-    --color-text-primary-rgb: 248 237 225;
-    --color-text-secondary: #d7c6b8;
-    --color-text-muted: #b8a090;
-    --color-text-inverse: #1b120c;
+    /* Text colors - WCAG AA compliant (4.5:1+ contrast) - Cool grays */
+    --color-text-primary: #e6edf3;
+    --color-text-primary-rgb: 230 237 243;
+    --color-text-secondary: #8b949e;
+    --color-text-muted: #6e7781;
+    --color-text-inverse: #0d1117;
 
-    /* Border tokens */
-    --color-border: #3b2b22;
+    /* Border tokens - Cool neutrals */
+    --color-border: #30363d;
     --color-border-soft: rgba(var(--color-text-primary-rgb), 0.08);
     --color-border-subtle: rgba(var(--color-text-primary-rgb), 0.16);
-    --color-border-strong: #4b372d;
+    --color-border-strong: #484f58;
 
-    /* Accent + interactive colors */
-    --color-accent: #fb9f74;
-    --color-accent-dark: #f77342;
-    --color-accent-soft: rgba(251, 159, 116, 0.16);
-    --color-accent-rgb: 251 159 116;
+    /* Accent + interactive colors - Bright electric blue for dark */
+    --color-accent: #58a6ff;
+    --color-accent-dark: #1f6feb;
+    --color-accent-soft: rgba(88, 166, 255, 0.16);
+    --color-accent-rgb: 88 166 255;
     --color-accent-tint: rgba(var(--color-accent-rgb), 0.22);
     --color-accent-tint-6: color-mix(in srgb, var(--color-accent) 6%, transparent);
     --color-accent-tint-8: color-mix(in srgb, var(--color-accent) 8%, transparent);
     --color-accent-tint-12: color-mix(in srgb, var(--color-accent) 12%, transparent);
     --color-accent-tint-18: color-mix(in srgb, var(--color-accent) 18%, transparent);
-    --color-link: #ffb088;
-    --color-link-hover: #ffcfb3;
+    --color-link: #58a6ff;
+    --color-link-hover: #79c0ff;
 
-    /* State colors */
-    --color-state-success-bg: rgba(93, 161, 118, 0.16);
-    --color-state-success-text: #9dd8b2;
-    --color-state-info-bg: rgba(237, 189, 104, 0.16);
-    --color-state-info-text: #f2d39a;
-    --color-success: #8bcaa0;
-    --color-warning: #f3b05b;
-    --color-danger: #f18879;
-    --color-note: #a79fe6;
+    /* State colors - Modern palette for dark */
+    --color-state-success-bg: rgba(46, 160, 67, 0.16);
+    --color-state-success-text: #3fb950;
+    --color-state-info-bg: rgba(88, 166, 255, 0.16);
+    --color-state-info-text: #58a6ff;
+    --color-success: #3fb950;
+    --color-warning: #d29922;
+    --color-danger: #f85149;
+    --color-note: #a371f7;
 
     /* Shadow presets - stronger for dark mode */
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -226,38 +228,38 @@
     --color-backdrop: rgba(0, 0, 0, 0.85);
     --shadow-lightbox: 0 20px 60px rgba(0, 0, 0, 0.6);
 
-    /* Interactive state */
-    --shadow-button-hover: 0 6px 20px rgba(251, 159, 116, 0.35);
+    /* Interactive state - Bright blue glow for dark */
+    --shadow-button-hover: 0 6px 20px rgba(88, 166, 255, 0.4);
 
-    /* Glow effects - Space Radio Design System (brighter for dark) */
-    --glow-accent-soft: 0 0 24px rgba(251, 159, 116, 0.3);
-    --glow-accent-strong: 0 0 36px rgba(251, 159, 116, 0.5);
-    --glow-cool: 0 0 28px rgba(96, 165, 250, 0.4);
+    /* Glow effects - Modern Spaceship (vivid for dark) */
+    --glow-accent-soft: 0 0 24px rgba(88, 166, 255, 0.3);
+    --glow-accent-strong: 0 0 36px rgba(88, 166, 255, 0.5);
+    --glow-cool: 0 0 28px rgba(34, 211, 238, 0.4);
 
     /* Code block colors */
-    --color-code-bg: #282a36;
+    --color-code-bg: #161b22;
 
-    /* Space Radio Color Palettes - Dark Theme (brighter, more vivid) */
+    /* Modern Spaceship Color Palettes - Dark Theme (vivid, electric) */
     --color-accent-warm: #ff9f74;
-    --color-accent-cool: #60a5fa;
+    --color-accent-cool: #58a6ff;
 
-    /* Retro radio palette - adjusted for dark */
+    /* Retro radio palette (legacy) */
     --color-radio-dial: #e5b882;
     --color-radio-tube: #ffaa77;
     --color-radio-grill: #9d8366;
 
-    /* Spaceship palette - adjusted for dark */
-    --color-space-cyan: #7df3c4;
-    --color-space-purple: #b99aff;
-    --color-space-blue: #5b9eff;
-    --color-space-silver: #a8b8cc;
+    /* Spaceship palette - Vivid for dark theme */
+    --color-space-cyan: #22d3ee;
+    --color-space-purple: #c084fc;
+    --color-space-blue: #58a6ff;
+    --color-space-silver: #8b949e;
 
-    /* Gradient tokens - Dark Theme (more vivid) */
-    --gradient-warm-to-cool: linear-gradient(135deg, #ff9f74 0%, #60a5fa 100%);
-    --gradient-cosmic: linear-gradient(135deg, #b99aff 0%, #7df3c4 50%, #5b9eff 100%);
-    --gradient-radio-glow: radial-gradient(circle, #ffaa77 0%, #ff9f74 50%, transparent 100%);
-    --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-                          radial-gradient(ellipse at bottom, rgba(244, 114, 182, 0.08) 0%, transparent 50%);
-    --gradient-bg-radio: radial-gradient(circle at 20% 20%, rgba(255, 159, 116, 0.12) 0%, transparent 40%),
-                         radial-gradient(circle at 80% 80%, rgba(229, 184, 130, 0.08) 0%, transparent 40%);
+    /* Gradient tokens - Dark Theme (electric, futuristic) */
+    --gradient-warm-to-cool: linear-gradient(135deg, #58a6ff 0%, #22d3ee 100%);
+    --gradient-cosmic: linear-gradient(135deg, #c084fc 0%, #22d3ee 50%, #58a6ff 100%);
+    --gradient-radio-glow: radial-gradient(circle, #22d3ee 0%, #58a6ff 50%, transparent 100%);
+    --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(88, 166, 255, 0.05) 0%, transparent 50%),
+                          radial-gradient(ellipse at bottom, rgba(34, 211, 238, 0.05) 0%, transparent 50%);
+    --gradient-bg-radio: radial-gradient(circle at 20% 20%, rgba(88, 166, 255, 0.08) 0%, transparent 40%),
+                         radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.05) 0%, transparent 40%);
 }

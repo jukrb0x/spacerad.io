@@ -24,16 +24,16 @@ header[data-header] {
     z-index: var(--z-sticky);
 }
 
-/* Blur backdrop when scrolled */
+/* Blur backdrop when scrolled - Modern Spaceship */
 header[data-header].is-scrolled {
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
-    background: rgba(255, 250, 244, 0.8); /* Light mode with transparency */
+    background: rgba(250, 251, 252, 0.85); /* Light mode with transparency - cool white */
 }
 
-/* Dark theme blur backdrop */
+/* Dark theme blur backdrop - Deep space */
 :root[data-theme="dark"] header[data-header].is-scrolled {
-    background: rgba(20, 14, 11, 0.8); /* Dark mode with transparency */
+    background: rgba(13, 17, 23, 0.85); /* Dark mode with transparency - deep space black */
 }
 
 /* Hidden state - slides up out of view */

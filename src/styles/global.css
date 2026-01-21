@@ -927,12 +927,8 @@ html[data-theme="dark"] .prose pre code span {
     gap: clamp(var(--space-6), 3vw, var(--space-12));
 }
 
-.text-secondary {
-    color: var(--color-text-secondary);
-}
-
-.text-muted {
-    color: var(--color-text-muted);
+.bg-muted {
+    background-color: var(--color-bg-muted);
 }
 
 .surface-card {

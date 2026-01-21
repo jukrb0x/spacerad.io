@@ -35,12 +35,11 @@ export default defineConfig({
             // Background colors
             page: "var(--color-bg-page)",
             surface: "var(--color-bg-surface)",
-            muted: "var(--color-bg-muted)",
 
             // Text colors
             primary: "var(--color-text-primary)",
             secondary: "var(--color-text-secondary)",
-            "text-muted": "var(--color-text-muted)",
+            muted: "var(--color-text-muted)",
             inverse: "var(--color-text-inverse)",
 
             // Accent colors
@@ -176,6 +175,8 @@ export default defineConfig({
         "toc",
         "lightbox",
         "scroll-locked",
+        // Custom utility classes from global.css
+        "bg-muted",
         // Animation classes
         "animate-pop",
         "animate-shake",
