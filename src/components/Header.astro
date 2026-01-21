@@ -200,3 +200,12 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 <script>
     import "../scripts/header-scroll.ts";
 </script>
+
+<style lang="scss">
+    /* Prevent flash of mobile nav toggle on desktop */
+    @media (min-width: 768px) {
+        [data-nav-toggle] {
+            display: none !important;
+        }
+    }
+</style>

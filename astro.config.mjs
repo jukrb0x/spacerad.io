@@ -28,11 +28,9 @@ const rehypePrettyCodeOptions = {
         dark: "github-dark",
     },
     // Keep the background from the theme
-    keepBackground: true,
+    keepBackground: false,
     // Enable grid layout for line highlighting
     grid: true,
-    // Filter meta for code blocks (language specification)
-    filterMetaString: (string) => string.replace(/filename="[^"]*"/, ""),
     // Add data attributes for CSS styling
     onVisitLine(node) {
         // Prevent lines from collapsing in `display: grid` mode
