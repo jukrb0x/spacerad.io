@@ -39,35 +39,38 @@ const groupedPosts = Array.from(postsByYear.entries());
 	</div>
 	{
 		groupedPosts.map(([year, yearPosts]) => (
-			<div class="space-y-4" data-year-group>
-				{/* 年份标题 - 使用分隔线而非巨大数字 */}
-				<div class="flex items-center gap-4">
-					<h3 class="text-xl font-bold tracking-tight text-primary sm:text-2xl">
+			<div class="relative" data-year-group>
+				{/* Year in background - wh0.is style */}
+				<div class="relative h-20 pointer-events-none select-none">
+					<span class="absolute -left-3 -top-4 text-8xl sm:text-9xl font-bold opacity-[0.08] text-primary">
 						{year}
-					</h3>
-					<div class="h-px flex-1 bg-border-soft" />
+					</span>
 				</div>
 
-				<ul class="m-0 flex list-none flex-col gap-0 p-0">
+				<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
 					{yearPosts.map((post) => {
 						const isDeepSearch = post.data.tags?.includes('DeepSearch') ?? false;
+						const isZh = post.data.lang === 'zh';
 						return (
 							<li data-deepsearch={isDeepSearch ? 'true' : 'false'}>
-								<div class="post-link group relative flex items-baseline gap-4 rounded-md px-4 py-2.5 transition-all duration-200 hover:bg-accent-tint-6">
-									<h4 class="title flex-1 text-base font-medium tracking-tight text-primary transition-colors duration-200 group-hover:text-accent sm:text-lg">
-										<a
-											href={`/posts/${post.id}`}
-											class="no-underline text-primary hover:text-accent focus-accent"
-											data-post-id={post.id}
-										>
-											{post.data.title}
-										</a>
-									</h4>
+								<a
+									href={`/posts/${post.id}`}
+									class="post-item group flex items-baseline justify-between gap-4 py-2 no-underline"
+									data-post-id={post.id}
+								>
+									<div class="text-base sm:text-lg leading-tight text-primary">
+										{isZh && (
+											<span class="text-xs border border-current rounded px-1 mr-2 opacity-60">
+												中文
+											</span>
+										)}
+										<span class="break-words">{post.data.title}</span>
+									</div>
 
-									<p class="date ml-auto shrink-0 text-[0.7rem] font-medium uppercase tracking-[0.12em] text-muted transition-colors duration-200 group-hover:text-accent sm:text-xs" data-no-preview>
+									<time class="shrink-0 text-xs opacity-50 tabular-nums" data-no-preview>
 										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</div>
+									</time>
+								</a>
 							</li>
 						);
 					})}

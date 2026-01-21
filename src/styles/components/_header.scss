@@ -1,0 +1,119 @@
+// =============================================
+// Header Component - Space Radio Design System
+// =============================================
+// Enhanced header with:
+// - Auto-hide on scroll down
+// - Show on scroll up
+// - Blur backdrop when scrolled
+// - Reading progress indicator
+// - Minimal mode (optional)
+// - Respects prefers-reduced-motion
+
+@use '../tokens' as *;
+
+// ---------------------------------------------
+// Header Base
+// ---------------------------------------------
+
+header[data-header] {
+  z-index: z('sticky');
+  transition:
+    transform 0.3s ease,
+    backdrop-filter 0.3s ease,
+    -webkit-backdrop-filter 0.3s ease,
+    background-color 0.3s ease;
+
+  // Blur backdrop when scrolled
+  &.is-scrolled {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    background: rgba(250, 251, 252, 0.85);
+
+    @include dark-theme {
+      background: rgba(13, 17, 23, 0.85);
+    }
+  }
+
+  // Hidden state - slides up out of view
+  &.header--hidden {
+    transform: translateY(-100%);
+  }
+
+  // Minimal mode - reduces header size when scrolling
+  &.header--minimal {
+    padding-block: 0.5rem;
+
+    h2 {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// ---------------------------------------------
+// Reading Progress Bar
+// ---------------------------------------------
+
+[data-reading-progress] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.1s ease-out;
+  pointer-events: none;
+}
+
+// ---------------------------------------------
+// Reduced Motion
+// ---------------------------------------------
+
+@include reduced-motion {
+  header[data-header],
+  [data-reading-progress] {
+    transition: none;
+    animation: none;
+  }
+
+  // Still hide header but without animation
+  header[data-header].header--hidden {
+    transform: translateY(-100%);
+  }
+}
+
+// ---------------------------------------------
+// Mobile Adjustments
+// ---------------------------------------------
+
+@include breakpoint-down('md') {
+  header[data-header] {
+    transition-duration: 0.25s;
+  }
+
+  [data-reading-progress] {
+    height: 2px;
+  }
+}
+
+// ---------------------------------------------
+// Browser Support Fallbacks
+// ---------------------------------------------
+
+// Safari-specific fixes for backdrop-filter
+@supports ((-webkit-backdrop-filter: blur(1px)) and (not (backdrop-filter: blur(1px)))) {
+  header[data-header].is-scrolled {
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+}
+
+// Fallback for browsers without backdrop-filter support
+@supports not (backdrop-filter: blur(1px)) {
+  header[data-header].is-scrolled {
+    background: var(--color-bg-surface);
+
+    @include dark-theme {
+      background: var(--color-bg-surface);
+    }
+  }
+}

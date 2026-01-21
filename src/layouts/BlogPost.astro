@@ -12,6 +12,7 @@ import ShareSidebar from "../components/ShareSidebar.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
+import { calculateReadingTime } from "../utils/readingTime";
 
 type EntryData =
     | CollectionEntry<"blog">["data"]
@@ -41,6 +42,7 @@ const {
 } = Astro.props;
 
 const description = providedDescription || (body ? extractDescription(body) : "No description available");
+const readingTime = body ? calculateReadingTime(body) : null;
 
 const imageSrc = socialImage || DEFAULT_POST_SOCIAL_IMAGE;
 
@@ -62,11 +64,17 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 			<!-- Article main body: always centered -->
 			<article class="mx-auto max-w-[50rem] sm:px-6">
 				<!-- Header section -->
-				<div data-article-header class="space-y-4 border-b border-border-subtle pb-6 text-center">
+				<div data-article-header class="space-y-3 border-b border-border-muted pb-6">
 					<h1 class="text-3xl font-bold text-primary sm:text-4xl">{title}</h1>
 					<div class="space-y-2 text-sm text-muted">
 						<p>
 							<FormattedDate date={pubDate} />
+							{readingTime && (
+								<>
+									<span class="px-2 opacity-50">&middot;</span>
+									<span>{readingTime}</span>
+								</>
+							)}
 						</p>
 						{
 							(lastModified || updatedDate) && (
@@ -90,7 +98,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 						}
 					</div>
 					{tags && tags.length > 0 && (
-						<div class="flex flex-wrap justify-center gap-2">
+						<div class="flex flex-wrap gap-2">
 							{tags.map((tag: string) => (
 								<a
 									href={`/tags/${tag}`}

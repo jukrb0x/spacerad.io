@@ -12,8 +12,47 @@ import rehypeFigure from "rehype-figure";
 import rehypeImgSize from "rehype-img-size";
 import rehypePicture from "rehype-picture";
 import rehypeSlug from "rehype-slug";
+import {
+    rehypePrettyCode,
+} from "rehype-pretty-code";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import { remarkModifiedTime } from "./remark-modified-time.mjs";
+
+import vue from "@astrojs/vue";
+
+/** @type {import("rehype-pretty-code").Options} */
+const rehypePrettyCodeOptions = {
+    // Use dual themes for light/dark mode support
+    theme: {
+        light: "github-light",
+        dark: "github-dark",
+    },
+    // Keep the background from the theme
+    keepBackground: true,
+    // Enable grid layout for line highlighting
+    grid: true,
+    // Filter meta for code blocks (language specification)
+    filterMetaString: (string) => string.replace(/filename="[^"]*"/, ""),
+    // Add data attributes for CSS styling
+    onVisitLine(node) {
+        // Prevent lines from collapsing in `display: grid` mode
+        if (node.children.length === 0) {
+            node.children = [{ type: "text", value: " " }];
+        }
+    },
+    onVisitHighlightedLine(node) {
+        if (!node.properties.className) {
+            node.properties.className = [];
+        }
+        node.properties.className.push("highlighted");
+    },
+    onVisitHighlightedChars(node) {
+        if (!node.properties.className) {
+            node.properties.className = [];
+        }
+        node.properties.className.push("highlighted-chars");
+    },
+};
 
 // https://astro.build/config
 export default defineConfig({
@@ -21,7 +60,7 @@ export default defineConfig({
         imageService: "compile",
     }),
     site: "https://example.com",
-    output: "static", 
+    output: "static",
     integrations: [
         mdx(),
         sitemap(),
@@ -51,23 +90,15 @@ export default defineConfig({
             },
         }),
         pagefind(),
+        vue(),
     ],
 
     markdown: {
         remarkPlugins: [remarkAlert, remarkModifiedTime],
-        shikiConfig: {
-            // 双主题配置：通过 CSS 变量控制，无需 !important
-            themes: {
-                light: "github-light",
-                dark: "dracula",
-            },
-            // 禁用默认颜色，让 CSS 完全控制主题切换
-            defaultColor: false,
-        },
-        syntaxHighlight: {
-            excludeLangs: ["mermaid"],
-        },
+        // Disable Astro's built-in syntax highlighting - using rehype-pretty-code instead
+        syntaxHighlight: false,
         rehypePlugins: [
+            [rehypePrettyCode, rehypePrettyCodeOptions],
             rehypeSlug,
             [
                 rehypeAutolinkHeadings,

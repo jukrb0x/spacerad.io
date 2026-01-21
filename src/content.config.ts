@@ -11,6 +11,8 @@ const sharedSchema = z.object({
     socialImage: z.string().optional(),
     tags: z.array(z.string()).optional().default([]),
     hidden: z.boolean().optional().default(false),
+    // Language field for Chinese post detection
+    lang: z.enum(['en', 'zh']).optional().default('en'),
     // Comment system override: "cusdis" | "remark42" | false (to disable)
     commentSystem: z.union([z.literal("cusdis"), z.literal("remark42")]).optional(),
     comment: z.boolean().optional().default(true),
