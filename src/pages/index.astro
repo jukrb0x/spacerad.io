@@ -10,10 +10,14 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
     <style>
+      .intro-container {
+        animation: fadeIn 0.6s ease-out;
+      }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(30px);
+          transform: translateY(20px);
         }
         to {
           opacity: 1;
@@ -21,121 +25,20 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
         }
       }
 
-      @keyframes breathe {
-        0%,
-        100% {
-          opacity: 0.95;
-        }
-        50% {
-          opacity: 1;
-        }
+      .intro-link {
+        text-decoration: underline;
+        text-decoration-color: rgba(128, 128, 128, 0.3);
+        text-underline-offset: 0.2em;
+        transition: text-decoration-color 0.3s ease;
       }
 
-      .quote-container {
-        animation: fadeIn 1s ease-out;
-        position: relative;
-        width: 100%;
-      }
-
-      .quote-text {
-        color: var(--color-text-secondary);
-        line-height: 1.8;
-        font-size: clamp(1.25rem, 4.5vw, 1.5rem);
-      }
-
-      /* Ghost container maintains stable height */
-      .quote-ghost {
-        visibility: hidden;
-        pointer-events: none;
-        user-select: none;
-        aria-hidden: true;
-      }
-
-      /* Actual typewriter overlays on ghost container */
-      .quote-actual {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        margin: 0 auto;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .quote-actual.is-ready {
-        opacity: 1;
-      }
-
-      .quote-emphasis {
-        display: inline-block;
-        font-size: clamp(1.75rem, 6.5vw, 2.25rem);
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        color: var(--color-link);
-        margin: clamp(0.75rem, 2.5vw, 1rem) 0;
-        animation: breathe 4s ease-in-out infinite;
-      }
-
-      .quote-source {
-        transition: all 0.5s ease;
-        opacity: 0;
-      }
-
-      .quote-source.is-visible {
-        opacity: 1;
+      .intro-link:hover {
+        text-decoration-color: currentColor;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .quote-container,
-        .quote-source {
+        .intro-container {
           animation: none;
-        }
-        .quote-emphasis {
-          animation: none;
-        }
-      }
-
-      .quote-source:hover {
-        transform: translateX(-8px);
-      }
-
-      .quote-source a {
-        position: relative;
-        text-decoration: none;
-        transition: color 0.3s ease;
-      }
-
-      .quote-source a::after {
-        content: "";
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: var(--color-accent);
-        transition: width 0.3s ease;
-      }
-
-      .quote-source a:hover::after {
-        width: 100%;
-      }
-
-      /* Typewriter cursor style */
-      .typewriter-cursor {
-        display: inline-block;
-        width: 1.5px;
-        height: 1.2em;
-        background-color: var(--color-accent);
-        margin-left: 2px;
-        animation: blink 0.75s step-end infinite;
-        vertical-align: middle;
-        position: relative;
-        top: -0.05em;
-      }
-
-      @keyframes blink {
-        50% {
-          opacity: 0;
         }
       }
     </style>
@@ -146,135 +49,40 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
       class="page-shell flex min-h-[calc(100vh-18rem)] items-center justify-center"
     >
       <section
-        class="quote-container mx-auto max-w-3xl space-y-6 sm:space-y-8 text-center px-4"
+        class="intro-container mx-auto max-w-2xl space-y-6 px-4 py-12"
       >
-        <!-- Ghost placeholder: used to pre-expand height and fix vertical center point -->
-        <blockquote
-          class="quote-text quote-ghost space-y-4 sm:space-y-6 leading-relaxed"
-        >
-          <p>
-            <span class="block sm:inline">Perhaps everyone is proving their existence,</span>
-            <span class="block sm:inline">longing to be perceived by others.</span>
-          </p>
-          <p>
-            <span class="block sm:inline">Behind all behaviors,</span>
-            <span class="block sm:inline">there is only one simple yet poignant message:</span>
-          </p>
-          <p class="quote-emphasis">「Don't forget me」.</p>
-        </blockquote>
-
-        <!-- Actual displayed and typed Blockquote -->
-        <blockquote
-          class="quote-text quote-actual space-y-4 sm:space-y-6 leading-relaxed"
-          id="typewriter-quote"
-        >
-          <p>
-            <span class="block sm:inline">Perhaps everyone is proving their existence,</span>
-            <span class="block sm:inline">longing to be perceived by others.</span>
-          </p>
-          <p>
-            <span class="block sm:inline">Behind all behaviors,</span>
-            <span class="block sm:inline">there is only one simple yet poignant message:</span>
-          </p>
-          <p class="quote-emphasis">「Don't forget me」.</p>
-        </blockquote>
-        <p
-          class="quote-source text-right text-base text-muted"
-          id="quote-source"
-        >
-          —— From <a
-            href="https://spacerad.io/blog"
-            class="text-secondary hover:text-accent">Spacerad.io</a
-          >
+        <p class="text-xl sm:text-2xl leading-relaxed text-secondary">
+          Hey there!
         </p>
+
+        <p class="text-base sm:text-lg leading-relaxed text-secondary">
+          I'm actively working on this website. Please visit again soon.
+        </p>
+
+        <div class="pt-4">
+          <img
+            src="/img.jpeg"
+            alt="Scenery"
+            class="rounded-lg shadow-md max-w-full h-auto"
+            loading="lazy"
+          />
+        </div>
+
+        <blockquote class="border-l-2 border-accent pl-4 text-muted italic">
+          <p class="mb-2">
+            <strong class="text-secondary not-italic">This website is actively under development. Please excuse the mess.</strong>
+          </p>
+          <p>
+            Repository: <a
+              href="https://github.com/jukrb0x/wh0.is"
+              class="intro-link text-secondary hover:text-accent"
+              target="_blank"
+              rel="noopener noreferrer"
+            >jukrb0x/wh0.is</a>
+          </p>
+        </blockquote>
       </section>
     </main>
     <Footer />
-    <script>
-      interface TypeTask {
-        node: Node;
-        text: string;
-        parent: HTMLElement;
-      }
-
-      const quoteElement = document.getElementById("typewriter-quote");
-      const sourceElement = document.getElementById("quote-source");
-
-      if (quoteElement && sourceElement) {
-        const tasks: TypeTask[] = [];
-        const walker = document.createTreeWalker(
-          quoteElement,
-          NodeFilter.SHOW_TEXT,
-          null
-        );
-
-        const cursor = document.createElement("span");
-        cursor.className = "typewriter-cursor";
-
-        let node: Node | null;
-        while ((node = walker.nextNode())) {
-          if (node.parentNode instanceof HTMLElement) {
-            tasks.push({
-              node: node,
-              text: node.nodeValue || "",
-              parent: node.parentNode,
-            });
-            node.nodeValue = "\u200B"; // Use zero-width space as placeholder
-          }
-        }
-
-        // Initialize ready, show quote
-        quoteElement.classList.add("is-ready");
-
-        let currentTaskIndex = 0;
-        let currentCharIndex = 0;
-
-        const type = () => {
-          if (currentTaskIndex < tasks.length) {
-            const { node, text, parent } = tasks[currentTaskIndex];
-
-            if (currentCharIndex < text.length) {
-              const char = text.charAt(currentCharIndex);
-
-              if (node.nodeValue === "\u200B") {
-                node.nodeValue = "";
-                parent.appendChild(cursor);
-              }
-
-              node.nodeValue += char;
-              (node as unknown as ChildNode).after(cursor);
-              currentCharIndex++;
-
-              // Natural rhythm typing speed
-              let delay = 60 + Math.random() * 15; // Stable flow (60ms-75ms)
-
-              // Emphasis: character by character strategy
-              if (text.includes("Don't forget me")) {
-                delay = 80; // Stable and slightly slower, adds solemnity
-              }
-
-              // Logical semantic pause (very short, maintains flow)
-              if (char === "," || char === ":") {
-                delay = 120;
-              } else if (char === "." || char === "!" || char === "?") {
-                delay = 250;
-              }
-
-              setTimeout(type, delay);
-            } else {
-              currentTaskIndex++;
-              currentCharIndex = 0;
-              setTimeout(type, 100); // Very short inter-line transition
-            }
-          } else if (sourceElement) {
-            cursor.remove();
-            sourceElement.classList.add("is-visible");
-          }
-        };
-
-        // Moderate startup speed
-        setTimeout(type, 600);
-      }
-    </script>
   </body>
 </html>

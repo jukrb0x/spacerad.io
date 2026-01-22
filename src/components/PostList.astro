@@ -26,7 +26,7 @@ const groupedPosts = Array.from(postsByYear.entries());
 ---
 
 <section class="section-stack">
-	<div class="flex items-center justify-end">
+	<div class="flex items-center justify-end mb-4">
 		<label class="inline-flex select-none items-center gap-2 text-sm text-muted">
 			<input
 				id="filter-deepsearch"
@@ -40,32 +40,32 @@ const groupedPosts = Array.from(postsByYear.entries());
 	{
 		groupedPosts.map(([year, yearPosts]) => (
 			<div class="relative" data-year-group>
-				{/* Year in background - wh0.is style */}
-				<div class="relative h-20 pointer-events-none select-none">
-					<span class="absolute -left-3 -top-4 text-8xl sm:text-9xl font-bold opacity-[0.08] text-primary">
+				{/* Year in background - closer to first post */}
+				<div class="relative h-14 pointer-events-none select-none">
+					<span class="absolute -left-3 -top-2 text-8xl sm:text-9xl font-bold opacity-[0.08] text-primary">
 						{year}
 					</span>
 				</div>
 
-				<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
+				<ul class="m-0 flex list-none flex-col gap-2 p-0 relative">
 					{yearPosts.map((post) => {
 						const isDeepSearch = post.data.tags?.includes('DeepSearch') ?? false;
 						const isZh = post.data.lang === 'zh';
 						return (
-							<li data-deepsearch={isDeepSearch ? 'true' : 'false'}>
+							<li data-deepsearch={isDeepSearch ? 'true' : 'false'} class="post-item-wrapper">
 								<a
 									href={`/posts/${post.id}`}
-									class="post-item group flex items-baseline justify-between gap-4 py-2 no-underline"
+									class="post-item group block py-2 no-underline"
 									data-post-id={post.id}
 								>
-									<div class="text-base sm:text-lg leading-tight text-primary">
+									<div class="text-base sm:text-lg leading-snug text-primary">
 										{isZh && (
-											<span class="text-xs border border-current rounded px-1 mr-2 opacity-60">中文</span>
+											<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle">中文</span>
 										)}
-										<span class="break-words">{post.data.title}</span>
+										<span class="break-words align-middle">{post.data.title}</span>
 									</div>
 
-									<time class="shrink-0 text-xs opacity-50 tabular-nums" data-no-preview>
+									<time class="block mt-1 text-xs opacity-50 tabular-nums" data-no-preview>
 										<FormattedDate date={post.data.pubDate} />
 									</time>
 								</a>
@@ -77,6 +77,20 @@ const groupedPosts = Array.from(postsByYear.entries());
 		))
 	}
 </section>
+
+<style>
+	/* Chinese badge with negative margin to align titles */
+	.zh-badge {
+		margin-left: -2.75rem;
+	}
+
+	@media (max-width: 640px) {
+		.zh-badge {
+			margin-left: 0;
+			margin-right: 0.5rem;
+		}
+	}
+</style>
 
 <script is:inline>
 	document.addEventListener('DOMContentLoaded', function() {

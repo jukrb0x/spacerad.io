@@ -1,6 +1,5 @@
 ---
 import { SITE_TITLE } from "../consts";
-import HeaderLink from "./HeaderLink.astro";
 import SearchModal from "./SearchModal.astro";
 import ThemeToggle from "./ThemeToggle.astro";
 
@@ -19,8 +18,14 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
 <header
     data-header
-    class="sticky top-0 bg-surface border-b border-border transition-all duration-300"
+    class="header-wrapper sticky top-0 z-sticky bg-surface border-b border-border transition-all duration-300"
 >
+    <!-- Subtle neon glow effect on scroll -->
+    <div
+        data-header-glow
+        class="header-glow absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500"
+    ></div>
+
     <!-- Reading progress indicator -->
     <div
         data-reading-progress
@@ -34,24 +39,58 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
     ></div>
 
     <nav
-        class="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6"
+        class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-2 py-2 sm:px-4"
     >
+        <!-- Left: Logo + Site Name -->
         <h2
-            class="text-[1.05rem] font-semibold tracking-tight text-primary sm:text-[1.1rem]"
+            class="text-[1.1rem] font-semibold tracking-tight text-primary sm:text-[1.15rem] shrink-0"
         >
             <a
                 href="/"
-                class="no-underline transition-interactive hover:text-accent focus-accent"
+                class="inline-flex items-center gap-2 no-underline transition-interactive hover:text-accent focus-accent"
             >
-                {SITE_TITLE}
+                <span class="text-xl" aria-hidden="true">📻</span>
+                <span>{SITE_TITLE}</span>
             </a>
         </h2>
-        <SearchModal />
-        <ThemeToggle variant="header" />
-        <div class="ml-auto flex items-center gap-2 sm:gap-3">
+
+        <!-- Right: Search | NavLinks | ThemeToggle -->
+        <div class="flex items-center gap-1 sm:gap-2">
+            <!-- Search -->
+            <SearchModal />
+
+            <!-- Spacer -->
+            <!-- <span class="hidden sm:block text-border mx-1 select-none">|</span> -->
+
+            <!-- Nav Links (desktop) -->
+            <div class="hidden items-center gap-1 md:flex" data-no-preview>
+                {
+                    navLinks.map((link) => (
+                        <a
+                            href={link.href}
+                            class:list={[
+                                "no-underline nav-link px-3 py-1.5 text-[0.9rem] font-medium rounded-md transition-all duration-200",
+                                isActive(link.href)
+                                    ? "text-muted cursor-default"
+                                    : "text-secondary hover:text-accent hover:bg-accent-tint-6",
+                            ]}
+                        >
+                            {link.label}
+                        </a>
+                    ))
+                }
+            </div>
+
+            <!-- Spacer -->
+            <span class="hidden sm:block text-border mx-1 select-none">|</span>
+
+            <!-- Theme Toggle -->
+            <ThemeToggle variant="header" />
+
+            <!-- Mobile menu toggle -->
             <button
                 type="button"
-                class="icon-btn icon-btn--sm icon-btn--square icon-btn--bordered focus-accent md:hidden"
+                class="icon-btn icon-btn--sm icon-btn--square icon-btn--bordered focus-accent md:hidden ml-1"
                 aria-label="Open navigation menu"
                 aria-expanded="false"
                 data-nav-toggle
@@ -71,13 +110,6 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                         data-bar-bottom></span>
                 </span>
             </button>
-            <div class="hidden items-center gap-2 sm:gap-3 md:flex" data-no-preview>
-                {
-                    navLinks.map((link) => (
-                        <HeaderLink href={link.href}>{link.label}</HeaderLink>
-                    ))
-                }
-            </div>
         </div>
     </nav>
     <div
@@ -119,7 +151,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                             class:list={[
                                 "inline-flex items-center rounded-md px-3 py-2 transition-interactive focus-accent",
                                 isActive(link.href)
-                                    ? "bg-accent-tint-12 text-accent font-semibold"
+                                    ? "text-muted cursor-default"
                                     : "text-secondary hover:text-accent hover:bg-accent-tint-8",
                             ]}
                             data-nav-link
@@ -207,5 +239,32 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         [data-nav-toggle] {
             display: none !important;
         }
+    }
+
+    /* Subtle neon/space-radio glow effect */
+    .header-glow {
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            color-mix(in srgb, var(--color-space-purple) 3%, transparent) 20%,
+            color-mix(in srgb, var(--color-space-cyan) 5%, transparent) 50%,
+            color-mix(in srgb, var(--color-space-purple) 3%, transparent) 80%,
+            transparent 100%
+        );
+    }
+
+    :global([data-theme="dark"]) .header-glow {
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            color-mix(in srgb, var(--color-space-purple) 8%, transparent) 20%,
+            color-mix(in srgb, var(--color-space-cyan) 12%, transparent) 50%,
+            color-mix(in srgb, var(--color-space-purple) 8%, transparent) 80%,
+            transparent 100%
+        );
+    }
+
+    .header-wrapper.is-scrolled .header-glow {
+        opacity: 1;
     }
 </style>
