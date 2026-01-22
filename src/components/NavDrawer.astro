@@ -1,0 +1,127 @@
+---
+// NavDrawer.astro - Mobile navigation drawer (rendered outside header to avoid transform issues)
+
+const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/posts", label: "Blog" },
+    { href: "/tags", label: "Tags" },
+    { href: "/channel", label: "Channel" },
+    { href: "/about", label: "About" },
+];
+
+const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
+const subpath = pathname.match(/[^/]+/g);
+const isActive = (href: string) => href === pathname || href === `/${subpath?.[0] || ""}`;
+---
+
+<div
+    data-nav-overlay
+    class="fixed inset-0 z-50 flex items-start justify-end bg-black/30 opacity-0 transition-opacity duration-200 pointer-events-none md:hidden"
+    data-nav-state="closed"
+>
+    <button
+        type="button"
+        class="absolute inset-0 h-full w-full cursor-default"
+        data-nav-close
+        aria-label="Close navigation menu"></button>
+    <div
+        data-nav-drawer
+        class="relative z-10 flex h-full w-72 max-w-[80vw] translate-x-6 flex-col gap-6 border-l border-border bg-surface p-6 text-primary shadow-xl transition-transform duration-200"
+    >
+        <div class="flex items-center justify-between">
+            <span
+                class="text-sm font-semibold uppercase tracking-[0.25em] text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)]"
+            >
+                Menu
+            </span>
+            <button
+                type="button"
+                class="icon-btn icon-btn--xs icon-btn--square focus-accent"
+                data-nav-close
+                aria-label="Close navigation menu"
+            >
+                <span aria-hidden="true" class="text-xl leading-none">×</span>
+            </button>
+        </div>
+        <nav class="flex flex-col gap-2 text-base" data-no-preview>
+            {
+                navLinks.map((link) => (
+                    <a
+                        href={link.href}
+                        class:list={[
+                            "no-underline inline-flex items-center rounded-md px-3 py-2 transition-interactive focus-accent",
+                            isActive(link.href)
+                                ? "text-muted cursor-default"
+                                : "text-secondary hover:text-accent hover:bg-accent-tint-8",
+                        ]}
+                        data-nav-link
+                    >
+                        {link.label}
+                    </a>
+                ))
+            }
+        </nav>
+    </div>
+</div>
+
+<script is:inline>
+(function() {
+    const toggleButton = document.querySelector("[data-nav-toggle]");
+    const overlay = document.querySelector("[data-nav-overlay]");
+    const drawer = document.querySelector("[data-nav-drawer]");
+    const closeButtons = document.querySelectorAll("[data-nav-close]");
+    const navLinks = document.querySelectorAll("[data-nav-link]");
+    const barTop = toggleButton?.querySelector("[data-bar-top]");
+    const barMiddle = toggleButton?.querySelector("[data-bar-middle]");
+    const barBottom = toggleButton?.querySelector("[data-bar-bottom]");
+    let lastFocusedElement = null;
+
+    const toggleClasses = (el, add, remove) => {
+        if (!el) return;
+        el.classList.remove(...remove);
+        el.classList.add(...add);
+    };
+
+    const setNavOpen = (open) => {
+        if (!overlay || !drawer) return;
+
+        overlay.dataset.navState = open ? "open" : "closed";
+        toggleButton?.setAttribute("aria-expanded", String(open));
+        toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+
+        if (open) {
+            lastFocusedElement = document.activeElement;
+            toggleClasses(overlay, ["opacity-100"], ["pointer-events-none", "opacity-0"]);
+            toggleClasses(drawer, ["translate-x-0"], ["translate-x-6"]);
+            toggleClasses(barTop, ["translate-y-1.5", "rotate-45"], []);
+            toggleClasses(barBottom, ["-translate-y-1.5", "-rotate-45"], []);
+            toggleClasses(barMiddle, ["opacity-0"], []);
+            document.body.classList.add("scroll-locked");
+            requestAnimationFrame(() => navLinks[0]?.focus({ preventScroll: true }));
+        } else {
+            toggleClasses(overlay, ["opacity-0", "pointer-events-none"], ["opacity-100"]);
+            toggleClasses(drawer, ["translate-x-6"], ["translate-x-0"]);
+            toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
+            toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
+            toggleClasses(barMiddle, [], ["opacity-0"]);
+            document.body.classList.remove("scroll-locked");
+            if (lastFocusedElement && "focus" in lastFocusedElement) {
+                lastFocusedElement.focus({ preventScroll: true });
+            }
+        }
+    };
+
+    toggleButton?.addEventListener("click", () => setNavOpen(overlay?.dataset.navState !== "open"));
+    closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
+    overlay?.addEventListener("click", (e) => e.target === overlay && setNavOpen(false));
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && overlay?.dataset.navState === "open") {
+            setNavOpen(false);
+        }
+    });
+    navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+
+    const mdQuery = window.matchMedia("(min-width: 768px)");
+    mdQuery.addEventListener("change", (e) => e.matches && setNavOpen(false));
+})();
+</script>
