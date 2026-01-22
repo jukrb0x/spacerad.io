@@ -7,7 +7,7 @@
 <button
     type="button"
     class="icon-btn icon-btn--sm icon-btn--square icon-btn--bordered focus-accent"
-    aria-label="搜索 (Cmd+K)"
+    aria-label="Search (Cmd+K)"
     data-search-trigger
 >
     <svg
@@ -33,14 +33,14 @@
     data-search-state="closed"
     role="dialog"
     aria-modal="true"
-    aria-label="站内搜索"
+    aria-label="Site Search"
 >
     <!-- Backdrop close button -->
     <button
         type="button"
         class="absolute inset-0 h-full w-full cursor-default"
         data-search-close
-        aria-label="关闭搜索"
+        aria-label="Close Search"
     ></button>
 
     <!-- Search Container -->
@@ -64,11 +64,11 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.3-4.3"></path>
             </svg>
-            <label for="search-input" class="sr-only">搜索文章</label>
+            <label for="search-input" class="sr-only">Search Posts</label>
             <input
                 id="search-input"
                 type="search"
-                placeholder="搜索文章..."
+                placeholder="Search posts..."
                 class="w-full bg-transparent text-lg text-primary placeholder:text-muted focus-accent rounded"
                 data-search-input
                 autocomplete="off"
@@ -83,7 +83,7 @@
                 type="button"
                 class="icon-btn icon-btn--sm icon-btn--square focus-accent sm:hidden"
                 data-search-close
-                aria-label="关闭搜索"
+                aria-label="Close Search"
             >
                 <span aria-hidden="true" class="text-xl leading-none">&times;</span>
             </button>
@@ -96,16 +96,16 @@
         >
             <!-- Empty state -->
             <div data-search-empty class="py-8 text-center text-muted">
-                <p>输入关键词开始搜索</p>
-                <p class="mt-2 text-sm">支持搜索所有文章、TIL 和月度总结</p>
+                <p>Enter keywords to search</p>
+                <p class="mt-2 text-sm">Search all posts</p>
             </div>
             <!-- No results state (hidden by default) -->
             <div data-search-no-results class="hidden py-8 text-center text-muted">
-                <p>未找到相关内容</p>
-                <p class="mt-2 text-sm">请尝试其他关键词</p>
+                <p>No results found</p>
+                <p class="mt-2 text-sm">Try different keywords</p>
             </div>
             <!-- Results list -->
-            <ul data-search-list class="hidden space-y-2" role="listbox" aria-label="搜索结果">
+            <ul data-search-list class="hidden space-y-2" role="listbox" aria-label="Search Results">
             </ul>
         </div>
 
@@ -113,9 +113,9 @@
         <div class="flex items-center justify-between border-t border-subtle pt-3 text-xs text-muted">
             <span>
                 <kbd class="rounded border border-subtle bg-page px-1.5 py-0.5">↵</kbd>
-                选择
+                Select
                 <kbd class="ml-2 rounded border border-subtle bg-page px-1.5 py-0.5">↑↓</kbd>
-                导航
+                Navigate
             </span>
             <span class="flex items-center gap-1">
                 <span>Powered by</span>
