@@ -112,57 +112,6 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             </button>
         </div>
     </nav>
-    <div
-        data-nav-overlay
-        class="fixed inset-0 z-40 flex items-start justify-end bg-black/30 opacity-0 transition-opacity duration-200 pointer-events-none md:hidden"
-        data-nav-state="closed"
-    >
-        <button
-            type="button"
-            class="absolute inset-0 h-full w-full cursor-default"
-            data-nav-close
-            aria-label="Close navigation menu"></button>
-        <div
-            data-nav-drawer
-            class="relative z-10 flex h-full w-72 max-w-[80vw] translate-x-6 flex-col gap-6 border-l border-border bg-surface p-6 text-primary shadow-xl transition-transform duration-200"
-        >
-            <div class="flex items-center justify-between">
-                <span
-                    class="text-sm font-semibold uppercase tracking-[0.25em] text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)]"
-                >
-                    Menu
-                </span>
-                <button
-                    type="button"
-                    class="icon-btn icon-btn--xs icon-btn--square focus-accent"
-                    data-nav-close
-                    aria-label="Close navigation menu"
-                >
-                    <span aria-hidden="true" class="text-xl leading-none"
-                        >×</span
-                    >
-                </button>
-            </div>
-            <nav class="flex flex-col gap-2 text-base" data-no-preview>
-                {
-                    navLinks.map((link) => (
-                        <a
-                            href={link.href}
-                            class:list={[
-                                "inline-flex items-center rounded-md px-3 py-2 transition-interactive focus-accent",
-                                isActive(link.href)
-                                    ? "text-muted cursor-default"
-                                    : "text-secondary hover:text-accent hover:bg-accent-tint-8",
-                            ]}
-                            data-nav-link
-                        >
-                            {link.label}
-                        </a>
-                    ))
-                }
-            </nav>
-        </div>
-    </div>
     <link
         rel="alternate"
         type="application/rss+xml"
@@ -170,6 +119,59 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         href={new URL("rss.xml", Astro.site)}
     />
 </header>
+
+<!-- Mobile Drawer - placed outside header to avoid transform positioning issues -->
+<div
+    data-nav-overlay
+    class="fixed inset-0 z-50 flex items-start justify-end bg-black/30 opacity-0 transition-opacity duration-200 pointer-events-none md:hidden"
+    data-nav-state="closed"
+>
+    <button
+        type="button"
+        class="absolute inset-0 h-full w-full cursor-default"
+        data-nav-close
+        aria-label="Close navigation menu"></button>
+    <div
+        data-nav-drawer
+        class="relative z-10 flex h-full w-72 max-w-[80vw] translate-x-6 flex-col gap-6 border-l border-border bg-surface p-6 text-primary shadow-xl transition-transform duration-200"
+    >
+        <div class="flex items-center justify-between">
+            <span
+                class="text-sm font-semibold uppercase tracking-[0.25em] text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)]"
+            >
+                Menu
+            </span>
+            <button
+                type="button"
+                class="icon-btn icon-btn--xs icon-btn--square focus-accent"
+                data-nav-close
+                aria-label="Close navigation menu"
+            >
+                <span aria-hidden="true" class="text-xl leading-none"
+                    >×</span
+                >
+            </button>
+        </div>
+        <nav class="flex flex-col gap-2 text-base" data-no-preview>
+            {
+                navLinks.map((link) => (
+                    <a
+                        href={link.href}
+                        class:list={[
+                            "no-underline inline-flex items-center rounded-md px-3 py-2 transition-interactive focus-accent",
+                            isActive(link.href)
+                                ? "text-muted cursor-default"
+                                : "text-secondary hover:text-accent hover:bg-accent-tint-8",
+                        ]}
+                        data-nav-link
+                    >
+                        {link.label}
+                    </a>
+                ))
+            }
+        </nav>
+    </div>
+</div>
 
 <script is:inline>
     const toggleButton = document.querySelector("[data-nav-toggle]");

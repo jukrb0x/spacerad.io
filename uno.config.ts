@@ -156,7 +156,7 @@ export default defineConfig({
         "icon-btn-bordered": "border border-border-soft",
 
         // Pill/tag
-        pill: "inline-flex items-center px-3 py-1 text-sm rounded-full bg-accent-tint text-accent border border-transparent transition-interactive hover:(bg-accent text-inverse)",
+        pill: "inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-accent-tint text-accent border border-transparent transition-interactive hover:(bg-accent text-inverse)",
 
         // Surface card
         "surface-card": "bg-surface rounded-lg border border-border-subtle shadow-soft",
