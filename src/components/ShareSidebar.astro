@@ -64,7 +64,7 @@ const shareLinks = [
 <!-- Desktop: Fixed sidebar on left -->
 <aside
     data-share-sidebar
-    class="hidden min-[900px]:flex fixed flex-col gap-3 opacity-0 transition-opacity duration-200 mt-[5px]"
+    class="hidden min-[1400px]:flex fixed flex-col gap-3 opacity-0 transition-opacity duration-200 mt-[5px]"
     style="right: calc(50% + 25rem + 2rem); top: 6rem;"
     aria-label="Share article"
 >
@@ -109,7 +109,7 @@ const shareLinks = [
 <button
     type="button"
     data-share-mobile-toggle
-    class="min-[900px]:hidden fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95"
+    class="min-[1400px]:hidden fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95"
     aria-label="Share article"
     aria-expanded="false"
 >
@@ -119,7 +119,7 @@ const shareLinks = [
 <!-- Mobile: Share menu -->
 <div
     data-share-menu
-    class="min-[900px]:hidden fixed bottom-24 right-6 z-40 flex flex-col-reverse gap-2 pb-16 opacity-0 pointer-events-none transition-opacity duration-200"
+    class="min-[1400px]:hidden fixed bottom-24 right-6 z-40 flex flex-col-reverse gap-2 pb-16 opacity-0 pointer-events-none transition-opacity duration-200"
     aria-hidden="true"
 >
     {shareLinks.map((link) => (
