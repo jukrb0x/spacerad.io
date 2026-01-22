@@ -9,12 +9,8 @@ import icon from "astro-icon";
 import pagefind from "astro-pagefind";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeFigure from "rehype-figure";
-import rehypeImgSize from "rehype-img-size";
-import rehypePicture from "rehype-picture";
 import rehypeSlug from "rehype-slug";
-import {
-    rehypePrettyCode,
-} from "rehype-pretty-code";
+import { rehypePrettyCode } from "rehype-pretty-code";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import { remarkModifiedTime } from "./remark-modified-time.mjs";
 
@@ -109,8 +105,6 @@ export default defineConfig({
                     },
                 },
             ],
-            rehypePicture,
-            [rehypeImgSize, { dir: "./public" }],
             rehypeFigure,
         ],
     },

@@ -392,6 +392,7 @@ a {
   figure {
     display: grid;
     gap: var(--space-2);
+    justify-items: center;
     margin: 0;
     background: transparent;
     padding: 0;
@@ -399,7 +400,8 @@ a {
     box-shadow: none;
 
     > img {
-      width: 100%;
+      max-width: 100%;
+      height: auto;
     }
   }
 
@@ -481,7 +483,6 @@ a {
     border-radius: var(--radius-sm);
     padding: 0.1em 0.2em;
     background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 20%, transparent);
 
     @include dark-theme {
       background: color-mix(in srgb, var(--color-accent) 25%, transparent);

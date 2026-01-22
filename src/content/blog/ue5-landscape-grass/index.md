@@ -4,14 +4,13 @@ description: 'UE5 源码分析：Landscape Grass 地形草系统'
 pubDate: 2023-05-17
 lang: zh
 tags: ['Unreal Engine', 'Landscape', 'Foliage', 'UE5']
-heroImage: '/images/ue5-landscape-grass/landscaspe-grass-world.jpeg'
-socialImage: '/images/ue5-landscape-grass/a-look-under-the-hood-at-unreal-engine-landscape-grass.jpg'
+socialImage: './a-look-under-the-hood-at-unreal-engine-landscape-grass.jpg'
 comment: true
 ---
 
 _本文试图对 Unreal Engine 4.27 / 5 中的 Landscape Grass （景观/地形草地） 系统的种草部分原理进行分析梳理。受限于笔者水平，文中内容可能存在一定谬误，请同时参考相关资料和源代码以获取更全面和准确的信息。_
 
-![Landscape Grass in UE5](/images/ue5-landscape-grass/landscaspe-grass-world.jpeg)
+![Landscape Grass in UE5](./landscaspe-grass-world.jpeg)
 
 如何使用 Landscape Grass? 详见官方快速上手指南 [Grass Quick Start](https://docs.unrealengine.com/5.2/en-US/grass-quick-start-in-unreal-engine/)
 
@@ -59,7 +58,7 @@ UE Landscape 设计框架的基础，参见官方文档 [Landscape Technical Gui
 
 对于 Landscape 框架来讲，Landscape Component 作为处理的最小粒度和渲染的基本单元。在创建 Landscape 伊始，所有的 Landscape Component 都是方形且同等大小。
 
-![A Landscape made of four Landscape Components](/images/ue5-landscape-grass/landscape-tech-components.jpg)
+![A Landscape made of four Landscape Components](../ue5-landscape-grass/landscape-tech-components.jpg)
 
 ### Component Section (Subsection)
 
@@ -67,13 +66,13 @@ Landscape Component 承载 Component Section，对于一个 Component 引擎只�
 
 Component Subsection 主要用于地形 LOD 计算，用于提高地形分辨率和性能。通常来说一个 Section 会产生一个 Drawcall，但由于摄像机距离，有可能会导致多个 Section 合并成一个 Drawcall （1x1 section per component 或者 2x2 section per component 合并成一个 drawcall）。
 
-![A Landscape Component containing four subsections (2x2)](/images/ue5-landscape-grass/landscape-tech-component-sections.jpg)
+![A Landscape Component containing four subsections (2x2)](../ue5-landscape-grass/landscape-tech-component-sections.jpg)
 
 ## Foliage in UE5
 
 正式进入 Landscape Grass 之前，我们先了解一下在 UE5 里面制作植被的几种方式，以及为什么我们选择 Landscape Grass 作为大型植被渲染方案。在 Content Browser 中右键，选择 Foliage 可以看到：
 
-![在 Content Browser 中添加 Foliage 资产](/images/ue5-landscape-grass/content-browser-add-foliage.png)
+![在 Content Browser 中添加 Foliage 资产](../ue5-landscape-grass/content-browser-add-foliage.png)
 
 我们可以将这三种 Foliage 分为以下两类：
 
@@ -95,7 +94,7 @@ Actor Foliage 和 Static Mesh Foliage 的差别在于，前者是无异于在场
 
 ## 种草流程图
 
-![Landscape Grass 的一次更新](/images/ue5-landscape-grass/grass-flowchart.png)
+![Landscape Grass 的一次更新](../ue5-landscape-grass/grass-flowchart.png)
 
 ## 开荒前准备
 
@@ -192,7 +191,7 @@ void ALandscapeProxy::TickGrass(const TArray<FVector>& Cameras, int32& InOutNumC
 
 ## 草的数据类型 GrassData and GrassType
 
-![Landscape Grass Type Editor](/images/ue5-landscape-grass/grass-type-editor.png)
+![Landscape Grass Type Editor](../ue5-landscape-grass/grass-type-editor.png)
 
 前面提到，种植的不一定是"草"，可以是任意想要的植被 mesh，因此我们需要了解种植的数据是什么。
 
@@ -483,7 +482,7 @@ else
 
 ### Grass Variety 随机放置算法
 
-![Edit Grass Variety](/images/ue5-landscape-grass/use-grid.png)
+![Edit Grass Variety](../ue5-landscape-grass/use-grid.png)
 
 Grass Variety 的随机放置有两种算法：
 

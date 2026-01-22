@@ -4,14 +4,13 @@ description: 'A breakdown of the principles behind the Landscape Grass system in
 pubDate: 2023-05-19
 lang: en
 tags: ['Unreal Engine', 'Landscape', 'Foliage', 'UE5']
-heroImage: '/images/ue5-landscape-grass/landscaspe-grass-world.jpeg'
-socialImage: '/images/ue5-landscape-grass/a-look-under-the-hood-at-unreal-engine-landscape-grass-en.jpg'
+socialImage: '../ue5-landscape-grass/a-look-under-the-hood-at-unreal-engine-landscape-grass-en.jpg'
 comment: true
 ---
 
 _This article aims to analyze and summarize the principles behind the grass planting part of the Landscape Grass system in Unreal Engine 4.27 / 5. Please note that due to the author's expertise, there may be some inaccuracies in the content. Therefore, it is recommended to refer to relevant resources and source code for more comprehensive and accurate information._
 
-![Landscape Grass in UE5](/images/ue5-landscape-grass/landscaspe-grass-world.jpeg)
+![Landscape Grass in UE5](../ue5-landscape-grass/landscaspe-grass-world.jpeg)
 
 For instructions on how to use Landscape Grass, refer to the official documentation [Grass Quick Start](https://docs.unrealengine.com/5.2/en-US/grass-quick-start-in-unreal-engine/).
 
@@ -59,7 +58,7 @@ To understand the foundation of the UE Landscape design framework, refer to the 
 
 In the Landscape framework, the Landscape Component is the smallest unit of processing and the basic rendering unit. When creating a Landscape, all Landscape Components are initially square and of equal size.
 
-![A Landscape made of four Landscape Components](/images/ue5-landscape-grass/landscape-tech-components.jpg)
+![A Landscape made of four Landscape Components](../ue5-landscape-grass/landscape-tech-components.jpg)
 
 ### Component Section (Subsection)
 
@@ -67,20 +66,20 @@ Landscape Components house Component Sections. The engine offers the option of h
 
 Component Subsections are primarily used for terrain LOD calculation to enhance terrain resolution and performance. Typically, each Section generates a draw call, but due to camera distance, multiple Sections can be merged into a single draw call (1x1 section per component or 2x2 section per component merged into a draw call).
 
-![A Landscape Component containing four subsections (2x2)](/images/ue5-landscape-grass/landscape-tech-component-sections.jpg)
+![A Landscape Component containing four subsections (2x2)](../ue5-landscape-grass/landscape-tech-component-sections.jpg)
 
 ## Foliage in UE5
 
 Before diving into Landscape Grass, let's first understand the different methods of creating vegetation in UE5 and why we choose Landscape Grass as the solution for rendering large-scale vegetation. In the UE5's Content Browser, right-click and select Foliage:
 
-![Adding Foliage assets in the Content Browser](/images/ue5-landscape-grass/content-browser-add-foliage.png)
+![Adding Foliage assets in the Content Browser](../ue5-landscape-grass/content-browser-add-foliage.png)
 
 We can categorize these three types of Foliage into the following two categories:
 
--   [Foliage Mode](https://docs.unrealengine.com/5.2/en-US/foliage-mode-in-unreal-engine/)
-    -   Static Mesh Foliage
-    -   Actor Foliage
--   [Landscape Grass](https://docs.unrealengine.com/5.2/en-US/grass-quick-start-in-unreal-engine/)
+- [Foliage Mode](https://docs.unrealengine.com/5.2/en-US/foliage-mode-in-unreal-engine/)
+  - Static Mesh Foliage
+  - Actor Foliage
+- [Landscape Grass](https://docs.unrealengine.com/5.2/en-US/grass-quick-start-in-unreal-engine/)
 
 For Foliage Mode, we can summarize as follows:
 
@@ -95,7 +94,7 @@ The difference between Actor Foliage and Static Mesh Foliage is that the former 
 
 ## Grass Planting Process
 
-![A single update of Landscape Grass](/images/ue5-landscape-grass/grass-flowchart.png)
+![A single update of Landscape Grass](../ue5-landscape-grass/grass-flowchart.png)
 
 ## Preparing for Planting
 
@@ -192,7 +191,7 @@ void ALandscapeProxy::TickGrass(const TArray<FVector>& Cameras, int32& InOutNumC
 
 ## Data Structure: GrassData and GrassType
 
-![Landscape Grass Type Editor](/images/ue5-landscape-grass/grass-type-editor.png)
+![Landscape Grass Type Editor](../ue5-landscape-grass/grass-type-editor.png)
 
 As mentioned earlier, the vegetation planted using Landscape Grass doesn't have to be limited to "grass." It can be any desired vegetation mesh. Therefore, let's take a look at the data involved in planting vegetation.
 
@@ -281,13 +280,12 @@ The general sequence of operations in `UpdateGrass()` is as follows:
 3. Introduce the data structure `FCachedLandscapeFoliage::FGrassComp` to store the information of grass that will be generated. If there is no GrassData in the editor, generation will be triggered here.
 
 4. Create `HierarchicalInstancedStaticMeshComponent` (HISM Comp), fill in the data. Each Grass Variety has its own HISM Comp (similar to how InstancedFoliage is handled).
-
-    1. If LOD is present, perform the corresponding operations (LightMap, ShadowMap, ResourceCluster).
-    2. Write Instance Culling data (used for visibility culling).
+   1. If LOD is present, perform the corresponding operations (LightMap, ShadowMap, ResourceCluster).
+   2. Write Instance Culling data (used for visibility culling).
 
 5. Create AsyncGrassBuilder, push it into the AsyncTask queue, and call `StartBackgroundTask()`.
 
-    > The asynchronous task is responsible for grass rendering, instance generation, and more.
+   > The asynchronous task is responsible for grass rendering, instance generation, and more.
 
 6. Register HISM Comp in the world.
 
@@ -485,7 +483,7 @@ Since HISM Comp utilizes GPU instancing, it can be inferred that a single HISM C
 
 ### Random Placement Algorithms for Grass Variety
 
-![Edit Grass Variety](/images/ue5-landscape-grass/use-grid.png)
+![Edit Grass Variety](../ue5-landscape-grass/use-grid.png)
 
 There are two algorithms for the random placement of grass variety:
 
@@ -509,12 +507,12 @@ Check if the HISM Comp is still in use and clean up unused HISM Comp: `Component
 
 ## Summary of Grass Planting Principles
 
--   Overall, LandscapeGrass calculates the number of vegetation to load into memory (range) and asynchronously loads/unloads them based on parameters such as EndCullDistance in the grass variety.
--   The minimum granularity for distance culling is the grass variety subsection. Grass variety subsections without grass or outside the distance are directly discarded, and no grass is generated on them.
--   LandscapeGrass refines the number of Landscape Components (`SortedLandscapeComponents`) and, in turn, the number of grass variety subsections to control the number of generated instances.
--   Each grass variety in a grass variety subsection corresponds to an HISM Comp. This means that the same grass variety in the scene may have different HISM Comps (multiple grass variety subsections), and there is no one-to-one relationship. However, a grass variety on a single grass variety subsection corresponds to only one HISM Comp.
--   `ExclusionBoxes` can be set to block the generation of HISM Comps in specific areas.
--   `TickInterval` can be increased to reduce performance overhead, depending on the situation.
+- Overall, LandscapeGrass calculates the number of vegetation to load into memory (range) and asynchronously loads/unloads them based on parameters such as EndCullDistance in the grass variety.
+- The minimum granularity for distance culling is the grass variety subsection. Grass variety subsections without grass or outside the distance are directly discarded, and no grass is generated on them.
+- LandscapeGrass refines the number of Landscape Components (`SortedLandscapeComponents`) and, in turn, the number of grass variety subsections to control the number of generated instances.
+- Each grass variety in a grass variety subsection corresponds to an HISM Comp. This means that the same grass variety in the scene may have different HISM Comps (multiple grass variety subsections), and there is no one-to-one relationship. However, a grass variety on a single grass variety subsection corresponds to only one HISM Comp.
+- `ExclusionBoxes` can be set to block the generation of HISM Comps in specific areas.
+- `TickInterval` can be increased to reduce performance overhead, depending on the situation.
 
 ## Reference
 
@@ -524,4 +522,3 @@ Check if the HISM Comp is still in use and clean up unused HISM Comp: `Component
 4. [LearnOpenGL - Instancing](https://learnopengl.com/Advanced-OpenGL/Instancing)
 5. [UE4 材质系统](https://papalqi.cn/ue4材质系统/)
 6. [Halton Sequence](https://web.maths.unsw.edu.au/~josefdick/MCQMC_Proceedings/MCQMC_Proceedings_2012_Preprints/100_Keller_tutorial.pdf)
-
