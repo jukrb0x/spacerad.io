@@ -18,6 +18,8 @@ const progressBar = document.querySelector('[data-reading-progress]') as HTMLEle
 // Scroll threshold before hiding header
 const SCROLL_THRESHOLD = 100;
 const BLUR_THRESHOLD = 10;
+// Minimum scrollable distance (in vh) to show progress bar
+const MIN_SCROLL_DISTANCE_VH = 1.5;
 
 // Check if user prefers reduced motion
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -53,12 +55,19 @@ function updateHeader() {
         const windowHeight = window.innerHeight;
         const documentHeight = document.documentElement.scrollHeight;
         const scrollTop = window.scrollY;
-
         const trackLength = documentHeight - windowHeight;
-        const percentScrolled = trackLength > 0 ? (scrollTop / trackLength) * 100 : 0;
 
-        progressBar.style.transform = `scaleX(${Math.min(percentScrolled / 100, 1)})`;
-        progressBar.setAttribute('aria-valuenow', Math.round(percentScrolled).toString());
+        // Hide progress bar if page is not long enough
+        const minScrollDistance = windowHeight * MIN_SCROLL_DISTANCE_VH;
+        const isPageLongEnough = trackLength >= minScrollDistance;
+
+        progressBar.style.opacity = isPageLongEnough ? '1' : '0';
+
+        if (isPageLongEnough) {
+            const percentScrolled = (scrollTop / trackLength) * 100;
+            progressBar.style.transform = `scaleX(${Math.min(percentScrolled / 100, 1)})`;
+            progressBar.setAttribute('aria-valuenow', Math.round(percentScrolled).toString());
+        }
     }
 
     lastScrollY = scrollY;
