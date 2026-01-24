@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import type { ImageMetadata } from "astro";
 import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
 
@@ -24,25 +25,32 @@ const normalizeMetaMap = (map: Record<string, PostMeta>): Record<string, PostMet
         return acc;
     }, {});
 
+// Helper to extract image URL from socialImage (ImageMetadata or string)
+const getImageUrl = (socialImage: ImageMetadata | string | undefined): string | undefined => {
+    if (!socialImage) return undefined;
+    // If it's an ImageMetadata object (local image), extract src
+    if (typeof socialImage === 'object' && 'src' in socialImage) {
+        return socialImage.src;
+    }
+    // Otherwise it's a string (external URL or /public/ path)
+    return socialImage;
+};
+
 let postMetaMap: Record<string, PostMeta>;
 
 if (meta) {
     postMetaMap = meta;
 } else {
-    const [blogPosts, monthlyPosts, tilPosts] = await Promise.all([
-        getCollection("blog"),
-        getCollection("monthly"),
-        getCollection("til"),
-    ]);
+    const blogPosts = await getCollection("blog");
 
-    const allPosts = [...blogPosts, ...monthlyPosts, ...tilPosts];
-
-    postMetaMap = allPosts.reduce<Record<string, PostMeta>>((acc, post) => {
+    postMetaMap = blogPosts.reduce<Record<string, PostMeta>>((acc, post) => {
         const description = post.data.description || extractDescription(post.body || "");
+        const imageUrl = getImageUrl(post.data.socialImage);
+
         acc[post.id] = {
             title: post.data.title,
             description,
-            image: post.data.socialImage || undefined,
+            image: imageUrl,
         };
         return acc;
     }, {});
