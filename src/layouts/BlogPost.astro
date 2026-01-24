@@ -14,10 +14,7 @@ import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
 import { calculateReadingTime } from "../utils/readingTime";
 
-type EntryData =
-    | CollectionEntry<"blog">["data"]
-    | CollectionEntry<"monthly">["data"]
-    | CollectionEntry<"til">["data"];
+type EntryData = CollectionEntry<"blog">["data"];
 
 type Props = EntryData & {
     body?: string;
@@ -41,7 +38,8 @@ const {
     lastModifiedCommitUrl,
 } = Astro.props;
 
-const description = providedDescription || (body ? extractDescription(body) : "No description available");
+const description =
+    providedDescription || (body ? extractDescription(body) : "No description available");
 const readingTime = body ? calculateReadingTime(body) : null;
 
 const imageSrc = socialImage || DEFAULT_POST_SOCIAL_IMAGE;

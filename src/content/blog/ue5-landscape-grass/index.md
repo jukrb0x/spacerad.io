@@ -8,7 +8,7 @@ socialImage: './a-look-under-the-hood-at-unreal-engine-landscape-grass.jpg'
 comment: true
 ---
 
-_本文试图对 Unreal Engine 4.27 / 5 中的 Landscape Grass （景观/地形草地） 系统的种草部分原理进行分析梳理。受限于笔者水平，文中内容可能存在一定谬误，请同时参考相关资料和源代码以获取更全面和准确的信息。_
+_本文试图对 Unreal Engine 4.27 / 5 中的 Landscape Grass （景观/地形草地） 系统的种草部分原理进行分析梳理。文中内容可能存在一定谬误，请同时参考相关资料和源代码以获取更全面和准确的信息。_
 
 ![Landscape Grass in UE5](./landscaspe-grass-world.jpeg)
 
