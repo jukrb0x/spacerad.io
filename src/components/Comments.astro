@@ -18,7 +18,7 @@ interface Props {
     pageTitle?: string;
 }
 
-const DEFAULT_SYSTEM = (import.meta.env.PUBLIC_COMMENT_SYSTEM as "cusdis" | "remark42") || "cusdis";
+const DEFAULT_SYSTEM = (import.meta.env.PUBLIC_COMMENT_SYSTEM as "cusdis" | "remark42") || "remark42";
 
 const { commentSystem = DEFAULT_SYSTEM, comment = true, pageTitle } = Astro.props;
 
