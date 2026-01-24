@@ -6,9 +6,11 @@ pages_build_output_dir = "./dist"
 compatibility_date = "2026-01-18"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
+[observability]
+enabled = true
+
+
 # KV Namespace Bindings
-# 在 Cloudflare Dashboard 创建 KV namespace 后填入 id
-# Workers & Pages > KV > Create namespace > 名称: LIKES
 [[kv_namespaces]]
 binding = "LIKES"
 id = "bfca45c77224430683574746d8a7069f"

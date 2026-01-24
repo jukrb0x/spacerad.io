@@ -54,7 +54,7 @@ export default defineConfig({
         imageService: "compile",
     }),
     site: "https://example.com",
-    output: "static",
+    output: "server",
     integrations: [
         mdx(),
         sitemap(),
