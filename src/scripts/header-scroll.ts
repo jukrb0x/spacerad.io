@@ -6,6 +6,7 @@
  * - Show header when scrolling up
  * - Blur backdrop when scrolled
  * - Reading progress indicator
+ * - Exposes --header-offset CSS variable for sticky elements
  * - Respects prefers-reduced-motion
  */
 
@@ -14,6 +15,15 @@ let ticking = false;
 
 const header = document.querySelector('[data-header]') as HTMLElement;
 const progressBar = document.querySelector('[data-reading-progress]') as HTMLElement;
+
+// Set header height CSS variable for sticky elements positioning
+function updateHeaderOffset(isHidden: boolean) {
+    const headerHeight = header?.offsetHeight || 0;
+    document.documentElement.style.setProperty(
+        '--header-offset',
+        isHidden ? '0px' : `${headerHeight}px`
+    );
+}
 
 // Scroll threshold before hiding header
 const SCROLL_THRESHOLD = 100;
@@ -37,13 +47,16 @@ function updateHeader() {
             if (scrollY > lastScrollY) {
                 // Scrolling down - hide header
                 header.classList.add('header--hidden');
+                updateHeaderOffset(true);
             } else {
                 // Scrolling up - show header
                 header.classList.remove('header--hidden');
+                updateHeaderOffset(false);
             }
         } else {
             // At top - always show header
             header.classList.remove('header--hidden');
+            updateHeaderOffset(false);
         }
 
         // Add scrolled state for blur backdrop
@@ -86,6 +99,9 @@ function onScroll() {
 
 // Initialize on page load
 if (header) {
+    // Set initial header offset
+    updateHeaderOffset(false);
+
     // Set initial state
     updateHeader();
 
@@ -97,6 +113,7 @@ if (header) {
 document.addEventListener('astro:page-load', () => {
     if (header) {
         lastScrollY = 0;
+        updateHeaderOffset(false);
         updateHeader();
     }
 });
