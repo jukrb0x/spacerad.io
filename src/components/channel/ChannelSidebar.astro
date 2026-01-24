@@ -41,7 +41,8 @@ const { title, description, avatar, username } = Astro.props;
 <style>
 .channel-sidebar {
     position: sticky;
-    top: var(--space-6);
+    top: calc(var(--header-offset, 0px) + var(--space-4));
+    transition: top 0.3s ease;
 }
 
 @media (max-width: 860px) {

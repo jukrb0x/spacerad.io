@@ -156,6 +156,11 @@ Astro.response.headers.set(
     min-width: 0;
   }
 
+  /* Sidebar sticky positioning - align-self: start prevents grid stretching */
+  .channel-layout > :global(.channel-sidebar) {
+    align-self: start;
+  }
+
   .posts-container {
     display: flex;
     flex-direction: column;
