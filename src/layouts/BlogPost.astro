@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import type { MarkdownHeading } from "astro";
+import type { MarkdownHeading, ImageMetadata } from "astro";
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import FormattedDate from "../components/FormattedDate.astro";
@@ -42,7 +42,13 @@ const description =
     providedDescription || (body ? extractDescription(body) : "No description available");
 const readingTime = body ? calculateReadingTime(body) : null;
 
-const imageSrc = socialImage || DEFAULT_POST_SOCIAL_IMAGE;
+// Extract image URL from socialImage (can be ImageMetadata or string)
+const getImageUrl = (img: ImageMetadata | string | undefined): string => {
+    if (!img) return DEFAULT_POST_SOCIAL_IMAGE;
+    if (typeof img === 'object' && 'src' in img) return img.src;
+    return img;
+};
+const imageSrc = getImageUrl(socialImage);
 
 // Extract slug from URL path for like API
 const slug = Astro.url.pathname.replace(/^\/|\/$/g, "");

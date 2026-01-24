@@ -1,13 +1,14 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z, type ImageFunction } from "astro:content";
 import { glob } from "astro/loaders";
 
-const sharedSchema = z.object({
+const createSharedSchema = (image: ImageFunction) => z.object({
     title: z.string(),
     description: z.string().optional(),
     // Transform string to Date object
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    socialImage: z.string().optional(),
+    // socialImage: local image (resolved by image()), external URL, or /public/ path
+    socialImage: z.union([image(), z.string()]).optional(),
     tags: z.array(z.string()).optional().default([]),
     hidden: z.boolean().optional().default(false),
     // Language field for Chinese post detection
@@ -19,9 +20,7 @@ const sharedSchema = z.object({
 
 const blog = defineCollection({
     loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
-    schema: sharedSchema,
+    schema: ({ image }) => createSharedSchema(image),
 });
 
 export const collections = { blog };
-
-export type BlogEntry = z.infer<typeof sharedSchema>;

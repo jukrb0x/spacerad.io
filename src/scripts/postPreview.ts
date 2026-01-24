@@ -29,8 +29,8 @@ function ensurePreviewCard(): HTMLElement {
 
     card.innerHTML = `
 		<div class="h-40 w-full bg-muted-bg relative overflow-hidden">
-			<img id="${CARD_ID}-image" class="absolute top-0 left-0 w-full h-full object-cover hidden" alt="" />
-			<div id="${CARD_ID}-no-image" class="absolute top-0 left-0 w-full h-full hidden flex items-center justify-center text-xs text-muted">
+			<img id="${CARD_ID}-image" class="absolute top-0 left-0 w-full h-full object-cover" style="opacity: 0; transition: opacity 0.2s;" alt="" />
+			<div id="${CARD_ID}-no-image" class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-xs text-muted" style="opacity: 0; transition: opacity 0.2s;">
 				No preview image
 			</div>
 		</div>
@@ -44,23 +44,16 @@ function ensurePreviewCard(): HTMLElement {
     return card;
 }
 
-const imageCache = new Map<string, HTMLImageElement>();
+// Track successfully loaded image URLs (stores absolute URLs for comparison)
+const loadedImages = new Set<string>();
 
-function preloadImage(src: string): Promise<HTMLImageElement> {
-    const cached = imageCache.get(src);
-    if (cached) {
-        return Promise.resolve(cached);
+// Convert relative URL to absolute for consistent comparison
+function toAbsoluteUrl(src: string): string {
+    try {
+        return new URL(src, window.location.origin).href;
+    } catch {
+        return src;
     }
-
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            imageCache.set(src, img);
-            resolve(img);
-        };
-        img.onerror = reject;
-        img.src = src;
-    });
 }
 
 function updatePreviewContent(card: HTMLElement, meta: PostMeta) {
@@ -74,32 +67,78 @@ function updatePreviewContent(card: HTMLElement, meta: PostMeta) {
 
     if (meta.image && imageEl && noImageEl) {
         const imageSrc = meta.image;
-        // Check if image is already cached/loaded
-        if (imageCache.has(imageSrc)) {
-            imageEl.src = imageSrc;
-            imageEl.alt = `Preview of ${meta.title ?? ""}`;
-            imageEl.classList.remove("hidden");
-            noImageEl.classList.add("hidden");
-        } else {
-            // Show loading state while image loads
-            imageEl.classList.add("hidden");
-            noImageEl.classList.remove("hidden");
-            noImageEl.textContent = "Loading...";
+        const absoluteSrc = toAbsoluteUrl(imageSrc);
 
-            preloadImage(imageSrc)
-                .then(() => {
-                    imageEl.src = imageSrc;
-                    imageEl.alt = `Preview of ${meta.title ?? ""}`;
-                    imageEl.classList.remove("hidden");
-                    noImageEl.classList.add("hidden");
-                })
-                .catch(() => {
-                    noImageEl.textContent = "No preview image";
-                });
+        // Helper to show the image
+        const showImage = () => {
+            imageEl.style.opacity = "1";
+            noImageEl.style.opacity = "0";
+        };
+
+        // Helper to show error/loading state
+        const showMessage = (msg: string) => {
+            imageEl.style.opacity = "0";
+            noImageEl.style.opacity = "1";
+            noImageEl.textContent = msg;
+        };
+
+        // Check if this exact image is already loaded in the element
+        if (imageEl.src === absoluteSrc && imageEl.complete && imageEl.naturalWidth > 0) {
+            showImage();
+            return;
         }
+
+        // Check if we've loaded this image before (will use browser cache)
+        if (loadedImages.has(absoluteSrc)) {
+            if (imageEl.src !== absoluteSrc) {
+                imageEl.alt = `Preview of ${meta.title ?? ""}`;
+                imageEl.src = imageSrc;
+            }
+            // Check if complete after setting src (sync from cache)
+            if (imageEl.complete && imageEl.naturalWidth > 0) {
+                showImage();
+            } else {
+                // Wait for load
+                const onLoad = () => {
+                    showImage();
+                    imageEl.removeEventListener("load", onLoad);
+                    imageEl.removeEventListener("error", onError);
+                };
+                const onError = () => {
+                    showMessage("No preview image");
+                    imageEl.removeEventListener("load", onLoad);
+                    imageEl.removeEventListener("error", onError);
+                };
+                imageEl.addEventListener("load", onLoad);
+                imageEl.addEventListener("error", onError);
+            }
+            return;
+        }
+
+        // First time loading - show loading state
+        showMessage("Loading...");
+
+        // Remove old listeners and add new ones
+        const onLoad = () => {
+            loadedImages.add(absoluteSrc);
+            showImage();
+            imageEl.removeEventListener("load", onLoad);
+            imageEl.removeEventListener("error", onError);
+        };
+        const onError = () => {
+            console.error("[PostPreview] Failed to load image:", imageSrc);
+            showMessage("No preview image");
+            imageEl.removeEventListener("load", onLoad);
+            imageEl.removeEventListener("error", onError);
+        };
+
+        imageEl.addEventListener("load", onLoad);
+        imageEl.addEventListener("error", onError);
+        imageEl.alt = `Preview of ${meta.title ?? ""}`;
+        imageEl.src = imageSrc;
     } else if (imageEl && noImageEl) {
-        imageEl.classList.add("hidden");
-        noImageEl.classList.remove("hidden");
+        imageEl.style.opacity = "0";
+        noImageEl.style.opacity = "1";
         noImageEl.textContent = "No preview image";
     }
 }
@@ -173,28 +212,6 @@ export function initPostPreview(root: ParentNode = document) {
     });
 
     if (links.length === 0) return;
-
-    // Preload images for all posts to improve hover performance
-    links.forEach((link) => {
-        const id = link.dataset.postId || parsePostIdFromHref(link.href);
-        if (id && metaMap[id]?.image) {
-            // Use requestIdleCallback to preload images when browser is idle
-            if ("requestIdleCallback" in window) {
-                window.requestIdleCallback(() => {
-                    preloadImage(metaMap[id].image as string).catch(() => {
-                        // Silently fail for preload errors
-                    });
-                });
-            } else {
-                // Fallback for browsers without requestIdleCallback
-                setTimeout(() => {
-                    preloadImage(metaMap[id].image as string).catch(() => {
-                        // Silently fail for preload errors
-                    });
-                }, 100);
-            }
-        }
-    });
 
     const previewCard = ensurePreviewCard();
     let hoverTimeout: number | null = null;
