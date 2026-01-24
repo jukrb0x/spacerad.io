@@ -3,6 +3,9 @@ import sanitizeHtml from "sanitize-html";
 import { SITE_TITLE } from "../consts";
 import { fetchTelegramChannel } from "../utils/telegram";
 
+// This page needs SSR because it fetches live Telegram data
+export const prerender = false;
+
 /**
  * Detect media type from post content (inspired by RSSHub)
  * Returns emoji prefix for the title
