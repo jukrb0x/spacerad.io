@@ -2,9 +2,13 @@
 # https://developers.cloudflare.com/pages/functions/wrangler-configuration/
 
 name = "space-radio"
-pages_build_output_dir = "./dist"
+main = "./dist/_worker.js/index.js"
 compatibility_date = "2026-01-18"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+[assets]
+binding = "ASSETS"
+directory = "./dist"
 
 [observability]
 enabled = true
