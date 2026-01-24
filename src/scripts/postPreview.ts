@@ -28,10 +28,10 @@ function ensurePreviewCard(): HTMLElement {
     card.style.transform = "translateY(-8px) scale(0.96)";
 
     card.innerHTML = `
-		<div class="h-40 w-full bg-muted-bg">
-			<img id="${CARD_ID}-image" class="h-full w-full object-cover hidden" alt="" />
-			<div id="${CARD_ID}-no-image" class="hidden h-full flex items-center justify-center text-xs text-muted">
-				暂无预览图
+		<div class="h-40 w-full bg-muted-bg relative overflow-hidden">
+			<img id="${CARD_ID}-image" class="absolute top-0 left-0 w-full h-full object-cover hidden" alt="" />
+			<div id="${CARD_ID}-no-image" class="absolute top-0 left-0 w-full h-full hidden flex items-center justify-center text-xs text-muted">
+				No preview image
 			</div>
 		</div>
 		<div class="space-y-2 p-4 text-sm">
@@ -84,7 +84,7 @@ function updatePreviewContent(card: HTMLElement, meta: PostMeta) {
             // Show loading state while image loads
             imageEl.classList.add("hidden");
             noImageEl.classList.remove("hidden");
-            noImageEl.textContent = "加载中...";
+            noImageEl.textContent = "Loading...";
 
             preloadImage(imageSrc)
                 .then(() => {
@@ -94,13 +94,13 @@ function updatePreviewContent(card: HTMLElement, meta: PostMeta) {
                     noImageEl.classList.add("hidden");
                 })
                 .catch(() => {
-                    noImageEl.textContent = "暂无预览图";
+                    noImageEl.textContent = "No preview image";
                 });
         }
     } else if (imageEl && noImageEl) {
         imageEl.classList.add("hidden");
         noImageEl.classList.remove("hidden");
-        noImageEl.textContent = "暂无预览图";
+        noImageEl.textContent = "No preview image";
     }
 }
 
@@ -144,8 +144,8 @@ function updatePosition(card: HTMLElement, event: MouseEvent | FocusEvent) {
 }
 
 export function initPostPreview(root: ParentNode = document) {
-    // 跳过移动端/触摸环境，避免在小屏设备显示预览卡片
-    // Coarse pointer 通常表示触摸设备；同时也屏蔽较小视口
+    // Skip mobile/touch environments to avoid showing preview cards on small-screen devices
+    // Coarse pointer typically indicates touch devices; also blocks smaller viewports
     const isCoarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
     const isSmallViewport = window.matchMedia?.("(max-width: 1024px)").matches ?? false;
     if (isCoarse || isSmallViewport) return;
@@ -161,11 +161,11 @@ export function initPostPreview(root: ParentNode = document) {
 
     const links = Array.from(root.querySelectorAll<HTMLAnchorElement>("a")).filter((link) => {
         if (!link.href) return false;
-        // 排除目录与标记禁止预览的区域/链接
+        // Exclude table of contents and areas/links marked to disable previews
         if (link.closest("[data-no-preview]")) return false;
         if (link.closest(".toc")) return false;
         if (link.dataset.preview === "off") return false;
-        // 排除站内锚点（如 TOC 链接）
+        // Exclude in-page anchors (such as TOC links)
         const rawHref = link.getAttribute("href") || "";
         if (rawHref.startsWith("#")) return false;
         const id = link.dataset.postId || parsePostIdFromHref(link.href);

@@ -3,13 +3,11 @@ import { getCollection } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
 
 // 使用 Promise.all 并行获取所有集合数据
-const [blogPosts, monthlyPosts, tilPosts] = await Promise.all([
+const [blogPosts ] = await Promise.all([
     getCollection("blog"),
-    getCollection("monthly"),
-    getCollection("til"),
 ]);
 
-const posts = [...blogPosts, ...monthlyPosts, ...tilPosts]
+const posts = [...blogPosts]
     .filter((post) => !post.data.hidden)
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
@@ -42,12 +40,12 @@ const groupedPosts = Array.from(postsByYear.entries());
 			<div class="relative" data-year-group>
 				{/* Year in background - closer to first post */}
 				<div class="relative h-14 pointer-events-none select-none">
-					<span class="absolute -left-3 -top-2 text-8xl sm:text-9xl font-bold opacity-[0.08] text-primary">
+					<span class="absolute -left-7 sm:-left-10 -top-1 text-8xl sm:text-9xl font-bold opacity-[0.06] text-primary">
 						{year}
 					</span>
 				</div>
 
-				<ul class="m-0 flex list-none flex-col gap-2 p-0 relative">
+				<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
 					{yearPosts.map((post) => {
 						const isDeepSearch = post.data.tags?.includes('DeepSearch') ?? false;
 						const isZh = post.data.lang === 'zh';
@@ -55,17 +53,17 @@ const groupedPosts = Array.from(postsByYear.entries());
 							<li data-deepsearch={isDeepSearch ? 'true' : 'false'} class="post-item-wrapper">
 								<a
 									href={`/posts/${post.id}`}
-									class="post-item group block py-2 no-underline"
+									class="post-item group flex flex-col gap-0 py-1 no-underline"
 									data-post-id={post.id}
 								>
-									<div class="text-base sm:text-lg leading-snug text-primary">
+									<div class="text-base sm:text-lg leading-tight text-primary">
 										{isZh && (
 											<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle">中文</span>
 										)}
 										<span class="break-words align-middle">{post.data.title}</span>
 									</div>
 
-									<time class="block mt-1 text-xs opacity-50 tabular-nums" data-no-preview>
+									<time class="block text-xs opacity-50 tabular-nums" data-no-preview>
 										<FormattedDate date={post.data.pubDate} />
 									</time>
 								</a>

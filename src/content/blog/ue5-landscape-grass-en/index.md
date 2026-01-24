@@ -4,11 +4,11 @@ description: 'A breakdown of the principles behind the Landscape Grass system in
 pubDate: 2023-05-19
 lang: en
 tags: ['Unreal Engine', 'Landscape', 'Foliage', 'UE5']
-socialImage: '../ue5-landscape-grass/a-look-under-the-hood-at-unreal-engine-landscape-grass-en.jpg'
+socialImage: './a-look-under-the-hood-at-unreal-engine-landscape-grass-en.jpg'
 comment: true
 ---
 
-_This article aims to analyze and summarize the principles behind the grass planting part of the Landscape Grass system in Unreal Engine 4.27 / 5. Please note that due to the author's expertise, there may be some inaccuracies in the content. Therefore, it is recommended to refer to relevant resources and source code for more comprehensive and accurate information._
+_This article aims to analyze and summarize the principles behind the grass planting part of the Landscape Grass system in Unreal Engine 4.27 / 5. It is recommended to refer to relevant resources and source code for more comprehensive and accurate information._
 
 ![Landscape Grass in UE5](../ue5-landscape-grass/landscaspe-grass-world.jpeg)
 

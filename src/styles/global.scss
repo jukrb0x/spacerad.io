@@ -1159,8 +1159,9 @@ a {
     color: var(--color-accent);
 
     &:hover {
-      background: color-mix(in srgb, var(--color-accent-soft) 85%, transparent);
+      background: color-mix(in srgb, var(--color-accent) 12%, transparent);
       border-color: var(--color-accent);
+      color: var(--color-accent);
     }
   }
 }
