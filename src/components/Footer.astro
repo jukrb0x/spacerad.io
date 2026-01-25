@@ -10,7 +10,7 @@ const iconClass = "h-7 w-7";
 
 <footer class="bg-page py-12 text-center text-sm text-secondary">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 space-y-6">
-        <div class="flex flex-wrap items-center justify-center gap-3">
+        <div class="flex flex-wrap items-center justify-start sm:justify-center gap-3">
             <a
                 href={SOCIAL_LINKS.telegram}
                 target="_blank"
@@ -58,8 +58,29 @@ const iconClass = "h-7 w-7";
                 <Icon name="ri:rss-fill" class={iconClass} aria-hidden="true" />
             </a>
         </div>
-        <div class="text-muted">
-            &copy; {today.getFullYear()} Spacerad.io. All rights reserved.
+        <div class="flex flex-wrap items-center justify-between gap-4 text-muted text-left">
+            <div class="flex flex-col gap-1">
+                <span class="inline-flex items-center gap-1">
+                    <Icon name="ri:creative-commons-line" class="h-4 w-4" aria-hidden="true" />
+                    <a
+                        target="_blank"
+                        rel="noreferrer"
+                        href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
+                        class="hover:text-primary transition-colors"
+                    >
+                        CC BY-NC-SA 4.0
+                    </a>
+                </span>
+                <span class="group relative inline-block" style="height: 1.25em;">
+                    <span class="absolute left-0 top-0 block w-full transition-opacity duration-300 group-hover:opacity-0">
+                        版权所有，禁止转载，转发需注明出处
+                    </span>
+                    <span class="block w-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        Copyright reserved. Unauthorized reproduction prohibited.
+                    </span>
+                </span>
+            </div>
+            <span>2017 - {today.getFullYear()} &copy; Jabriel</span>
         </div>
     </div>
 </footer>
