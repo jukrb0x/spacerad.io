@@ -13,10 +13,10 @@ Personal blog based on Astro.
 
 ### Stack
 1. Astro and Vue
-2. UnoCSS
+2. UnoCSS + SCSS
 3. Cloudflare Pages
 4. MDX
-5. Comment System - Cusdis for now, migrate to Remark42 later
+5. Comment System - Remark42
 
 ### Feats
 1. Responsive design
