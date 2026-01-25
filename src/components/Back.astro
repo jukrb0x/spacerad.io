@@ -1,0 +1,14 @@
+---
+interface Props {
+    href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<div class="mb-6">
+    <span class="font-mono opacity-50">&gt; </span>
+    <a href={href} class="font-mono opacity-50 hover:opacity-75 transition-opacity" title="Go Back">
+        cd ..
+    </a>
+</div>
