@@ -413,9 +413,10 @@ a {
 
   // Horizontal rule
   hr {
-    margin: var(--space-6) 0;
     border: none;
-    border-top: 1px solid rgba(var(--color-text-primary-rgb), 0.12);
+    border-top: 1px solid rgba(125, 125, 125, 0.3);
+    width: 50px;
+    margin: 3em auto;
   }
 }
 
