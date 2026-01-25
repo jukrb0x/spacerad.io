@@ -146,8 +146,9 @@ Astro.response.headers.set(
 <style>
   .channel-layout {
     display: grid;
-    grid-template-columns: minmax(0, 600px) 260px;
-    gap: var(--space-6);
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-8);
+    max-width: 64rem;
     margin: 0 auto;
   }
 
@@ -227,10 +228,10 @@ Astro.response.headers.set(
     border-color: var(--color-accent-dark);
   }
 
-  @media (max-width: 860px) {
+  @media (max-width: 960px) {
     .channel-layout {
       grid-template-columns: 1fr;
-      max-width: none;
+      max-width: 42rem;
     }
 
     /* Sidebar moves to top on mobile */
