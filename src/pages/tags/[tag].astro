@@ -30,73 +30,91 @@ const { posts } = Astro.props;
 const sortedPosts = posts
     .filter((post) => !post.data.hidden)
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Group posts by year
+const postsByYear = sortedPosts.reduce((acc, post) => {
+    const year = String(post.data.pubDate.getFullYear());
+    if (!acc.has(year)) {
+        acc.set(year, []);
+    }
+    acc.get(year)?.push(post);
+    return acc;
+}, new Map<string, typeof sortedPosts>());
+
+const groupedPosts = Array.from(postsByYear.entries());
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
 		<BaseHead
-			title={`标签: ${tag} | ${SITE_TITLE}`}
-			description={`所有标记为 "${tag}" 的文章`}
+			title={`Tag: ${tag} | ${SITE_TITLE}`}
+			description={`All posts tagged with "${tag}"`}
 		/>
 	</head>
 	<body>
 		<Header />
-		<main class="mx-auto max-w-4xl space-y-10 px-4">
-			<nav class="text-sm text-secondary">
+		<main class="page-shell max-w-5xl">
+			<div class="mb-4">
 				<a
 					href="/tags"
-					class="inline-flex items-center gap-2 transition hover:text-accent"
+					class="inline-flex items-center gap-2 text-sm text-secondary transition hover:text-accent"
 				>
-					<span aria-hidden="true">←</span> Back to Tags
+					<span aria-hidden="true">←</span> All Tags
 				</a>
-			</nav>
-			<header class="space-y-2">
-				<p
-					class="text-xs uppercase tracking-[0.28em] text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)]"
-				>
-					Tag
-				</p>
-				<h1
-					class="text-3xl font-semibold tracking-tight text-primary sm:text-4xl"
-				>
-					<span class="text-accent">{tag}</span>
-				</h1>
-			</header>
-			<section>
-				<ul class="m-0 flex list-none flex-col gap-3.5 p-0 sm:gap-4">
-					{
-						sortedPosts.map((post) => (
-							<li>
-								<div class="group flex items-baseline gap-4 px-3 py-2 transition duration-150 sm:px-4 sm:py-2.5">
-									<h4 class="flex-1 text-base font-semibold tracking-tight text-primary transition duration-150 group-hover:text-accent sm:text-lg">
+			</div>
+			<h1 class="text-2xl sm:text-3xl font-bold text-primary mb-4">#{tag}</h1>
+			<section class="section-stack">
+				{groupedPosts.map(([year, yearPosts]) => (
+					<div class="relative" data-year-group>
+						<div class="relative h-14 pointer-events-none select-none">
+							<span class="absolute -left-7 sm:-left-10 -top-1 text-8xl sm:text-9xl font-bold opacity-[0.06] text-primary">
+								{year}
+							</span>
+						</div>
+
+						<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
+							{yearPosts.map((post) => {
+								const isZh = post.data.lang === 'zh';
+								return (
+									<li class="post-item-wrapper">
 										<a
-											href={`/${post.id}`}
-											class="no-underline text-primary transition hover:text-accent focus-visible:outline-none focus-visible:text-accent focus-visible:underline"
+											href={`/posts/${post.id}`}
+											class="post-item group flex flex-col gap-0 py-1 no-underline"
 											data-post-id={post.id}
 										>
-											{post.data.title}
+											<div class="text-base sm:text-lg leading-tight text-primary">
+												{isZh && (
+													<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle">中文</span>
+												)}
+												<span class="break-words align-middle">{post.data.title}</span>
+											</div>
+
+											<time class="block text-xs opacity-50 tabular-nums" data-no-preview>
+												<FormattedDate date={post.data.pubDate} />
+											</time>
 										</a>
-									</h4>
-									<p
-										class="ml-auto flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.14em] text-[color-mix(in_srgb,var(--color-text-muted)_75%,transparent)] transition-colors group-hover:text-accent sm:text-xs"
-										data-no-preview
-									>
-										<span
-											aria-hidden="true"
-											class="hidden h-px w-6 bg-[color-mix(in_srgb,var(--color-text-muted)_50%,transparent)] sm:inline-block"
-										/>
-										<FormattedDate
-											date={post.data.pubDate}
-										/>
-									</p>
-								</div>
-							</li>
-						))
-					}
-				</ul>
+									</li>
+								);
+							})}
+						</ul>
+					</div>
+				))}
 			</section>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style lang="scss">
+	.zh-badge {
+		margin-left: -2.75rem;
+	}
+
+	@media (max-width: 640px) {
+		.zh-badge {
+			margin-left: 0;
+			margin-right: 0.5rem;
+		}
+	}
+</style>

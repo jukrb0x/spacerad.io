@@ -16,6 +16,7 @@ posts.forEach((post) => {
     });
 });
 
+// Sort tags by count (descending), then alphabetically
 const sortedTags = Array.from(tagCountMap.entries()).sort((a, b) => {
     if (b[1] === a[1]) {
         return a[0].localeCompare(b[0], "zh-Hans-u-nu-latn");
@@ -23,10 +24,26 @@ const sortedTags = Array.from(tagCountMap.entries()).sort((a, b) => {
     return b[1] - a[1];
 });
 
-const primaryTags = sortedTags.filter(([_, count]) => count >= 3);
-const secondaryTags = sortedTags.filter(([_, count]) => count < 3);
+// Group tags by count tiers
+const tagsByTier = sortedTags.reduce((acc, [tag, count]) => {
+    let tier: string;
+    if (count >= 10) tier = "10+";
+    else if (count >= 5) tier = "5-9";
+    else if (count >= 3) tier = "3-4";
+    else tier = "1-2";
 
-const pageTitle = "标签索引";
+    if (!acc.has(tier)) acc.set(tier, []);
+    acc.get(tier)?.push([tag, count] as [string, number]);
+    return acc;
+}, new Map<string, [string, number][]>());
+
+const tierOrder = ["10+", "5-9", "3-4", "1-2"];
+const groupedTags = tierOrder
+    .filter(tier => tagsByTier.has(tier))
+    .map(tier => [tier, tagsByTier.get(tier)] as const);
+
+const totalTags = sortedTags.length;
+const pageTitle = "Tags";
 ---
 
 <!doctype html>
@@ -36,59 +53,36 @@ const pageTitle = "标签索引";
 	</head>
 	<body>
 		<Header />
-		<main class="page-shell max-w-5xl section-stack">
-			<header class="space-y-3 text-center">
-				<h1 class="text-3xl font-semibold tracking-tight text-primary sm:text-4xl">{pageTitle}</h1>
-				<p class="text-sm uppercase tracking-[0.25em] text-[color-mix(in srgb, var(--color-text-muted) 70%, transparent)]">
-					从这里探索所有话题
-				</p>
-			</header>
-			<section class="space-y-8">
-				{primaryTags.length > 0 && (
-					<div class="space-y-3">
-						<h2 class="text-center text-xs font-semibold uppercase tracking-[0.38em] text-[color-mix(in srgb, var(--color-text-muted) 70%, transparent)]">
-							高频标签
-						</h2>
-						<div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-							{primaryTags.map(([tag, count]) => (
-								<p class="m-0">
+		<main class="page-shell max-w-5xl">
+			<h1 class="text-2xl sm:text-3xl font-bold text-primary mb-4">{pageTitle}</h1>
+			<section class="section-stack">
+				{groupedTags.map(([tier, tags]) => (
+					<div class="relative" data-tier-group>
+						<div class="relative h-14 pointer-events-none select-none">
+							<span class="absolute -left-7 sm:-left-10 -top-1 text-8xl sm:text-9xl font-bold opacity-[0.06] text-primary">
+								{tier}
+							</span>
+						</div>
+
+						<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
+							{tags && tags.map(([tag, count]) => (
+								<li class="tag-item-wrapper">
 									<a
 										href={`/tags/${tag}`}
-										class="inline-flex items-center rounded-full border border-border-subtle bg-surface px-4 py-2 text-sm font-medium text-secondary transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent"
+										class="tag-item group flex items-baseline gap-4 py-1 no-underline"
 									>
-										<span>{tag}</span>
-										<span class="ml-2 text-xs font-semibold text-muted">
-											{count}
+										<span class="text-base sm:text-lg leading-tight text-primary break-words">
+											{tag}
+										</span>
+										<span class="text-xs opacity-50 tabular-nums">
+											{count} {count === 1 ? 'post' : 'posts'}
 										</span>
 									</a>
-								</p>
+								</li>
 							))}
-						</div>
+						</ul>
 					</div>
-				)}
-
-				{secondaryTags.length > 0 && (
-					<div class="space-y-3">
-						<h2 class="text-center text-xs font-semibold uppercase tracking-[0.38em] text-[color-mix(in srgb, var(--color-text-muted) 70%, transparent)]">
-							其余标签
-						</h2>
-						<div class="flex flex-wrap justify-center gap-3 sm:gap-4">
-							{secondaryTags.map(([tag, count]) => (
-								<p class="m-0">
-									<a
-										href={`/tags/${tag}`}
-										class="inline-flex items-center rounded-full border border-border-subtle bg-surface px-4 py-2 text-sm font-medium text-secondary transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent"
-									>
-									<span>{tag}</span>
-									<span class="ml-2 text-[0.75rem] font-semibold text-[color-mix(in srgb, var(--color-text-muted) 65%, transparent)]">
-										{count}
-									</span>
-									</a>
-								</p>
-							))}
-						</div>
-					</div>
-				)}
+				))}
 			</section>
 		</main>
 		<Footer />
