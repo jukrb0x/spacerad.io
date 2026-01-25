@@ -1,6 +1,6 @@
 /**
- * 博客文章交互功能
- * 包含：响应式表格、TOC 目录、移动端抽屉等
+ * Blog post interactive features
+ * Includes: responsive tables, TOC navigation, mobile drawer, etc.
  */
 
 // ============ Timing Utilities ============
@@ -26,7 +26,7 @@ function throttle<T extends (...args: unknown[]) => void>(fn: T, delay: number):
     }) as T;
 }
 
-// ============ 响应式表格处理 ============
+// ============ Responsive Table Handling ============
 function unwrapCardCells(table: HTMLTableElement) {
     const cardCells = table.querySelectorAll("[data-cardified]");
 
@@ -91,7 +91,7 @@ function applyResponsiveTables() {
     }
 }
 
-// ============ Iframe 嵌入处理 ============
+// ============ Iframe Embed Handling ============
 function handleEmbedIframes() {
     const iframes = document.querySelectorAll('iframe[data-testid="embed-iframe"]');
 
@@ -141,11 +141,11 @@ function handleEmbedIframes() {
     }
 }
 
-// ============ TOC 目录高亮 ============
+// ============ TOC Navigation Highlighting ============
 let currentTocCleanup: (() => void) | null = null;
 
 function initTocObserver() {
-    // 清理之前的 observer
+    // Cleanup previous observer
     if (currentTocCleanup) {
         currentTocCleanup();
         currentTocCleanup = null;
@@ -163,7 +163,7 @@ function initTocObserver() {
 
     if (headingElements.length === 0) return;
 
-    // 追踪所有当前可见的标题
+    // Track all currently visible headings
     const visibleHeadings = new Set<string>();
 
     const observerOptions = {
@@ -172,12 +172,12 @@ function initTocObserver() {
     };
 
     const setActiveLink = (id: string) => {
-        // 移除所有 active 类（包含桌面与移动端两个 TOC）
+        // Remove active class from all links (includes both desktop and mobile TOCs)
         for (const link of tocLinks) {
             link.classList.remove("active");
         }
 
-        // 针对同一 heading，给所有匹配链接添加 active
+        // Add active class to all matching links for the same heading
         const matches = document.querySelectorAll(`[data-heading-id="${id}"]`);
         for (const el of matches) {
             el.classList.add("active");
@@ -187,7 +187,7 @@ function initTocObserver() {
     const updateActiveHeading = () => {
         if (visibleHeadings.size === 0) return;
 
-        // 找到第一个可见的标题（从上到下）
+        // Find the first visible heading (top to bottom)
         let firstVisibleId: string | null = null;
         for (const heading of headingElements) {
             if (visibleHeadings.has(heading.id)) {
@@ -218,10 +218,10 @@ function initTocObserver() {
         observer.observe(heading);
     }
 
-    // 点击处理器映射，用于清理
+    // Click handler map for cleanup
     const clickHandlers = new Map<Element, () => void>();
 
-    // 添加点击事件处理
+    // Add click event handlers
     for (const link of tocLinks) {
         const handler = () => {
             const id = link.getAttribute("data-heading-id");
@@ -243,7 +243,7 @@ function initTocObserver() {
     };
 }
 
-// ============ 移动端 TOC 抽屉 ============
+// ============ Mobile TOC Drawer ============
 function initMobileTocDrawer() {
     const toggleBtn = document.querySelector("[data-toc-mobile-toggle]");
     const drawer = document.querySelector("[data-toc-mobile-drawer]");
@@ -270,7 +270,7 @@ function initMobileTocDrawer() {
         overlay.classList.add("opacity-0", "pointer-events-none");
         content.classList.add("translate-x-full");
         document.body.classList.remove("scroll-locked");
-        // 等待动画结束后再隐藏
+        // Wait for animation to complete before hiding
         setTimeout(() => {
             if (!isOpen) {
                 drawer.classList.add("pointer-events-none");
@@ -283,12 +283,12 @@ function initMobileTocDrawer() {
     closeBtn.addEventListener("click", closeDrawer);
     overlay.addEventListener("click", closeDrawer);
 
-    // 点击目录链接后自动关闭
+    // Auto-close drawer when clicking TOC links
     tocLinks?.forEach((link) => {
         link.addEventListener("click", closeDrawer);
     });
 
-    // ESC 键关闭
+    // Close on ESC key
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && isOpen) {
             closeDrawer();
@@ -296,75 +296,95 @@ function initMobileTocDrawer() {
     });
 }
 
-// ============ 侧边栏定位（TOC + 分享栏） ============
-// 动态计算侧边栏起始位置，实现滚动浮动效果
+// ============ Sidebar Positioning (TOC + Share Bar) ============
+// Dynamically calculate sidebar starting position, implementing scroll floating effect
 let sidebarPositionRAF: number | null = null;
+let sidebarsInitialized = false;
+
+// Cache DOM elements to avoid repeated queries
+let cachedTocSidebar: HTMLElement | null = null;
+let cachedShareSidebar: HTMLElement | null = null;
+let cachedArticleHeader: HTMLElement | null = null;
+
+function initSidebarCache(): void {
+    cachedTocSidebar = document.querySelector<HTMLElement>("[data-toc-sidebar]");
+    cachedShareSidebar = document.querySelector<HTMLElement>("[data-share-sidebar]");
+    cachedArticleHeader = document.querySelector<HTMLElement>("[data-article-header]");
+    sidebarsInitialized = false;
+}
 
 function adjustSidebarPositions(): void {
-    if (sidebarPositionRAF !== null) cancelAnimationFrame(sidebarPositionRAF);
+    // Skip if RAF already pending
+    if (sidebarPositionRAF !== null) return;
 
     sidebarPositionRAF = requestAnimationFrame(() => {
-        const tocSidebar = document.querySelector<HTMLElement>("[data-toc-sidebar]");
-        const shareSidebar = document.querySelector<HTMLElement>("[data-share-sidebar]");
-        const articleHeader = document.querySelector<HTMLElement>("[data-article-header]");
+        sidebarPositionRAF = null;
 
-        if (!articleHeader) return;
+        if (!cachedArticleHeader) return;
 
-        // 双重 RAF 确保布局完全稳定后再计算
-        requestAnimationFrame(() => {
-            const headerBottom = articleHeader.getBoundingClientRect().bottom;
-            const minTop = 64; // header 导航栏高度
-            const padding = 24; // 与分割线的间距
+        const headerBottom = cachedArticleHeader.getBoundingClientRect().bottom;
+        const minTop = 64; // header navigation bar height
+        const padding = 24; // spacing from separator line
 
-            // 滚动浮动逻辑：当标题滚出视口时，侧边栏浮动到顶部
-            const targetTop =
-                headerBottom < minTop
-                    ? minTop + padding
-                    : Math.max(minTop + padding, headerBottom + padding);
+        // Scroll floating logic: when header scrolls out of viewport, sidebar floats to top
+        const targetTop =
+            headerBottom < minTop
+                ? minTop + padding
+                : Math.max(minTop + padding, headerBottom + padding);
 
-            // 同时更新 TOC 和分享栏位置
-            if (tocSidebar) {
-                tocSidebar.style.top = `${targetTop}px`;
-                tocSidebar.style.opacity = "1";
-            }
-            if (shareSidebar) {
-                shareSidebar.style.top = `${targetTop}px`;
-                shareSidebar.style.opacity = "1";
-            }
+        const topValue = `${targetTop}px`;
 
-            sidebarPositionRAF = null;
-        });
+        // Update positions using cached elements
+        if (cachedTocSidebar) {
+            cachedTocSidebar.style.top = topValue;
+        }
+        if (cachedShareSidebar) {
+            cachedShareSidebar.style.top = topValue;
+        }
+
+        // Only set opacity once on first position update
+        if (!sidebarsInitialized) {
+            sidebarsInitialized = true;
+            if (cachedTocSidebar) cachedTocSidebar.style.opacity = "1";
+            if (cachedShareSidebar) cachedShareSidebar.style.opacity = "1";
+        }
     });
 }
 
-// 保持向后兼容的别名
+// Backward compatibility alias
 function adjustTocPosition(): void {
     adjustSidebarPositions();
 }
 
 const debouncedAdjustTocPosition = debounce(adjustTocPosition, 150);
-const throttledAdjustTocPosition = throttle(adjustTocPosition, 16);
 
-// ============ 初始化所有功能 ============
+// Initialize sidebar cache and position on page navigation
+function initSidebars(): void {
+    initSidebarCache();
+    adjustSidebarPositions();
+}
+
+// ============ Initialize All Features ============
 export function initBlogInteractive() {
-    // 响应式表格
+    // Responsive tables
     const ensureResponsiveTables = () => window.requestAnimationFrame(applyResponsiveTables);
     ensureResponsiveTables();
     window.addEventListener("astro:after-swap", ensureResponsiveTables);
 
-    // Iframe 处理
+    // Iframe handling
     handleEmbedIframes();
     window.addEventListener("astro:after-swap", handleEmbedIframes);
 
-    // TOC 功能
+    // TOC features
     initTocObserver();
     window.addEventListener("astro:after-swap", initTocObserver);
 
     initMobileTocDrawer();
     window.addEventListener("astro:after-swap", initMobileTocDrawer);
 
-    adjustTocPosition();
+    // Sidebar positioning - use RAF directly for scroll (no throttle needed, RAF handles timing)
+    initSidebars();
     window.addEventListener("resize", debouncedAdjustTocPosition);
-    window.addEventListener("scroll", throttledAdjustTocPosition, { passive: true });
-    window.addEventListener("astro:after-swap", adjustTocPosition);
+    window.addEventListener("scroll", adjustSidebarPositions, { passive: true });
+    window.addEventListener("astro:after-swap", initSidebars);
 }
