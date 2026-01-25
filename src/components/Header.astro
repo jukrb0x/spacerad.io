@@ -153,16 +153,16 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 setTimeout(() => {
                     isAnimating = false;
                 }, 800);
-            }, 2000);
+            }, 2500);
         }
 
         // Initial animation after page load
-        setTimeout(playAnimation, 1500);
+        setTimeout(playAnimation, 1000);
 
         // Hover trigger with delay
         wrapper.addEventListener("mouseenter", () => {
             if (isAnimating) return;
-            hoverTimeout = setTimeout(playAnimation, 150);
+            hoverTimeout = setTimeout(playAnimation, 100);
         });
 
         wrapper.addEventListener("mouseleave", () => {
