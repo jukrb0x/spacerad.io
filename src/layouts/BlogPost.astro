@@ -22,6 +22,14 @@ type Props = EntryData & {
     headings?: MarkdownHeading[];
     lastModified?: string;
     lastModifiedCommitUrl?: string | null;
+    frontmatter: Props;
+};
+
+// If it come from a page instead of a collection, we need to handle the pubDate from the frontmatter also
+const rawProps = Astro.props.body ? Astro.props : { ...Astro.props.frontmatter, ...Astro.props };
+const props = {
+    ...rawProps,
+    pubDate: new Date(rawProps.pubDate ?? rawProps.frontmatter.pubDate),
 };
 
 const {
@@ -37,7 +45,7 @@ const {
     comment,
     lastModified,
     lastModifiedCommitUrl,
-} = Astro.props;
+} = props;
 
 const description =
     providedDescription || (body ? extractDescription(body) : "No description available");
@@ -46,7 +54,7 @@ const readingTime = body ? calculateReadingTime(body) : null;
 // Extract image URL from socialImage (can be ImageMetadata or string)
 const getImageUrl = (img: ImageMetadata | string | undefined): string => {
     if (!img) return DEFAULT_POST_SOCIAL_IMAGE;
-    if (typeof img === 'object' && 'src' in img) return img.src;
+    if (typeof img === "object" && "src" in img) return img.src;
     return img;
 };
 const imageSrc = getImageUrl(socialImage);
@@ -68,7 +76,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 		<main class="page-shell max-w-none relative">
 			<!-- Article main body: always centered -->
 			<article class="mx-auto max-w-[50rem] sm:px-6">
-				<Back href="/posts" />
+				<Back />
 				<!-- Header section -->
 				<div data-article-header class="space-y-3">
 					<h1 class="text-2xl leading-tight font-bold text-primary sm:text-3xl">{title}</h1>

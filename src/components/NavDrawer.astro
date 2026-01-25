@@ -1,13 +1,6 @@
 ---
 // NavDrawer.astro - Mobile navigation drawer (rendered outside header to avoid transform issues)
-
-const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/posts", label: "Blog" },
-    { href: "/tags", label: "Tags" },
-    { href: "/channel", label: "Channel" },
-    { href: "/about", label: "About" },
-];
+import { NAV_LINKS } from "../consts";
 
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
 const subpath = pathname.match(/[^/]+/g);
@@ -45,7 +38,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         </div>
         <nav class="flex flex-col gap-2 text-base" data-no-preview>
             {
-                navLinks.map((link) => (
+                NAV_LINKS.map((link) => (
                     <a
                         href={link.href}
                         class:list={[
