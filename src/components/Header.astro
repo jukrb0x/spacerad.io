@@ -59,7 +59,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             <!-- Nav Links (desktop) -->
             <div class="hidden items-center gap-1 md:flex" data-no-preview>
                 {
-                    NAV_LINKS.map((link) => (
+                    NAV_LINKS.filter((link) => !link.drawer_only).map((link) => (
                         <a
                             href={link.href}
                             class:list={[
@@ -132,17 +132,45 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const altEl = wrapper.querySelector<HTMLElement>("[data-title-alt]");
         if (!altEl) return;
 
-        // Pick a random alt title
-        const randomTitle = altTitles[Math.floor(Math.random() * altTitles.length)];
-        altEl.textContent = randomTitle;
+        let isAnimating = false;
+        let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
 
-        // Show alt title after 1.5s, hide after 2s
-        setTimeout(() => {
+        function pickRandomTitle() {
+            return altTitles[Math.floor(Math.random() * altTitles.length)];
+        }
+
+        function playAnimation() {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            // Pick a new random title each time
+            altEl.textContent = pickRandomTitle();
+
             wrapper.classList.add("show-alt");
             setTimeout(() => {
                 wrapper.classList.remove("show-alt");
+                // Wait for exit transition to complete
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 800);
             }, 2000);
-        }, 1500);
+        }
+
+        // Initial animation after page load
+        setTimeout(playAnimation, 1500);
+
+        // Hover trigger with delay
+        wrapper.addEventListener("mouseenter", () => {
+            if (isAnimating) return;
+            hoverTimeout = setTimeout(playAnimation, 150);
+        });
+
+        wrapper.addEventListener("mouseleave", () => {
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+        });
     }
 
     // Run on initial load and after view transitions
@@ -189,11 +217,16 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
     .site-title-wrapper {
         position: relative;
         display: inline-block;
+        cursor: pointer;
     }
 
     .site-title-text {
         display: inline-block;
-        transition: opacity 0.4s ease, transform 0.4s ease;
+        transition:
+            opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+            transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+            filter 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+            text-shadow 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .site-title-alt {
@@ -201,16 +234,22 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         left: 0;
         top: 0;
         opacity: 0;
-        transform: translateY(4px);
+        transform: translateX(8px);
+        filter: blur(4px);
     }
 
+    /* Main title exit animation */
     .site-title-wrapper.show-alt [data-title-main] {
         opacity: 0;
-        transform: translateY(-4px);
+        transform: translateX(-8px);
+        filter: blur(4px);
     }
 
+    /* Alt title enter animation */
     .site-title-wrapper.show-alt [data-title-alt] {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
+        filter: blur(0);
+        color: var(--color-accent);
     }
 </style>
