@@ -25,15 +25,26 @@ const groupedPosts = Array.from(postsByYear.entries());
 
 <section class="section-stack">
 	<div class="flex items-center justify-end mb-4">
-		<label class="inline-flex select-none items-center gap-2 text-sm text-muted">
-			<input
-				id="filter-deepsearch"
-				type="checkbox"
-				class="h-4 w-4 accent-[var(--color-accent)]"
-				checked
-			/>
-			<span>隐藏 DeepSearch 文章</span>
-		</label>
+		<div class="lang-switcher inline-flex select-none items-center gap-1 text-sm text-muted">
+			<button
+				id="lang-all"
+				type="button"
+				class="lang-btn px-2 py-0.5 rounded transition-colors"
+				data-lang="all"
+			>All</button>
+			<button
+				id="lang-en"
+				type="button"
+				class="lang-btn px-2 py-0.5 rounded transition-colors"
+				data-lang="en"
+			>EN</button>
+			<button
+				id="lang-zh"
+				type="button"
+				class="lang-btn px-2 py-0.5 rounded transition-colors"
+				data-lang="zh"
+			>中文</button>
+		</div>
 	</div>
 	{
 		groupedPosts.map(([year, yearPosts]) => (
@@ -47,17 +58,16 @@ const groupedPosts = Array.from(postsByYear.entries());
 
 				<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
 					{yearPosts.map((post) => {
-						const isDeepSearch = post.data.tags?.includes('DeepSearch') ?? false;
-						const isZh = post.data.lang === 'zh';
+						const lang = post.data.lang || 'en';
 						return (
-							<li data-deepsearch={isDeepSearch ? 'true' : 'false'} class="post-item-wrapper">
+							<li data-lang={lang} class="post-item-wrapper">
 								<a
 									href={`/posts/${post.id}`}
 									class="post-item group flex flex-col gap-0 py-1 no-underline"
 									data-post-id={post.id}
 								>
 									<div class="text-base sm:text-lg leading-tight text-primary">
-										{isZh && (
+										{lang === 'zh' && (
 											<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle">中文</span>
 										)}
 										<span class="break-words align-middle">{post.data.title}</span>
@@ -88,32 +98,49 @@ const groupedPosts = Array.from(postsByYear.entries());
 			margin-right: 0.5rem;
 		}
 	}
+
+	/* Language switcher buttons */
+	.lang-btn {
+		opacity: 0.5;
+		&:hover {
+			opacity: 0.8;
+			background: color-mix(in srgb, var(--color-text-muted) 10%, transparent);
+		}
+		&.active {
+			opacity: 1;
+			background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+		}
+	}
 </style>
 
 <script is:inline>
 	document.addEventListener('DOMContentLoaded', function() {
 		const yearGroups = document.querySelectorAll('[data-year-group]');
-		const filterCheckbox = document.getElementById('filter-deepsearch');
+		const langButtons = document.querySelectorAll('.lang-btn');
 
-		if (!filterCheckbox) return;
+		if (!langButtons.length) return;
 
-		const FILTER_KEY = 'hide-deepsearch-posts';
-		const savedPreference = window.localStorage.getItem(FILTER_KEY);
-		if (savedPreference !== null) {
-			filterCheckbox.checked = savedPreference === 'true';
-		}
+		const LANG_KEY = 'posts-lang-filter';
+		let currentLang = window.localStorage.getItem(LANG_KEY) || 'all';
 
-		const applyFilter = () => {
-			const hideDeepSearch = filterCheckbox.checked;
-			window.localStorage.setItem(FILTER_KEY, String(hideDeepSearch));
+		const setActiveButton = (lang) => {
+			langButtons.forEach((btn) => {
+				btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+			});
+		};
+
+		const applyFilter = (lang) => {
+			currentLang = lang;
+			window.localStorage.setItem(LANG_KEY, lang);
+			setActiveButton(lang);
 
 			yearGroups.forEach((group) => {
 				let visibleCount = 0;
-				group.querySelectorAll('li[data-deepsearch]').forEach((item) => {
-					const isDeepSearch = item.getAttribute('data-deepsearch') === 'true';
-					const shouldHide = hideDeepSearch && isDeepSearch;
-					item.style.display = shouldHide ? 'none' : '';
-					if (!shouldHide) visibleCount += 1;
+				group.querySelectorAll('li[data-lang]').forEach((item) => {
+					const itemLang = item.getAttribute('data-lang');
+					const shouldShow = lang === 'all' || itemLang === lang;
+					item.style.display = shouldShow ? '' : 'none';
+					if (shouldShow) visibleCount += 1;
 				});
 
 				const noDataIndicator = group.querySelector('.no-posts');
@@ -121,14 +148,19 @@ const groupedPosts = Array.from(postsByYear.entries());
 					noDataIndicator.style.display = visibleCount === 0 ? 'block' : 'none';
 				} else if (visibleCount === 0) {
 					const emptyState = document.createElement('p');
-					emptyState.className = 'no-posts text-sm text-[color-mix(in srgb, var(--color-text-muted) 70%, transparent)] italic';
-					emptyState.textContent = '（暂无符合条件的文章）';
+					emptyState.className = 'no-posts text-sm text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)] italic';
+					emptyState.textContent = 'No posts in this language for this year.';
 					group.querySelector('ul')?.appendChild(emptyState);
 				}
 			});
 		};
 
-		filterCheckbox.addEventListener('change', applyFilter);
-		applyFilter();
+		langButtons.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				applyFilter(btn.getAttribute('data-lang'));
+			});
+		});
+
+		applyFilter(currentLang);
 	});
 </script>
