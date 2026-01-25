@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import Back from "../../components/Back.astro";
 import BaseHead from "../../components/BaseHead.astro";
 import Footer from "../../components/Footer.astro";
 import FormattedDate from "../../components/FormattedDate.astro";
@@ -55,14 +56,7 @@ const groupedPosts = Array.from(postsByYear.entries());
 	<body>
 		<Header />
 		<main class="page-shell max-w-5xl">
-			<div class="mb-4">
-				<a
-					href="/tags"
-					class="inline-flex items-center gap-2 text-sm text-secondary transition hover:text-accent"
-				>
-					<span aria-hidden="true">←</span> All Tags
-				</a>
-			</div>
+			<Back href="/tags" />
 			<h1 class="text-2xl sm:text-3xl font-bold text-primary mb-4">#{tag}</h1>
 			<section class="section-stack">
 				{groupedPosts.map(([year, yearPosts]) => (
