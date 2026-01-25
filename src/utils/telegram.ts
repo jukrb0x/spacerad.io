@@ -274,19 +274,6 @@ export async function fetchTelegramChannel(
         };
     } catch (error) {
         console.error("Error fetching Telegram channel:", error);
-
-        // Detect wrangler local dev HTTPS fetch bug
-        // See: https://github.com/cloudflare/workers-sdk/issues/9356
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes("internal error; reference")) {
-            const wranglerError = new Error(
-                "Telegram fetch failed due to a known wrangler local dev issue with HTTPS requests. " +
-                    "This works in production. For local dev, use 'pnpm dev' instead of 'pnpm wrangler pages dev'.",
-            );
-            wranglerError.name = "WranglerLocalDevError";
-            throw wranglerError;
-        }
-
         throw error;
     }
 }

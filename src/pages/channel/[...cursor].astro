@@ -29,7 +29,6 @@ const cursorValue = cursor ? cursor.replace(/^(before-|after-)/, "") : undefined
 
 let channelData: TelegramChannel | undefined;
 let error: string | null = null;
-let isWranglerError = false;
 
 try {
     const options: { before?: string; after?: string } = {};
@@ -41,9 +40,7 @@ try {
 
     channelData = await fetchTelegramChannel(CHANNEL_USERNAME, options);
 } catch (e) {
-    const err = e instanceof Error ? e : new Error("Failed to load channel");
-    error = err.message;
-    isWranglerError = err.name === "WranglerLocalDevError";
+    error = e instanceof Error ? e.message : "Failed to load channel";
     console.error("Error loading Telegram channel:", e);
 }
 
@@ -78,19 +75,11 @@ Astro.response.headers.set(
         <div class="error-message surface-card">
           <h1>Failed to load channel</h1>
           <p>{error}</p>
-          {isWranglerError ? (
-            <div class="wrangler-hint">
-              <p><strong>Local Development Tip:</strong></p>
-              <p>Use <code>pnpm dev</code> instead of <code>pnpm wrangler pages dev</code> for this page.</p>
-              <p>This issue only affects local development - it works fine in production.</p>
-            </div>
-          ) : (
-            <p>
-              Please visit <a href={`https://t.me/${CHANNEL_USERNAME}`} target="_blank" rel="noopener noreferrer">
-                Telegram channel
-              </a>
-            </p>
-          )}
+          <p>
+            Please visit <a href={`https://t.me/${CHANNEL_USERNAME}`} target="_blank" rel="noopener noreferrer">
+              Telegram channel
+            </a>
+          </p>
         </div>
       ) : channelData ? (
         <div class="channel-layout">
@@ -192,22 +181,6 @@ Astro.response.headers.set(
   .error-message a {
     color: var(--color-accent);
     text-decoration: underline;
-  }
-
-  .wrangler-hint {
-    margin-top: var(--space-4);
-    padding: var(--space-4);
-    background: var(--color-bg-muted);
-    border-radius: var(--radius-md);
-    text-align: left;
-  }
-
-  .wrangler-hint code {
-    background: var(--color-bg-surface);
-    padding: 0.1em 0.3em;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
-    font-size: 0.9em;
   }
 
   /* Pagination */
