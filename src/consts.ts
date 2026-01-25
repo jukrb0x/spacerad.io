@@ -14,3 +14,13 @@ export const SOCIAL_LINKS = {
     telegram: "https://t.me/yourchannel",
     rss: "/rss.xml",
 } as const;
+
+// Navigation links
+export const NAV_LINKS = [
+    { href: "/", label: "Home" },
+    { href: "/posts", label: "Blog" },
+    { href: "/tags", label: "Tags" },
+    { href: "/channel", label: "Channel" },
+    { href: "/friends", label: "Links" },
+    { href: "/about", label: "About" },
+] as const;
