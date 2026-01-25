@@ -11,7 +11,7 @@ import Prose from "../components/Prose.astro";
 import Comments from "../components/Comments.astro";
 import ShareSidebar from "../components/ShareSidebar.astro";
 import TableOfContents from "../components/TableOfContents.astro";
-import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
+import { SITE_TITLE, DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
 import { calculateReadingTime } from "../utils/readingTime";
 
@@ -68,7 +68,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} image={imageSrc} />
+		<BaseHead title={`${title} | ${SITE_TITLE}`} description={description} image={imageSrc} />
 	</head>
 
 	<body>

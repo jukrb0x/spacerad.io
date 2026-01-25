@@ -1,5 +1,5 @@
 ---
-import { SITE_TITLE, NAV_LINKS } from "../consts";
+import { SITE_TITLE, SITE_TITLE_ALT, NAV_LINKS } from "../consts";
 import SearchModal from "./SearchModal.astro";
 import SearchOverlay from "./SearchOverlay.astro";
 import NavDrawer from "./NavDrawer.astro";
@@ -44,7 +44,10 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 class="inline-flex items-center gap-2 no-underline transition-interactive hover:text-accent focus-accent"
             >
                 <span class="text-xl" aria-hidden="true">📻</span>
-                <span>{SITE_TITLE}</span>
+                <span class="site-title-wrapper" data-site-title data-alt-titles={JSON.stringify(SITE_TITLE_ALT)}>
+                    <span class="site-title-text" data-title-main>{SITE_TITLE}</span>
+                    <span class="site-title-text site-title-alt" data-title-alt aria-hidden="true"></span>
+                </span>
             </a>
         </h2>
 
@@ -117,6 +120,34 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
 <script>
     import "../scripts/header-scroll.ts";
+
+    // Site title animation
+    function initTitleAnimation() {
+        const wrapper = document.querySelector<HTMLElement>("[data-site-title]");
+        if (!wrapper) return;
+
+        const altTitles = JSON.parse(wrapper.dataset.altTitles || "[]") as string[];
+        if (altTitles.length === 0) return;
+
+        const altEl = wrapper.querySelector<HTMLElement>("[data-title-alt]");
+        if (!altEl) return;
+
+        // Pick a random alt title
+        const randomTitle = altTitles[Math.floor(Math.random() * altTitles.length)];
+        altEl.textContent = randomTitle;
+
+        // Show alt title after 1.5s, hide after 2s
+        setTimeout(() => {
+            wrapper.classList.add("show-alt");
+            setTimeout(() => {
+                wrapper.classList.remove("show-alt");
+            }, 2000);
+        }, 1500);
+    }
+
+    // Run on initial load and after view transitions
+    initTitleAnimation();
+    document.addEventListener("astro:after-swap", initTitleAnimation);
 </script>
 
 <style lang="scss">
@@ -152,5 +183,34 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
     .header-wrapper.is-scrolled .header-glow {
         opacity: 1;
+    }
+
+    /* Site title animation */
+    .site-title-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .site-title-text {
+        display: inline-block;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .site-title-alt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    .site-title-wrapper.show-alt [data-title-main] {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    .site-title-wrapper.show-alt [data-title-alt] {
+        opacity: 1;
+        transform: translateY(0);
     }
 </style>
