@@ -1068,19 +1068,6 @@ a {
 // =============================================
 // Layout Components
 // =============================================
-
-.page-shell {
-  width: 100%;
-  max-width: var(--layout-max-width);
-  margin-inline: auto;
-  padding-block: var(--space-8);
-  padding-inline: var(--space-4);
-
-  @include breakpoint('sm') {
-    padding-inline: var(--space-6);
-  }
-}
-
 .section-stack {
   display: grid;
   gap: clamp(var(--space-6), 3vw, var(--space-12));
