@@ -213,7 +213,7 @@ $breakpoints: (
 @mixin surface-card($shadow: true) {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-soft);
-  border-radius: radius('lg');
+  border-radius: radius('md');
   @if $shadow {
     box-shadow: var(--shadow-soft);
   }
