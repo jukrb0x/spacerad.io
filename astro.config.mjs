@@ -56,9 +56,6 @@ export default defineConfig({
         imageService: "compile",
     }),
     site: "https://example.com",
-    redirects: {
-        "/p/[...slug]": "/posts/[...slug]",
-    },
     integrations: [
         mdx(),
         sitemap(),
