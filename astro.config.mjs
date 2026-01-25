@@ -12,6 +12,8 @@ import rehypeFigure from "rehype-figure";
 import rehypeSlug from "rehype-slug";
 import { rehypePrettyCode } from "rehype-pretty-code";
 import { remarkAlert } from "remark-github-blockquote-alert";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./remark-modified-time.mjs";
 
 import vue from "@astrojs/vue";
@@ -94,11 +96,12 @@ export default defineConfig({
     ],
 
     markdown: {
-        remarkPlugins: [remarkAlert, remarkModifiedTime],
+        remarkPlugins: [remarkMath, remarkAlert, remarkModifiedTime],
         // Disable Astro's built-in syntax highlighting - using rehype-pretty-code instead
         syntaxHighlight: false,
         rehypePlugins: [
             [rehypePrettyCode, rehypePrettyCodeOptions],
+            rehypeKatex,
             rehypeSlug,
             [
                 rehypeAutolinkHeadings,
