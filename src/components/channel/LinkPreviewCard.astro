@@ -9,7 +9,7 @@ const { preview } = Astro.props;
 ---
 
 <a href={preview.url} target="_blank" rel="noopener noreferrer"
-   class="link-preview surface-card surface-card--compact surface-card--hover-border">
+   class="link-preview surface-card card-interactive shadow-md">
     {preview.imageUrl && (
         <div class="link-preview__image">
             <img src={preview.imageUrl} alt="" loading="lazy" />

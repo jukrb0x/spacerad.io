@@ -138,7 +138,8 @@ export default defineConfig({
         "flex-col-center": "flex flex-col items-center justify-center",
 
         // Gradient text - Space Radio
-        "text-gradient-warm-cool": "bg-clip-text text-transparent bg-gradient-to-r from-accent-warm to-accent-cool",
+        "text-gradient-warm-cool":
+            "bg-clip-text text-transparent bg-gradient-to-r from-accent-warm to-accent-cool",
         "text-gradient-cosmic": "bg-clip-text text-transparent",
 
         // Interactive effects - Space Radio
@@ -155,13 +156,11 @@ export default defineConfig({
         "icon-btn-square": "rounded-md",
         "icon-btn-bordered": "border border-border-soft",
 
-        // Pill/tag
-        pill: "inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-accent-tint text-accent border border-transparent transition-interactive hover:(bg-accent text-inverse)",
-
         // Surface card
-        "surface-card": "bg-surface rounded-lg border border-border-subtle shadow-soft",
+        "surface-card": "bg-surface rounded-md border-none border-border-subtle shadow-soft",
         "surface-card-hover": "hover:(border-accent shadow-strong)",
-        "card-interactive": "surface-card transition-all duration-200 hover:(border-accent shadow-strong -translate-y-0.5)",
+        "card-interactive":
+            "surface-card transition-all duration-200 hover:(border-accent shadow-soft -translate-y-0.5)",
 
         // Page shell (main container)
         "page-shell": "max-w-[72rem] mx-auto px-4 py-8 sm:px-6",
@@ -217,19 +216,22 @@ export default defineConfig({
         ["space-12", { gap: "var(--space-12)" }],
 
         // Gradient backgrounds - Space Radio
-        ["bg-gradient-warm-cool", { "background": "var(--gradient-warm-to-cool)" }],
-        ["bg-gradient-cosmic", { "background": "var(--gradient-cosmic)" }],
-        ["bg-gradient-radio-glow", { "background": "var(--gradient-radio-glow)" }],
-        ["bg-gradient-cosmic-subtle", { "background": "var(--gradient-bg-cosmic)" }],
-        ["bg-gradient-radio-subtle", { "background": "var(--gradient-bg-radio)" }],
+        ["bg-gradient-warm-cool", { background: "var(--gradient-warm-to-cool)" }],
+        ["bg-gradient-cosmic", { background: "var(--gradient-cosmic)" }],
+        ["bg-gradient-radio-glow", { background: "var(--gradient-radio-glow)" }],
+        ["bg-gradient-cosmic-subtle", { background: "var(--gradient-bg-cosmic)" }],
+        ["bg-gradient-radio-subtle", { background: "var(--gradient-bg-radio)" }],
 
         // Gradient text utilities - Space Radio
-        [/^text-gradient-(.+)$/, ([, c]) => ({
-            "background-image": `var(--gradient-${c})`,
-            "-webkit-background-clip": "text",
-            "background-clip": "text",
-            "-webkit-text-fill-color": "transparent",
-            "color": "transparent",
-        })],
+        [
+            /^text-gradient-(.+)$/,
+            ([, c]) => ({
+                "background-image": `var(--gradient-${c})`,
+                "-webkit-background-clip": "text",
+                "background-clip": "text",
+                "-webkit-text-fill-color": "transparent",
+                color: "transparent",
+            }),
+        ],
     ],
 });

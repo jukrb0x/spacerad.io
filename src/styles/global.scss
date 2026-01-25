@@ -1091,45 +1091,45 @@ a {
 }
 
 // =============================================
-// Surface Card Component
+// Surface Card Component (Deorecated)
 // =============================================
 
-.surface-card {
-  @include surface-card;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
+// .surface-card {
+//   @include surface-card;
+//   transition:
+//     border-color 0.2s ease,
+//     background-color 0.2s ease,
+//     box-shadow 0.2s ease;
 
-  &--soft {
-    box-shadow: none;
-    border-color: var(--color-border-subtle);
-    background: color-mix(in srgb, var(--color-bg-surface) 80%, var(--color-bg-muted) 20%);
-  }
+//   &--soft {
+//     box-shadow: none;
+//     border-color: var(--color-border-subtle);
+//     background: color-mix(in srgb, var(--color-bg-surface) 80%, var(--color-bg-muted) 20%);
+//   }
 
-  &--flat {
-    box-shadow: none;
-    border-color: var(--color-border-subtle);
-  }
+//   &--flat {
+//     box-shadow: none;
+//     border-color: var(--color-border-subtle);
+//   }
 
-  &--compact {
-    border-radius: var(--radius-md);
-  }
+//   &--compact {
+//     border-radius: var(--radius-md);
+//   }
 
-  &--hover-border:hover {
-    border-color: var(--color-border);
-    box-shadow: var(--shadow-soft);
-  }
+//   &--hover-border:hover {
+//     border-color: var(--color-border);
+//     box-shadow: var(--shadow-soft);
+//   }
 
-  &--hover-none {
-    transition: none;
+//   &--hover-none {
+//     transition: none;
 
-    &:hover {
-      border-color: var(--color-border-soft);
-      box-shadow: var(--shadow-soft);
-    }
-  }
-}
+//     &:hover {
+//       border-color: var(--color-border-soft);
+//       box-shadow: var(--shadow-soft);
+//     }
+//   }
+// }
 
 // =============================================
 // Pill Component
