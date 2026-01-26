@@ -13,6 +13,10 @@ directory = "./dist"
 [observability]
 enabled = true
 
+# Vars
+[vars]
+PUBLIC_REMARK_SITE_ID = "space-radio"
+PUBLIC_REMARK_URL = "https://remark42.spacerad.io"
 
 # KV Namespace Bindings
 [[kv_namespaces]]
