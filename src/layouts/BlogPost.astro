@@ -213,7 +213,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 			)}
 
 			<!-- Share sidebar: Desktop left side, Mobile floating button -->
-			<ShareSidebar title={title} description={description} tags={tags} slug={slug} />
+			<ShareSidebar title={title} description={description} tags={tags} slug={slug} hasToc={showToc} />
 		</main>
 		<Footer />
 	</body>
