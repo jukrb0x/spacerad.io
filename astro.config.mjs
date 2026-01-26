@@ -54,6 +54,7 @@ const rehypePrettyCodeOptions = {
 export default defineConfig({
     adapter: cloudflare({
         imageService: "compile",
+        platformProxy: { enabled: true },
     }),
     site: "https://example.com",
     integrations: [
