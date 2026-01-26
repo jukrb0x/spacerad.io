@@ -55,7 +55,7 @@ export default defineConfig({
     adapter: cloudflare({
         imageService: "compile",
     }),
-    site: "https://example.com",
+    site: "https://spacerad.io",
     integrations: [
         mdx(),
         sitemap(),
