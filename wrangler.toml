@@ -13,10 +13,6 @@ directory = "./dist"
 [observability]
 enabled = true
 
-[vars]
-PUBLIC_REMARK_URL="https://remark42.spacerad.io"
-PUBLIC_REMARK_SITE_ID="space-radio"
-
 [[kv_namespaces]]
 binding = "LIKES"
 id = "bfca45c77224430683574746d8a7069f"

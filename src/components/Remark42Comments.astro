@@ -2,9 +2,8 @@
 // Remark42 Comment System Component
 // @docs: https://remark42.com/docs/
 
-const { env } = Astro.locals.runtime;
-const REMARK_URL = env.PUBLIC_REMARK_URL ?? "https://remark42.example.com";
-const SITE_ID = env.PUBLIC_REMARK_SITE_ID ?? "default";
+const REMARK_URL = import.meta.env.PUBLIC_REMARK_URL || "https://remark42.example.com";
+const SITE_ID = import.meta.env.PUBLIC_REMARK_SITE_ID || "default";
 
 // Get current page URL as unique identifier for comments
 const pageUrl = Astro.url.href;
