@@ -35,5 +35,5 @@ export const NAV_LINKS: NavLink[] = [
     { href: "/tags", label: "Tags" },
     { href: "/channel", label: "Channel" },
     { href: "/friends", label: "Links" },
-    { href: "/about", label: "About" },
+    { href: "/me", label: "About" },
 ];
