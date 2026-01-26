@@ -246,6 +246,9 @@ $breakpoints: (
   // Color scheme
   color-scheme: light dark;
 
+  // Override UnoCSS default border color
+  --un-default-border-color: var(--color-border);
+
   // Typography
   @each $name, $size in $font-sizes {
     --font-size-#{$name}: #{$size};
