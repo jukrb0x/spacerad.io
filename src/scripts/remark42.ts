@@ -64,7 +64,7 @@ const initRemark42 = (container: HTMLElement) => {
         locale: "en",
         show_email_subscription: true,
         simple_view: false,
-        no_footer: false,
+        no_footer: true,
     };
 
     const applyTheme = (state: ThemeState) => {
