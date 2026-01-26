@@ -7,9 +7,14 @@ interface Props {
     tags?: string[];
     url?: string;
     slug: string;
+    hasToc?: boolean;
 }
 
-const { title, description, tags = [], url = Astro.url.href, slug } = Astro.props;
+const { title, description, tags = [], url = Astro.url.href, slug, hasToc = false } = Astro.props;
+
+// Mobile button position: if TOC exists, stack above it; otherwise take TOC's position
+const mobileButtonPosition = hasToc ? "bottom-24" : "bottom-6";
+const mobileMenuPosition = hasToc ? "bottom-24" : "bottom-6";
 
 // Twitter: hashtags as comma-separated (without #), max 3 tags
 const twitterHashtags = tags.slice(0, 3).join(",");
@@ -109,7 +114,10 @@ const shareLinks = [
 <button
     type="button"
     data-share-mobile-toggle
-    class="min-[1400px]:hidden fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95"
+    class:list={[
+        "min-[1400px]:hidden fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95",
+        mobileButtonPosition
+    ]}
     aria-label="Share article"
     aria-expanded="false"
 >
@@ -119,7 +127,10 @@ const shareLinks = [
 <!-- Mobile: Share menu -->
 <div
     data-share-menu
-    class="min-[1400px]:hidden fixed bottom-24 right-7 z-40 flex flex-col-reverse gap-2 pb-16 opacity-0 pointer-events-none transition-opacity duration-200"
+    class:list={[
+        "min-[1400px]:hidden fixed right-7 z-40 flex flex-col-reverse gap-2 pb-16 opacity-0 pointer-events-none transition-opacity duration-200",
+        mobileMenuPosition
+    ]}
     aria-hidden="true"
 >
     {shareLinks.map((link) => (
