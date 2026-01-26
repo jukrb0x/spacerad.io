@@ -42,6 +42,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             <a
                 href="/"
                 class="inline-flex items-center gap-2 no-underline transition-interactive hover:text-accent focus-accent"
+                data-site-title-trigger
             >
                 <span class="text-xl" aria-hidden="true">📻</span>
                 <span class="site-title-wrapper" data-site-title data-alt-titles={JSON.stringify(SITE_TITLE_ALT)}>
@@ -124,7 +125,8 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
     // Site title animation
     function initTitleAnimation() {
         const wrapper = document.querySelector<HTMLElement>("[data-site-title]");
-        if (!wrapper) return;
+        const trigger = document.querySelector<HTMLElement>("[data-site-title-trigger]");
+        if (!wrapper || !trigger) return;
 
         const altTitles = JSON.parse(wrapper.dataset.altTitles || "[]") as string[];
         if (altTitles.length === 0) return;
@@ -134,16 +136,22 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
         let isAnimating = false;
         let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+        let lastTitle = "";
 
         function pickRandomTitle() {
-            return altTitles[Math.floor(Math.random() * altTitles.length)];
+            if (altTitles.length === 1) return altTitles[0];
+            let title: string;
+            do {
+                title = altTitles[Math.floor(Math.random() * altTitles.length)];
+            } while (title === lastTitle);
+            lastTitle = title;
+            return title;
         }
 
         function playAnimation() {
             if (isAnimating) return;
             isAnimating = true;
 
-            // Pick a new random title each time
             altEl.textContent = pickRandomTitle();
 
             wrapper.classList.add("show-alt");
@@ -159,13 +167,13 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         // Initial animation after page load
         setTimeout(playAnimation, 1000);
 
-        // Hover trigger with delay
-        wrapper.addEventListener("mouseenter", () => {
+        // Hover trigger with delay (includes logo)
+        trigger.addEventListener("mouseenter", () => {
             if (isAnimating) return;
-            hoverTimeout = setTimeout(playAnimation, 100);
+            hoverTimeout = setTimeout(playAnimation, 10);
         });
 
-        wrapper.addEventListener("mouseleave", () => {
+        trigger.addEventListener("mouseleave", () => {
             if (hoverTimeout) {
                 clearTimeout(hoverTimeout);
                 hoverTimeout = null;
