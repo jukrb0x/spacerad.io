@@ -3,6 +3,8 @@
  * Includes: responsive tables, TOC navigation, mobile drawer, etc.
  */
 
+import { lockScroll, unlockScroll } from "../utils/scrollLock";
+
 // ============ Timing Utilities ============
 function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number): T {
     let timeoutId: number | null = null;
@@ -261,14 +263,14 @@ function initMobileTocDrawer() {
         drawer.setAttribute("aria-hidden", "false");
         overlay.classList.remove("opacity-0", "pointer-events-none");
         content.classList.remove("translate-x-full");
-        document.body.classList.add("scroll-locked");
+        lockScroll();
     };
 
     const closeDrawer = () => {
         isOpen = false;
         overlay.classList.add("opacity-0", "pointer-events-none");
         content.classList.add("translate-x-full");
-        document.body.classList.remove("scroll-locked");
+        unlockScroll();
         // Wait for animation to complete before hiding
         setTimeout(() => {
             if (!isOpen) {

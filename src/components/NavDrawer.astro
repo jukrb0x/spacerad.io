@@ -57,64 +57,69 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
     </div>
 </div>
 
-<script is:inline>
-(function() {
-    const toggleButton = document.querySelector("[data-nav-toggle]");
-    const overlay = document.querySelector("[data-nav-overlay]");
-    const drawer = document.querySelector("[data-nav-drawer]");
-    const closeButtons = document.querySelectorAll("[data-nav-close]");
-    const navLinks = document.querySelectorAll("[data-nav-link]");
-    const barTop = toggleButton?.querySelector("[data-bar-top]");
-    const barMiddle = toggleButton?.querySelector("[data-bar-middle]");
-    const barBottom = toggleButton?.querySelector("[data-bar-bottom]");
-    let lastFocusedElement = null;
+<script>
+    import { lockScroll, unlockScroll } from "../utils/scrollLock";
 
-    const toggleClasses = (el, add, remove) => {
-        if (!el) return;
-        el.classList.remove(...remove);
-        el.classList.add(...add);
-    };
+    function initNavDrawer() {
+        const toggleButton = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+        const overlay = document.querySelector<HTMLElement>("[data-nav-overlay]");
+        const drawer = document.querySelector<HTMLElement>("[data-nav-drawer]");
+        const closeButtons = document.querySelectorAll<HTMLButtonElement>("[data-nav-close]");
+        const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
+        const barTop = toggleButton?.querySelector<HTMLElement>("[data-bar-top]");
+        const barMiddle = toggleButton?.querySelector<HTMLElement>("[data-bar-middle]");
+        const barBottom = toggleButton?.querySelector<HTMLElement>("[data-bar-bottom]");
+        let lastFocusedElement: Element | null = null;
 
-    const setNavOpen = (open) => {
-        if (!overlay || !drawer) return;
+        const toggleClasses = (el: Element | null | undefined, add: string[], remove: string[]) => {
+            if (!el) return;
+            el.classList.remove(...remove);
+            el.classList.add(...add);
+        };
 
-        overlay.dataset.navState = open ? "open" : "closed";
-        toggleButton?.setAttribute("aria-expanded", String(open));
-        toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+        const setNavOpen = (open: boolean) => {
+            if (!overlay || !drawer) return;
 
-        if (open) {
-            lastFocusedElement = document.activeElement;
-            toggleClasses(overlay, ["opacity-100"], ["pointer-events-none", "opacity-0"]);
-            toggleClasses(drawer, ["translate-x-0"], ["translate-x-6"]);
-            toggleClasses(barTop, ["translate-y-1.5", "rotate-45"], []);
-            toggleClasses(barBottom, ["-translate-y-1.5", "-rotate-45"], []);
-            toggleClasses(barMiddle, ["opacity-0"], []);
-            document.body.classList.add("scroll-locked");
-            requestAnimationFrame(() => navLinks[0]?.focus({ preventScroll: true }));
-        } else {
-            toggleClasses(overlay, ["opacity-0", "pointer-events-none"], ["opacity-100"]);
-            toggleClasses(drawer, ["translate-x-6"], ["translate-x-0"]);
-            toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
-            toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
-            toggleClasses(barMiddle, [], ["opacity-0"]);
-            document.body.classList.remove("scroll-locked");
-            if (lastFocusedElement && "focus" in lastFocusedElement) {
-                lastFocusedElement.focus({ preventScroll: true });
+            overlay.dataset.navState = open ? "open" : "closed";
+            toggleButton?.setAttribute("aria-expanded", String(open));
+            toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+
+            if (open) {
+                lastFocusedElement = document.activeElement;
+                toggleClasses(overlay, ["opacity-100"], ["pointer-events-none", "opacity-0"]);
+                toggleClasses(drawer, ["translate-x-0"], ["translate-x-6"]);
+                toggleClasses(barTop, ["translate-y-1.5", "rotate-45"], []);
+                toggleClasses(barBottom, ["-translate-y-1.5", "-rotate-45"], []);
+                toggleClasses(barMiddle, ["opacity-0"], []);
+                lockScroll();
+                requestAnimationFrame(() => navLinks[0]?.focus({ preventScroll: true }));
+            } else {
+                toggleClasses(overlay, ["opacity-0", "pointer-events-none"], ["opacity-100"]);
+                toggleClasses(drawer, ["translate-x-6"], ["translate-x-0"]);
+                toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
+                toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
+                toggleClasses(barMiddle, [], ["opacity-0"]);
+                unlockScroll();
+                if (lastFocusedElement && "focus" in lastFocusedElement) {
+                    (lastFocusedElement as HTMLElement).focus({ preventScroll: true });
+                }
             }
-        }
-    };
+        };
 
-    toggleButton?.addEventListener("click", () => setNavOpen(overlay?.dataset.navState !== "open"));
-    closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
-    overlay?.addEventListener("click", (e) => e.target === overlay && setNavOpen(false));
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && overlay?.dataset.navState === "open") {
-            setNavOpen(false);
-        }
-    });
-    navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+        toggleButton?.addEventListener("click", () => setNavOpen(overlay?.dataset.navState !== "open"));
+        closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
+        overlay?.addEventListener("click", (e) => e.target === overlay && setNavOpen(false));
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && overlay?.dataset.navState === "open") {
+                setNavOpen(false);
+            }
+        });
+        navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
 
-    const mdQuery = window.matchMedia("(min-width: 768px)");
-    mdQuery.addEventListener("change", (e) => e.matches && setNavOpen(false));
-})();
+        const mdQuery = window.matchMedia("(min-width: 768px)");
+        mdQuery.addEventListener("change", (e) => e.matches && setNavOpen(false));
+    }
+
+    initNavDrawer();
+    document.addEventListener("astro:after-swap", initNavDrawer);
 </script>

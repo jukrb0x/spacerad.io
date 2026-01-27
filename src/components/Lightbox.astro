@@ -90,154 +90,167 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 	</div>
 </dialog>
 
-<script is:inline>
-	(() => {
-		const lightboxes = document.querySelectorAll("[data-lightbox]");
+<script>
+	import { lockScroll, unlockScroll } from "../utils/scrollLock";
+
+	interface Shot {
+		el?: Element;
+		src: string;
+		caption: string;
+	}
+
+	function initAllLightboxes() {
+		const lightboxes = document.querySelectorAll<HTMLDialogElement>("[data-lightbox]");
 		lightboxes.forEach((dialog) => initLightbox(dialog));
+	}
 
-		function initLightbox(dialog) {
-			if (dialog.dataset.lightboxInitialized) return;
-			dialog.dataset.lightboxInitialized = "true";
+	function initLightbox(dialog: HTMLDialogElement) {
+		if (dialog.dataset.lightboxInitialized) return;
+		dialog.dataset.lightboxInitialized = "true";
 
-			const selector = dialog.dataset.selector;
-			if (!selector) return;
+		const selector = dialog.dataset.selector;
+		if (!selector) return;
 
-			const imgEl = dialog.querySelector("[data-lightbox-img]");
-			const captionEl = dialog.querySelector("[data-lightbox-caption]");
-			const counterEl = dialog.querySelector("[data-lightbox-counter]");
-			const container = dialog.querySelector("[data-lightbox-container]");
-			const closeButtons = dialog.querySelectorAll("[data-lightbox-close]");
-			const prevBtn = dialog.querySelector("[data-lightbox-prev]");
-			const nextBtn = dialog.querySelector("[data-lightbox-next]");
+		const imgEl = dialog.querySelector<HTMLImageElement>("[data-lightbox-img]");
+		const captionEl = dialog.querySelector<HTMLElement>("[data-lightbox-caption]");
+		const counterEl = dialog.querySelector<HTMLElement>("[data-lightbox-counter]");
+		const container = dialog.querySelector<HTMLElement>("[data-lightbox-container]");
+		const closeButtons = dialog.querySelectorAll<HTMLButtonElement>("[data-lightbox-close]");
+		const prevBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-prev]");
+		const nextBtn = dialog.querySelector<HTMLButtonElement>("[data-lightbox-next]");
 
-			let shots = [];
-			let current = 0;
-			const preloadCache = new Set();
+		let shots: Shot[] = [];
+		let current = 0;
+		const preloadCache = new Set<string>();
 
-			const preload = (url) => {
-				if (!url || preloadCache.has(url)) return;
-				const img = new Image();
-				img.src = url;
-				preloadCache.add(url);
-			};
+		const preload = (url: string | undefined) => {
+			if (!url || preloadCache.has(url)) return;
+			const img = new Image();
+			img.src = url;
+			preloadCache.add(url);
+		};
 
-			const preloadNeighbors = (index) => {
-				if (!shots.length) return;
-				const next = shots[(index + 1) % shots.length]?.src;
-				const prev = shots[(index - 1 + shots.length) % shots.length]?.src;
-				preload(next);
-				preload(prev);
-			};
+		const preloadNeighbors = (index: number) => {
+			if (!shots.length) return;
+			const next = shots[(index + 1) % shots.length]?.src;
+			const prev = shots[(index - 1 + shots.length) % shots.length]?.src;
+			preload(next);
+			preload(prev);
+		};
 
-			const getShots = () => {
-				const elements = Array.from(document.querySelectorAll(selector));
-				return elements.map((el) => {
-					const isImg = el.tagName === "IMG";
-					const src = isImg
-						? el.currentSrc || el.src
-						: el.dataset.photoUrl || el.dataset.src || "";
-					const caption =
-						el.getAttribute("alt") ||
-						el.dataset.caption ||
-						el.dataset.title ||
-						"";
-					return { el, src, caption };
-				});
-			};
+		const getShots = (): Shot[] => {
+			const elements = Array.from(document.querySelectorAll(selector));
+			return elements.map((el) => {
+				const isImg = el.tagName === "IMG";
+				const imgElement = el as HTMLImageElement;
+				const htmlElement = el as HTMLElement;
+				const src = isImg
+					? imgElement.currentSrc || imgElement.src
+					: htmlElement.dataset.photoUrl || htmlElement.dataset.src || "";
+				const caption =
+					el.getAttribute("alt") ||
+					htmlElement.dataset.caption ||
+					htmlElement.dataset.title ||
+					"";
+				return { el, src, caption };
+			});
+		};
 
-			document.addEventListener("click", (event) => {
-				const target = event.target.closest(selector);
-				if (!target) return;
+		document.addEventListener("click", (event) => {
+			const target = (event.target as Element).closest(selector);
+			if (!target) return;
 
-				event.preventDefault();
-				const allShots = getShots();
-				const index = allShots.findIndex((s) => s.el === target);
-				if (index !== -1) {
-					shots = allShots.map(({ src, caption }) => ({ src, caption }));
-					open(index);
+			event.preventDefault();
+			const allShots = getShots();
+			const index = allShots.findIndex((s) => s.el === target);
+			if (index !== -1) {
+				shots = allShots.map(({ src, caption }) => ({ src, caption }));
+				open(index);
+			}
+		});
+
+		const setLoading = (loading: boolean) => {
+			if (container) {
+				container.classList.toggle("is-loading", loading);
+			}
+		};
+
+		const showImage = (index: number) => {
+			const shot = shots[index];
+			if (!shot) return;
+
+			setLoading(true);
+
+			const loader = new Image();
+			loader.onload = () => {
+				if (imgEl) {
+					imgEl.src = shot.src;
+					imgEl.alt = shot.caption;
 				}
-			});
-
-			const setLoading = (loading) => {
-				if (container) {
-					container.classList.toggle("is-loading", loading);
-				}
+				if (captionEl) captionEl.textContent = shot.caption || "";
+				if (counterEl) counterEl.textContent = `${index + 1} / ${shots.length}`;
+				current = index;
+				setLoading(false);
+				preloadNeighbors(index);
 			};
-
-			const showImage = (index) => {
-				const shot = shots[index];
-				if (!shot) return;
-
-				setLoading(true);
-
-				const loader = new Image();
-				loader.onload = () => {
-					if (imgEl) {
-						imgEl.src = shot.src;
-						imgEl.alt = shot.caption;
-					}
-					if (captionEl) captionEl.textContent = shot.caption || "";
-					if (counterEl) counterEl.textContent = `${index + 1} / ${shots.length}`;
-					current = index;
-					setLoading(false);
-					preloadNeighbors(index);
-				};
-				loader.onerror = () => {
-					setLoading(false);
-				};
-				loader.src = shot.src;
+			loader.onerror = () => {
+				setLoading(false);
 			};
+			loader.src = shot.src;
+		};
 
-			const open = (index) => {
-				if (!shots.length) return;
-				current = ((index % shots.length) + shots.length) % shots.length;
-				showImage(current);
-				dialog.showModal();
-				dialog.classList.add("is-open");
-				document.body.classList.add("scroll-locked");
-			};
+		const open = (index: number) => {
+			if (!shots.length) return;
+			current = ((index % shots.length) + shots.length) % shots.length;
+			showImage(current);
+			dialog.showModal();
+			dialog.classList.add("is-open");
+			lockScroll();
+		};
 
-			const close = () => {
-				dialog.close();
-				dialog.classList.remove("is-open");
-				document.body.classList.remove("scroll-locked");
-			};
+		const close = () => {
+			dialog.close();
+			dialog.classList.remove("is-open");
+			unlockScroll();
+		};
 
-			const step = (delta) => {
-				if (!shots.length) return;
-				const atEnd = current === shots.length - 1 && delta > 0;
-				const atStart = current === 0 && delta < 0;
-				const newIndex = atEnd ? 0 : atStart ? shots.length - 1 : current + delta;
-				showImage(newIndex);
-			};
+		const step = (delta: number) => {
+			if (!shots.length) return;
+			const atEnd = current === shots.length - 1 && delta > 0;
+			const atStart = current === 0 && delta < 0;
+			const newIndex = atEnd ? 0 : atStart ? shots.length - 1 : current + delta;
+			showImage(newIndex);
+		};
 
-			closeButtons.forEach((btn) => btn.addEventListener("click", close));
-			prevBtn?.addEventListener("click", () => step(-1));
-			nextBtn?.addEventListener("click", () => step(1));
+		closeButtons.forEach((btn) => btn.addEventListener("click", close));
+		prevBtn?.addEventListener("click", () => step(-1));
+		nextBtn?.addEventListener("click", () => step(1));
 
-			dialog.addEventListener("click", (event) => {
-				if (event.target === dialog) close();
-			});
+		dialog.addEventListener("click", (event) => {
+			if (event.target === dialog) close();
+		});
 
-			document.addEventListener("keydown", (event) => {
-				if (!dialog.open) return;
-				switch (event.key) {
-					case "Escape": close(); break;
-					case "ArrowLeft": step(-1); break;
-					case "ArrowRight": step(1); break;
-				}
-			});
+		document.addEventListener("keydown", (event) => {
+			if (!dialog.open) return;
+			switch (event.key) {
+				case "Escape": close(); break;
+				case "ArrowLeft": step(-1); break;
+				case "ArrowRight": step(1); break;
+			}
+		});
 
-			// Touch swipe support
-			let touchStartX = 0;
-			dialog.addEventListener("touchstart", (e) => {
-				touchStartX = e.changedTouches[0].screenX;
-			});
-			dialog.addEventListener("touchend", (e) => {
-				const touchEndX = e.changedTouches[0].screenX;
-				const diff = touchEndX - touchStartX;
-				if (Math.abs(diff) > 50) step(diff > 0 ? -1 : 1);
-			});
-		}
-	})();
+		// Touch swipe support
+		let touchStartX = 0;
+		dialog.addEventListener("touchstart", (e) => {
+			touchStartX = e.changedTouches[0].screenX;
+		});
+		dialog.addEventListener("touchend", (e) => {
+			const touchEndX = e.changedTouches[0].screenX;
+			const diff = touchEndX - touchStartX;
+			if (Math.abs(diff) > 50) step(diff > 0 ? -1 : 1);
+		});
+	}
+
+	initAllLightboxes();
+	document.addEventListener("astro:after-swap", initAllLightboxes);
 </script>

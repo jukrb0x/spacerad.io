@@ -15,6 +15,8 @@
 
 html {
   scroll-behavior: smooth;
+  // Ensure background extends to iOS Safari safe area
+  background: var(--color-bg-page);
 
   @include reduced-motion {
     scroll-behavior: auto;
@@ -39,11 +41,19 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   letter-spacing: 0.01em;
+}
 
-  // Scroll lock utility - used by drawers, lightboxes, modals
-  &.scroll-locked {
-    overflow: hidden;
-  }
+// Scroll lock utility - used by drawers, lightboxes, modals
+// Compensates for scrollbar width to prevent layout shift
+html.scroll-locked {
+  overflow: hidden;
+  // Compensate for scrollbar disappearing
+  padding-right: var(--scrollbar-width, 0);
+}
+
+// iOS Safari requires overflow hidden on body too
+body.scroll-locked {
+  overflow: hidden;
 }
 
 strong,

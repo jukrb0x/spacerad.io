@@ -4,7 +4,7 @@
 
 <div
     data-search-overlay
-    class="fixed inset-0 z-50 flex items-start justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-200 pointer-events-none"
+    class="fixed inset-0 z-[60] flex items-start justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-200 pointer-events-none"
     data-search-state="closed"
     role="dialog"
     aria-modal="true"
@@ -107,213 +107,220 @@
     </div>
 </div>
 
-<script is:inline>
-(function() {
-    const searchTrigger = document.querySelector("[data-search-trigger]");
-    const searchOverlay = document.querySelector("[data-search-overlay]");
-    const searchContainer = document.querySelector("[data-search-container]");
-    const searchInput = document.querySelector("[data-search-input]");
-    const searchCloseButtons = document.querySelectorAll("[data-search-close]");
-    const searchEmpty = document.querySelector("[data-search-empty]");
-    const searchNoResults = document.querySelector("[data-search-no-results]");
-    const searchList = document.querySelector("[data-search-list]");
+<script>
+    import { lockScroll, unlockScroll } from "../utils/scrollLock";
 
-    let lastFocusedElement = null;
-    let pagefind = null;
-    let selectedIndex = -1;
+    function initSearchOverlay() {
+        const searchTrigger = document.querySelector<HTMLButtonElement>("[data-search-trigger]");
+        const searchOverlay = document.querySelector<HTMLElement>("[data-search-overlay]");
+        const searchContainer = document.querySelector<HTMLElement>("[data-search-container]");
+        const searchInput = document.querySelector<HTMLInputElement>("[data-search-input]");
+        const searchCloseButtons = document.querySelectorAll<HTMLButtonElement>("[data-search-close]");
+        const searchEmpty = document.querySelector<HTMLElement>("[data-search-empty]");
+        const searchNoResults = document.querySelector<HTMLElement>("[data-search-no-results]");
+        const searchList = document.querySelector<HTMLElement>("[data-search-list]");
 
-    async function loadPagefind() {
-        if (pagefind) return pagefind;
-        try {
-            pagefind = await import("/pagefind/pagefind.js");
-            await pagefind.init();
-            return pagefind;
-        } catch (e) {
-            console.error("Failed to load Pagefind:", e);
-            return null;
-        }
-    }
+        let lastFocusedElement: Element | null = null;
+        let pagefind: any = null;
+        let selectedIndex = -1;
 
-    function createResultItem(result, index) {
-        const li = document.createElement("li");
-        li.setAttribute("role", "option");
-        li.setAttribute("aria-selected", "false");
-
-        const link = document.createElement("a");
-        link.href = result.url;
-        link.className = "search-result-item group flex flex-col gap-1 rounded-lg p-3 transition-colors hover:bg-accent-tint-8 focus:bg-accent-tint-8 focus:outline-none";
-        link.dataset.searchResultIndex = String(index);
-
-        const title = document.createElement("span");
-        title.className = "font-medium text-primary group-hover:text-accent group-focus:text-accent";
-        title.textContent = result.meta?.title || result.url;
-
-        const excerpt = document.createElement("span");
-        excerpt.className = "line-clamp-2 text-sm text-secondary search-excerpt";
-        if (result.excerpt) {
-            excerpt.innerHTML = result.excerpt;
+        async function loadPagefind() {
+            if (pagefind) return pagefind;
+            try {
+                // Use variable to prevent Vite from resolving at build time
+                const pagefindPath = "/pagefind/pagefind.js";
+                pagefind = await import(/* @vite-ignore */ pagefindPath);
+                await pagefind.init();
+                return pagefind;
+            } catch (e) {
+                console.error("Failed to load Pagefind:", e);
+                return null;
+            }
         }
 
-        link.appendChild(title);
-        link.appendChild(excerpt);
-        li.appendChild(link);
+        function createResultItem(result: any, index: number) {
+            const li = document.createElement("li");
+            li.setAttribute("role", "option");
+            li.setAttribute("aria-selected", "false");
 
-        return li;
-    }
+            const link = document.createElement("a");
+            link.href = result.url;
+            link.className = "search-result-item group flex flex-col gap-1 rounded-lg p-3 transition-colors hover:bg-accent-tint-8 focus:bg-accent-tint-8 focus:outline-none";
+            link.dataset.searchResultIndex = String(index);
 
-    async function performSearch(query) {
-        if (!query.trim()) {
-            showEmpty();
-            return;
+            const title = document.createElement("span");
+            title.className = "font-medium text-primary group-hover:text-accent group-focus:text-accent";
+            title.textContent = result.meta?.title || result.url;
+
+            const excerpt = document.createElement("span");
+            excerpt.className = "line-clamp-2 text-sm text-secondary search-excerpt";
+            if (result.excerpt) {
+                excerpt.innerHTML = result.excerpt;
+            }
+
+            link.appendChild(title);
+            link.appendChild(excerpt);
+            li.appendChild(link);
+
+            return li;
         }
 
-        const pf = await loadPagefind();
-        if (!pf) return;
+        async function performSearch(query: string) {
+            if (!query.trim()) {
+                showEmpty();
+                return;
+            }
 
-        const search = await pf.search(query);
+            const pf = await loadPagefind();
+            if (!pf) return;
 
-        if (search.results.length === 0) {
-            showNoResults();
-            return;
+            const search = await pf.search(query);
+
+            if (search.results.length === 0) {
+                showNoResults();
+                return;
+            }
+
+            const results = await Promise.all(
+                search.results.slice(0, 10).map((r: any) => r.data())
+            );
+
+            showResults(results);
         }
 
-        const results = await Promise.all(
-            search.results.slice(0, 10).map((r) => r.data())
+        function showEmpty() {
+            searchEmpty?.classList.remove("hidden");
+            searchNoResults?.classList.add("hidden");
+            searchList?.classList.add("hidden");
+            selectedIndex = -1;
+        }
+
+        function showNoResults() {
+            searchEmpty?.classList.add("hidden");
+            searchNoResults?.classList.remove("hidden");
+            searchList?.classList.add("hidden");
+            selectedIndex = -1;
+        }
+
+        function showResults(results: any[]) {
+            searchEmpty?.classList.add("hidden");
+            searchNoResults?.classList.add("hidden");
+            searchList?.classList.remove("hidden");
+
+            if (!searchList) return;
+
+            searchList.replaceChildren();
+
+            results.forEach((result, index) => {
+                const item = createResultItem(result, index);
+                searchList.appendChild(item);
+            });
+
+            selectedIndex = -1;
+        }
+
+        function updateSelection(newIndex: number) {
+            const items = searchList?.querySelectorAll<HTMLElement>("[data-search-result-index]");
+            if (!items || items.length === 0) return;
+
+            if (newIndex < 0) newIndex = items.length - 1;
+            if (newIndex >= items.length) newIndex = 0;
+
+            items.forEach((item, i) => {
+                const li = item.closest("li");
+                if (i === newIndex) {
+                    li?.setAttribute("aria-selected", "true");
+                    item.classList.add("bg-accent-tint-8");
+                    item.focus();
+                } else {
+                    li?.setAttribute("aria-selected", "false");
+                    item.classList.remove("bg-accent-tint-8");
+                }
+            });
+
+            selectedIndex = newIndex;
+        }
+
+        function setSearchOpen(open: boolean) {
+            if (!searchOverlay || !searchContainer) return;
+
+            searchOverlay.dataset.searchState = open ? "open" : "closed";
+
+            if (open) {
+                lastFocusedElement = document.activeElement;
+                searchOverlay.classList.remove("pointer-events-none", "opacity-0");
+                searchOverlay.classList.add("opacity-100");
+                searchContainer.classList.remove("translate-y-4");
+                searchContainer.classList.add("translate-y-0");
+                lockScroll();
+                requestAnimationFrame(() => {
+                    searchInput?.focus();
+                    searchInput?.select();
+                });
+            } else {
+                searchOverlay.classList.add("pointer-events-none", "opacity-0");
+                searchOverlay.classList.remove("opacity-100");
+                searchContainer.classList.add("translate-y-4");
+                searchContainer.classList.remove("translate-y-0");
+                unlockScroll();
+                if (lastFocusedElement && "focus" in lastFocusedElement) {
+                    (lastFocusedElement as HTMLElement).focus();
+                }
+                if (searchInput) searchInput.value = "";
+                showEmpty();
+            }
+        }
+
+        searchTrigger?.addEventListener("click", () => setSearchOpen(true));
+        searchCloseButtons.forEach((btn) =>
+            btn.addEventListener("click", () => setSearchOpen(false))
         );
 
-        showResults(results);
-    }
-
-    function showEmpty() {
-        searchEmpty?.classList.remove("hidden");
-        searchNoResults?.classList.add("hidden");
-        searchList?.classList.add("hidden");
-        selectedIndex = -1;
-    }
-
-    function showNoResults() {
-        searchEmpty?.classList.add("hidden");
-        searchNoResults?.classList.remove("hidden");
-        searchList?.classList.add("hidden");
-        selectedIndex = -1;
-    }
-
-    function showResults(results) {
-        searchEmpty?.classList.add("hidden");
-        searchNoResults?.classList.add("hidden");
-        searchList?.classList.remove("hidden");
-
-        if (!searchList) return;
-
-        searchList.replaceChildren();
-
-        results.forEach((result, index) => {
-            const item = createResultItem(result, index);
-            searchList.appendChild(item);
+        searchOverlay?.addEventListener("click", (e) => {
+            if (e.target === searchOverlay) setSearchOpen(false);
         });
 
-        selectedIndex = -1;
-    }
-
-    function updateSelection(newIndex) {
-        const items = searchList?.querySelectorAll("[data-search-result-index]");
-        if (!items || items.length === 0) return;
-
-        if (newIndex < 0) newIndex = items.length - 1;
-        if (newIndex >= items.length) newIndex = 0;
-
-        items.forEach((item, i) => {
-            const li = item.closest("li");
-            if (i === newIndex) {
-                li?.setAttribute("aria-selected", "true");
-                item.classList.add("bg-accent-tint-8");
-                item.focus();
-            } else {
-                li?.setAttribute("aria-selected", "false");
-                item.classList.remove("bg-accent-tint-8");
-            }
-        });
-
-        selectedIndex = newIndex;
-    }
-
-    function setSearchOpen(open) {
-        if (!searchOverlay || !searchContainer) return;
-
-        searchOverlay.dataset.searchState = open ? "open" : "closed";
-
-        if (open) {
-            lastFocusedElement = document.activeElement;
-            searchOverlay.classList.remove("pointer-events-none", "opacity-0");
-            searchOverlay.classList.add("opacity-100");
-            searchContainer.classList.remove("translate-y-4");
-            searchContainer.classList.add("translate-y-0");
-            document.body.classList.add("scroll-locked");
-            requestAnimationFrame(() => {
-                searchInput?.focus();
-                searchInput?.select();
-            });
-        } else {
-            searchOverlay.classList.add("pointer-events-none", "opacity-0");
-            searchOverlay.classList.remove("opacity-100");
-            searchContainer.classList.add("translate-y-4");
-            searchContainer.classList.remove("translate-y-0");
-            document.body.classList.remove("scroll-locked");
-            if (lastFocusedElement && "focus" in lastFocusedElement) {
-                lastFocusedElement.focus();
-            }
-            if (searchInput) searchInput.value = "";
-            showEmpty();
-        }
-    }
-
-    searchTrigger?.addEventListener("click", () => setSearchOpen(true));
-    searchCloseButtons.forEach((btn) =>
-        btn.addEventListener("click", () => setSearchOpen(false))
-    );
-
-    searchOverlay?.addEventListener("click", (e) => {
-        if (e.target === searchOverlay) setSearchOpen(false);
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-            e.preventDefault();
-            setSearchOpen(true);
-            return;
-        }
-
-        if (searchOverlay?.dataset.searchState !== "open") return;
-
-        if (e.key === "Escape") {
-            e.preventDefault();
-            setSearchOpen(false);
-            return;
-        }
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            updateSelection(selectedIndex + 1);
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            updateSelection(selectedIndex - 1);
-        } else if (e.key === "Enter" && selectedIndex >= 0) {
-            const items = searchList?.querySelectorAll("[data-search-result-index]");
-            const selected = items?.[selectedIndex];
-            if (selected) {
+        document.addEventListener("keydown", (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
                 e.preventDefault();
-                selected.click();
+                setSearchOpen(true);
+                return;
             }
-        }
-    });
 
-    let debounceTimer;
-    searchInput?.addEventListener("input", (e) => {
-        const query = e.target.value;
-        clearTimeout(debounceTimer);
-        debounceTimer = window.setTimeout(() => performSearch(query), 200);
-    });
-})();
+            if (searchOverlay?.dataset.searchState !== "open") return;
+
+            if (e.key === "Escape") {
+                e.preventDefault();
+                setSearchOpen(false);
+                return;
+            }
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                updateSelection(selectedIndex + 1);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                updateSelection(selectedIndex - 1);
+            } else if (e.key === "Enter" && selectedIndex >= 0) {
+                const items = searchList?.querySelectorAll<HTMLElement>("[data-search-result-index]");
+                const selected = items?.[selectedIndex];
+                if (selected) {
+                    e.preventDefault();
+                    selected.click();
+                }
+            }
+        });
+
+        let debounceTimer: ReturnType<typeof setTimeout>;
+        searchInput?.addEventListener("input", (e) => {
+            const query = (e.target as HTMLInputElement).value;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => performSearch(query), 200);
+        });
+    }
+
+    initSearchOverlay();
+    document.addEventListener("astro:after-swap", initSearchOverlay);
 </script>
 
 <style>
