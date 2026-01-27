@@ -47,8 +47,7 @@ const {
     lastModifiedCommitUrl,
 } = props;
 
-const description =
-    providedDescription || (body ? extractDescription(body) : "No description available");
+const description = providedDescription || (body ? extractDescription(body) : "No description available");
 const readingTime = body ? calculateReadingTime(body) : null;
 
 // Extract image URL from socialImage (can be ImageMetadata or string)

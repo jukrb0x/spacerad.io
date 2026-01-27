@@ -34,9 +34,7 @@ function isAllowedUrl(urlString: string): boolean {
         // Only allow HTTPS
         if (url.protocol !== "https:") return false;
         // Check against allowlist
-        return ALLOWED_DOMAINS.some(
-            (domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`),
-        );
+        return ALLOWED_DOMAINS.some((domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`));
     } catch {
         return false;
     }

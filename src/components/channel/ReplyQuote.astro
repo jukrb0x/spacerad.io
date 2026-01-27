@@ -7,9 +7,7 @@ interface Props {
 
 const { reply } = Astro.props;
 const WrapperTag = reply.replyToLink ? "a" : "div";
-const wrapperProps = reply.replyToLink
-    ? { href: reply.replyToLink, target: "_blank", rel: "noopener noreferrer" }
-    : {};
+const wrapperProps = reply.replyToLink ? { href: reply.replyToLink, target: "_blank", rel: "noopener noreferrer" } : {};
 ---
 
 <WrapperTag class:list={["reply-quote", { "reply-quote--clickable": reply.replyToLink }]} {...wrapperProps}>

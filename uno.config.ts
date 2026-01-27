@@ -1,9 +1,4 @@
-import {
-    defineConfig,
-    presetWebFonts,
-    transformerDirectives,
-    transformerVariantGroup,
-} from "unocss";
+import { defineConfig, presetWebFonts, transformerDirectives, transformerVariantGroup } from "unocss";
 import presetWind3 from "@unocss/preset-wind3";
 
 export default defineConfig({
@@ -122,12 +117,10 @@ export default defineConfig({
     // Shortcuts for common patterns
     shortcuts: {
         // Focus states
-        "focus-accent":
-            "outline-none focus-visible:(outline-2 outline-accent-soft outline-offset-2)",
+        "focus-accent": "outline-none focus-visible:(outline-2 outline-accent-soft outline-offset-2)",
 
         // Transitions
-        "transition-interactive":
-            "transition-[color,background-color,border-color] duration-200 ease-out",
+        "transition-interactive": "transition-[color,background-color,border-color] duration-200 ease-out",
         "transition-fast": "transition-all duration-150 ease-out",
         "transition-base": "transition-all duration-200 ease-out",
         "transition-slow": "transition-all duration-300 ease-out",
@@ -138,8 +131,7 @@ export default defineConfig({
         "flex-col-center": "flex flex-col items-center justify-center",
 
         // Gradient text - Space Radio
-        "text-gradient-warm-cool":
-            "bg-clip-text text-transparent bg-gradient-to-r from-accent-warm to-accent-cool",
+        "text-gradient-warm-cool": "bg-clip-text text-transparent bg-gradient-to-r from-accent-warm to-accent-cool",
         "text-gradient-cosmic": "bg-clip-text text-transparent",
 
         // Interactive effects - Space Radio
@@ -147,8 +139,7 @@ export default defineConfig({
         "hover-glow": "transition-shadow duration-300 hover:shadow-glow-accent-soft",
 
         // Icon button
-        "icon-btn":
-            "inline-flex items-center justify-center bg-transparent text-secondary cursor-pointer transition-interactive hover:text-accent",
+        "icon-btn": "inline-flex items-center justify-center bg-transparent text-secondary cursor-pointer transition-interactive hover:text-accent",
         "icon-btn-xs": "w-8 h-8",
         "icon-btn-sm": "w-10 h-10",
         "icon-btn-md": "w-12 h-12",
@@ -159,8 +150,7 @@ export default defineConfig({
         // Surface card
         "surface-card": "bg-surface rounded-md border-none border-border-subtle shadow-soft",
         "surface-card-hover": "hover:(border-accent shadow-strong)",
-        "card-interactive":
-            "surface-card transition-all duration-200 hover:(border-accent shadow-soft -translate-y-0.5)",
+        "card-interactive": "surface-card transition-all duration-200 hover:(border-accent shadow-soft -translate-y-0.5)",
 
         // Page shell (main container)
         "page-shell": "max-w-5xl mx-auto px-4 py-8 sm:px-6",

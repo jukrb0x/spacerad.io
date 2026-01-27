@@ -70,8 +70,7 @@ function initCodeBlocks() {
         const existingTitle = figure?.querySelector("[data-rehype-pretty-code-title]");
 
         // Get language from data attribute or class
-        const language = codeEl?.dataset.language ||
-            codeEl?.className.match(/language-(\w+)/)?.[1] || "";
+        const language = codeEl?.dataset.language || codeEl?.className.match(/language-(\w+)/)?.[1] || "";
 
         if (existingTitle) {
             // rehype-pretty-code has a title - just add copy button to it

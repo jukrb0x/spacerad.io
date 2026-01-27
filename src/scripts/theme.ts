@@ -17,8 +17,7 @@ let hasResolvedState = false;
 let currentPreference: ThemePreference = DEFAULT_PREFERENCE;
 let currentTheme: ThemeName = "light";
 
-const isPreference = (value: unknown): value is ThemePreference =>
-    value === "light" || value === "dark" || value === "system";
+const isPreference = (value: unknown): value is ThemePreference => value === "light" || value === "dark" || value === "system";
 
 const readStoredPreference = (): ThemePreference | null => {
     try {
@@ -37,8 +36,7 @@ const storePreference = (preference: ThemePreference) => {
     }
 };
 
-const getSystemTheme = (): ThemeName =>
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+const getSystemTheme = (): ThemeName => (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
 const resolveTheme = (preference: ThemePreference): ThemeName => {
     switch (preference) {
@@ -51,11 +49,7 @@ const resolveTheme = (preference: ThemePreference): ThemeName => {
     }
 };
 
-const applyThemeToDocument = (
-    theme: ThemeName,
-    preference: ThemePreference,
-    doc: Document = document,
-) => {
+const applyThemeToDocument = (theme: ThemeName, preference: ThemePreference, doc: Document = document) => {
     const root = doc.documentElement;
     root.dataset.theme = theme;
     root.dataset.themeMode = preference;
@@ -88,11 +82,7 @@ const ensureState = (doc: Document = document) => {
     hasResolvedState = true;
 };
 
-const updateState = (
-    preference: ThemePreference,
-    doc: Document = document,
-    { emit } = { emit: true },
-) => {
+const updateState = (preference: ThemePreference, doc: Document = document, { emit } = { emit: true }) => {
     currentPreference = preference;
     currentTheme = resolveTheme(preference);
     applyThemeToDocument(currentTheme, preference, doc);
@@ -184,9 +174,7 @@ const describeState = (state: ThemeState) => {
     const { preference, theme } = state;
     const nextPreference = cyclePreference(preference);
     const currentLabel =
-        preference === "system"
-            ? `${preferenceLabel.system} (currently ${theme === "dark" ? "dark" : "light"})`
-            : preferenceLabel[preference];
+        preference === "system" ? `${preferenceLabel.system} (currently ${theme === "dark" ? "dark" : "light"})` : preferenceLabel[preference];
 
     return {
         nextPreference,

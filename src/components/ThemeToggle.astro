@@ -5,11 +5,7 @@ interface Props {
     variant?: "header" | "mobile";
 }
 
-const {
-    label = "Toggle theme",
-    class: className = "",
-    variant = "header",
-} = (Astro.props as Props) ?? {};
+const { label = "Toggle theme", class: className = "", variant = "header" } = (Astro.props as Props) ?? {};
 ---
 
 <div

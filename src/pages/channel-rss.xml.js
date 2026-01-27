@@ -106,8 +106,7 @@ function generateTitle(content, maxLength = 80) {
     // Limit length and add ellipsis if needed
     if (title.length > maxLength) {
         // Try to cut at a natural boundary (space, comma, etc.)
-        const cutPoint =
-            title.lastIndexOf(" ", maxLength) || title.lastIndexOf("，", maxLength) || maxLength;
+        const cutPoint = title.lastIndexOf(" ", maxLength) || title.lastIndexOf("，", maxLength) || maxLength;
         title = `${title.substring(0, cutPoint).trim()}...`;
     }
 
@@ -144,13 +143,10 @@ function generateDescription(html, maxLength = 200) {
 function fixHashtagLinks(html, channelUsername) {
     if (!html) return html;
 
-    return html.replace(
-        /<a href="\?q=([^"]+)" target="_blank">(#[^<]+)<\/a>/g,
-        (_match, _query, hashtag) => {
-            const tag = hashtag.replace("#", "");
-            return `<a href="https://t.me/s/${channelUsername}?q=%23${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${hashtag}</a>`;
-        },
-    );
+    return html.replace(/<a href="\?q=([^"]+)" target="_blank">(#[^<]+)<\/a>/g, (_match, _query, hashtag) => {
+        const tag = hashtag.replace("#", "");
+        return `<a href="https://t.me/s/${channelUsername}?q=%23${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${hashtag}</a>`;
+    });
 }
 
 export async function GET(context) {

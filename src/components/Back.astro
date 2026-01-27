@@ -7,10 +7,10 @@ const { href } = Astro.props;
 
 // Calculate parent path from current URL if href not provided
 const getParentPath = () => {
-    const path = Astro.url.pathname.replace(/\/$/, ''); // Remove trailing slash
-    const segments = path.split('/').filter(Boolean);
-    if (segments.length <= 1) return '/';
-    return '/' + segments.slice(0, -1).join('/');
+    const path = Astro.url.pathname.replace(/\/$/, ""); // Remove trailing slash
+    const segments = path.split("/").filter(Boolean);
+    if (segments.length <= 1) return "/";
+    return "/" + segments.slice(0, -1).join("/");
 };
 
 const backHref = href ?? getParentPath();

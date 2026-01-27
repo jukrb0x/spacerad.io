@@ -54,10 +54,7 @@ function getProxiedImageUrl(imageUrl: string): string {
  * @param options - Pagination options (before/after message ID)
  * @returns Channel information including posts
  */
-export async function fetchTelegramChannel(
-    channelUsername: string,
-    options: FetchOptions = {},
-): Promise<TelegramChannel> {
+export async function fetchTelegramChannel(channelUsername: string, options: FetchOptions = {}): Promise<TelegramChannel> {
     const params = new URLSearchParams();
     if (options.before) params.append("before", options.before);
     if (options.after) params.append("after", options.after);
@@ -83,15 +80,12 @@ export async function fetchTelegramChannel(
         // Convert numbered lists in description
         let description = $description.text().trim();
         // Replace numbered lists with HTML
-        description = description.replace(
-            /(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.\s+|\n\n|$)/gs,
-            (_match, num, text) => {
-                if (num === "1") {
-                    return `<ol><li>${text.trim()}</li>`;
-                }
-                return `<li>${text.trim()}</li>`;
-            },
-        );
+        description = description.replace(/(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.\s+|\n\n|$)/gs, (_match, num, text) => {
+            if (num === "1") {
+                return `<ol><li>${text.trim()}</li>`;
+            }
+            return `<li>${text.trim()}</li>`;
+        });
         // Close the last <ol> tag if there was a list
         if (description.includes("<ol>")) {
             description = description.replace(/(<li>.*?<\/li>)(?!.*<li>)/s, "$1</ol>");
@@ -155,15 +149,12 @@ export async function fetchTelegramChannel(
             let contentHtml = $content.html() || "";
 
             // Convert numbered lists (1. 2. 3.) to proper HTML lists
-            contentHtml = contentHtml.replace(
-                /(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.\s+|\n\n|$)/gs,
-                (_match, num, text) => {
-                    if (num === "1") {
-                        return `<ol><li>${text.trim()}</li>`;
-                    }
-                    return `<li>${text.trim()}</li>`;
-                },
-            );
+            contentHtml = contentHtml.replace(/(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.\s+|\n\n|$)/gs, (_match, num, text) => {
+                if (num === "1") {
+                    return `<ol><li>${text.trim()}</li>`;
+                }
+                return `<li>${text.trim()}</li>`;
+            });
             // Close the last <ol> tag if there was a list
             if (contentHtml.includes("<ol>")) {
                 contentHtml = contentHtml.replace(/(<li>.*?<\/li>)(?!.*<li>)/s, "$1</ol>");
@@ -171,12 +162,7 @@ export async function fetchTelegramChannel(
 
             // Add images if any
             if (images.length > 0) {
-                const imagesHtml = images
-                    .map(
-                        (img) =>
-                            `<img src="${img}" alt="${title}" loading="lazy" class="telegram-post-image" />`,
-                    )
-                    .join("");
+                const imagesHtml = images.map((img) => `<img src="${img}" alt="${title}" loading="lazy" class="telegram-post-image" />`).join("");
                 contentHtml = `<div class="telegram-images">${imagesHtml}</div>${contentHtml}`;
             }
 
@@ -187,24 +173,18 @@ export async function fetchTelegramChannel(
                 const previewUrl = $linkPreview.attr("href") || "";
                 const siteName = $linkPreview.find(".link_preview_site_name").text().trim();
                 const previewTitle = $linkPreview.find(".link_preview_title").text().trim();
-                const previewDescription = $linkPreview
-                    .find(".link_preview_description")
-                    .text()
-                    .trim();
+                const previewDescription = $linkPreview.find(".link_preview_description").text().trim();
 
                 // Extract image from style or img tag
                 let previewImageUrl = "";
-                const $previewImage = $linkPreview.find(
-                    ".link_preview_image, .link_preview_right_image",
-                );
+                const $previewImage = $linkPreview.find(".link_preview_image, .link_preview_right_image");
                 if ($previewImage.length) {
                     const style = $previewImage.attr("style") || "";
                     const imgMatch = style.match(/url\(['"](.+?)['"]\)/);
                     if (imgMatch?.[1]) {
                         previewImageUrl = getProxiedImageUrl(imgMatch[1]);
                     } else {
-                        const imgSrc =
-                            $previewImage.find("img").attr("src") || $previewImage.attr("src");
+                        const imgSrc = $previewImage.find("img").attr("src") || $previewImage.attr("src");
                         if (imgSrc) {
                             previewImageUrl = getProxiedImageUrl(imgSrc);
                         }
@@ -227,10 +207,7 @@ export async function fetchTelegramChannel(
             const $reply = $message.find(".tgme_widget_message_reply");
             if ($reply.length) {
                 const replyToAuthor = $reply.find(".tgme_widget_message_author_name").text().trim();
-                const replyToText = $reply
-                    .find(".tgme_widget_message_metatext, .tgme_widget_message_text")
-                    .text()
-                    .trim();
+                const replyToText = $reply.find(".tgme_widget_message_metatext, .tgme_widget_message_text").text().trim();
                 const replyToLink = $reply.attr("href") || undefined;
 
                 if (replyToAuthor || replyToText) {
