@@ -111,7 +111,7 @@ function generateTitle(content, maxLength = 80) {
         title = `${title.substring(0, cutPoint).trim()}...`;
     }
 
-    return `${mediaPrefix}${title}` || "无标题";
+    return `${mediaPrefix}${title}` || "No Title";
 }
 
 /**
@@ -154,15 +154,15 @@ function fixHashtagLinks(html, channelUsername) {
 }
 
 export async function GET(context) {
-    const CHANNEL_USERNAME = "durov";
+    const CHANNEL_USERNAME = "SpaceRad_io";
 
     try {
         // Fetch the latest posts (no pagination parameters)
         const channelData = await fetchTelegramChannel(CHANNEL_USERNAME, {});
 
         const rssContent = await rss({
-            title: `${channelData.title || SITE_TITLE} - 动态`,
-            description: channelData.description || "Telegram 频道最新动态",
+            title: `${channelData.title || SITE_TITLE} - Chanel`,
+            description: channelData.description || "Telegram Chanel Feed",
             site: context.site,
             trailingSlash: false,
             items: channelData.posts.map((post) => {
@@ -186,7 +186,7 @@ export async function GET(context) {
                     customData: `<guid isPermaLink="true">https://t.me/${CHANNEL_USERNAME}/${post.id}</guid>`,
                 };
             }),
-            customData: `<language>zh-CN</language>
+            customData: `<language>en-US</language>
       <atom:link href="${context.site}channel-rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom" />`,
             stylesheet: "/pretty-feed-v3.xsl",
         });
@@ -202,11 +202,11 @@ export async function GET(context) {
         console.error("Error generating RSS feed:", error);
         // Return empty feed on error
         const errorFeed = await rss({
-            title: `${SITE_TITLE} - 动态`,
-            description: "Telegram 频道动态",
+            title: `${SITE_TITLE} - Chanel`,
+            description: "Telegram Chanel",
             site: context.site,
             items: [],
-            customData: `<language>zh-CN</language>`,
+            customData: `<language>en-US</language>`,
         });
 
         return new Response(errorFeed.body, {
