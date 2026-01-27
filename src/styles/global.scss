@@ -45,6 +45,37 @@ body {
   letter-spacing: 0.01em;
 }
 
+// =============================================
+// Scrollbar Styles
+// =============================================
+
+* {
+  scrollbar-color: var(--c-scrollbar) var(--color-bg-page);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 6px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--color-bg-page);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--c-scrollbar);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-scrollbar-hover);
+}
+
 // Scroll lock utility - used by drawers, lightboxes, modals
 body.scroll-locked {
   overflow: hidden;

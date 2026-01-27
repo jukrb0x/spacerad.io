@@ -368,6 +368,10 @@ $breakpoints: (
   // Code
   --color-code-bg: #f6f8fa;
 
+  // Scrollbar
+  --c-scrollbar: #eee;
+  --c-scrollbar-hover: #bbb;
+
   // Shiki syntax highlighting tokens (wh0.is palette)
   --shiki-color-text: #414141;
   --shiki-color-background: transparent;
@@ -475,6 +479,10 @@ $breakpoints: (
 
   // Code
   --color-code-bg: #161b22;
+
+  // Scrollbar
+  --c-scrollbar: #222;
+  --c-scrollbar-hover: #333;
 
   // Shiki syntax highlighting tokens (wh0.is palette - dark mode)
   --shiki-color-text: #d1d1d1;
