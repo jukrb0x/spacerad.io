@@ -21,10 +21,7 @@ const twitterHashtags = tags.slice(0, 3).join(",");
 
 // Twitter: truncate description to fit 280 char limit
 const maxDescLength = 150;
-const truncatedDesc =
-    description && description.length > maxDescLength
-        ? `${description.slice(0, maxDescLength)}...`
-        : description;
+const truncatedDesc = description && description.length > maxDescLength ? `${description.slice(0, maxDescLength)}...` : description;
 
 // Twitter text: title + truncated description
 const twitterTextParts = [title];

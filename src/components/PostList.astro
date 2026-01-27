@@ -3,13 +3,9 @@ import { getCollection } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
 
 // 使用 Promise.all 并行获取所有集合数据
-const [blogPosts ] = await Promise.all([
-    getCollection("blog"),
-]);
+const [blogPosts] = await Promise.all([getCollection("blog")]);
 
-const posts = [...blogPosts]
-    .filter((post) => !post.data.hidden)
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts = [...blogPosts].filter((post) => !post.data.hidden).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const postsByYear = posts.reduce((acc, post) => {
     const year = String(post.data.pubDate.getFullYear());

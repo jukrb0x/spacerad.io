@@ -13,16 +13,13 @@
 let lastScrollY = 0;
 let ticking = false;
 
-const header = document.querySelector('[data-header]') as HTMLElement;
-const progressBar = document.querySelector('[data-reading-progress]') as HTMLElement;
+const header = document.querySelector("[data-header]") as HTMLElement;
+const progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
 
 // Set header height CSS variable for sticky elements positioning
 function updateHeaderOffset(isHidden: boolean) {
     const headerHeight = header?.offsetHeight || 0;
-    document.documentElement.style.setProperty(
-        '--header-offset',
-        isHidden ? '0px' : `${headerHeight}px`
-    );
+    document.documentElement.style.setProperty("--header-offset", isHidden ? "0px" : `${headerHeight}px`);
 }
 
 // Scroll threshold before hiding header
@@ -32,7 +29,7 @@ const BLUR_THRESHOLD = 10;
 const MIN_SCROLL_DISTANCE_VH = 1.5;
 
 // Check if user prefers reduced motion
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * Update header state based on scroll position
@@ -46,21 +43,21 @@ function updateHeader() {
         if (scrollY > SCROLL_THRESHOLD) {
             if (scrollY > lastScrollY) {
                 // Scrolling down - hide header
-                header.classList.add('header--hidden');
+                header.classList.add("header--hidden");
                 updateHeaderOffset(true);
             } else {
                 // Scrolling up - show header
-                header.classList.remove('header--hidden');
+                header.classList.remove("header--hidden");
                 updateHeaderOffset(false);
             }
         } else {
             // At top - always show header
-            header.classList.remove('header--hidden');
+            header.classList.remove("header--hidden");
             updateHeaderOffset(false);
         }
 
         // Add scrolled state for blur backdrop
-        header.classList.toggle('is-scrolled', scrollY > BLUR_THRESHOLD);
+        header.classList.toggle("is-scrolled", scrollY > BLUR_THRESHOLD);
     }
 
     // Update reading progress (visual feedback, works even with reduced motion)
@@ -74,12 +71,12 @@ function updateHeader() {
         const minScrollDistance = windowHeight * MIN_SCROLL_DISTANCE_VH;
         const isPageLongEnough = trackLength >= minScrollDistance;
 
-        progressBar.style.opacity = isPageLongEnough ? '1' : '0';
+        progressBar.style.opacity = isPageLongEnough ? "1" : "0";
 
         if (isPageLongEnough) {
             const percentScrolled = (scrollTop / trackLength) * 100;
             progressBar.style.transform = `scaleX(${Math.min(percentScrolled / 100, 1)})`;
-            progressBar.setAttribute('aria-valuenow', Math.round(percentScrolled).toString());
+            progressBar.setAttribute("aria-valuenow", Math.round(percentScrolled).toString());
         }
     }
 
@@ -106,11 +103,11 @@ if (header) {
     updateHeader();
 
     // Listen to scroll events (passive for better performance)
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
 }
 
 // Update on page navigation (for SPAs or view transitions)
-document.addEventListener('astro:page-load', () => {
+document.addEventListener("astro:page-load", () => {
     if (header) {
         lastScrollY = 0;
         updateHeaderOffset(false);

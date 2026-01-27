@@ -61,13 +61,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
         // 本地开发环境没有 KV，返回模拟数据
         if (!kv) {
-            return new Response(
-                JSON.stringify({ count: 0, userLikes: 0, maxLikes: MAX_LIKES_PER_USER }),
-                {
-                    status: 200,
-                    headers: { "Content-Type": "application/json" },
-                },
-            );
+            return new Response(JSON.stringify({ count: 0, userLikes: 0, maxLikes: MAX_LIKES_PER_USER }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
         }
 
         const data = await kv.get<LikeData>(`like:${slug}`, "json");
@@ -109,13 +106,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         // 本地开发环境没有 KV，返回模拟数据
         if (!kv) {
-            return new Response(
-                JSON.stringify({ count: 1, userLikes: 1, maxLikes: MAX_LIKES_PER_USER }),
-                {
-                    status: 200,
-                    headers: { "Content-Type": "application/json" },
-                },
-            );
+            return new Response(JSON.stringify({ count: 1, userLikes: 1, maxLikes: MAX_LIKES_PER_USER }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+            });
         }
 
         const clientIP = getClientIP(request);

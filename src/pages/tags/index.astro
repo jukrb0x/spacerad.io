@@ -38,9 +38,7 @@ const tagsByTier = sortedTags.reduce((acc, [tag, count]) => {
 }, new Map<string, [string, number][]>());
 
 const tierOrder = ["10+", "5-9", "3-4", "1-2"];
-const groupedTags = tierOrder
-    .filter(tier => tagsByTier.has(tier))
-    .map(tier => [tier, tagsByTier.get(tier)] as const);
+const groupedTags = tierOrder.filter((tier) => tagsByTier.has(tier)).map((tier) => [tier, tagsByTier.get(tier)] as const);
 
 const totalTags = sortedTags.length;
 const pageTitle = "Tags";

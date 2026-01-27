@@ -20,11 +20,7 @@ const CHANNEL_USERNAME = "SpaceRad_io";
 const CACHE_SECONDS = 300;
 
 // Parse cursor parameter
-const cursorType = cursor?.startsWith("before-")
-    ? "before"
-    : cursor?.startsWith("after-")
-      ? "after"
-      : null;
+const cursorType = cursor?.startsWith("before-") ? "before" : cursor?.startsWith("after-") ? "after" : null;
 const cursorValue = cursor ? cursor.replace(/^(before-|after-)/, "") : undefined;
 
 let channelData: TelegramChannel | undefined;
@@ -53,10 +49,7 @@ const hasNewerPosts = cursorType === "before" || cursorType === "after";
 const hasOlderPosts = !cursorType || (channelData?.posts && channelData.posts.length > 0);
 
 // Set short cache to avoid re-fetching on every refresh
-Astro.response.headers.set(
-    "Cache-Control",
-    `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=30`,
-);
+Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=30`);
 ---
 
 <!doctype html>

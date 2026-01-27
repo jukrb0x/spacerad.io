@@ -109,8 +109,7 @@ function handleEmbedIframes() {
         if (!iframeElement.parentElement?.classList.contains("embed-wrapper")) {
             const wrapper = document.createElement("div");
             wrapper.className = "embed-wrapper";
-            wrapper.style.cssText =
-                "transition: max-height 0.4s ease, opacity 0.4s ease; overflow: hidden;";
+            wrapper.style.cssText = "transition: max-height 0.4s ease, opacity 0.4s ease; overflow: hidden;";
             iframeElement.parentNode?.insertBefore(wrapper, iframeElement);
             wrapper.appendChild(iframeElement);
         }
@@ -327,10 +326,7 @@ function adjustSidebarPositions(): void {
         const padding = 24; // spacing from separator line
 
         // Scroll floating logic: when header scrolls out of viewport, sidebar floats to top
-        const targetTop =
-            headerBottom < minTop
-                ? minTop + padding
-                : Math.max(minTop + padding, headerBottom + padding);
+        const targetTop = headerBottom < minTop ? minTop + padding : Math.max(minTop + padding, headerBottom + padding);
 
         const topValue = `${targetTop}px`;
 

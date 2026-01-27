@@ -26,13 +26,13 @@ export function remarkModifiedTime({ branch = DEFAULT_BRANCH } = {}) {
 
             // Convert Git URL to GitHub web URL
             // Supports both https://github.com/user/repo.git and git@github.com:user/repo.git formats
-            const githubUrl = remoteUrl
-                .replace(/\.git$/, "")
-                .replace(/^git@github\.com:/, "https://github.com/");
+            const githubUrl = remoteUrl.replace(/\.git$/, "").replace(/^git@github\.com:/, "https://github.com/");
 
             // Generate commit history URL for the file
             // Uses /commits/{branch}/{filepath} format to show all commit history for this file
-            const relativeFilepath = normalize(filepath).replace(normalize(process.cwd()), "").replace(/^[/\\]/, "");
+            const relativeFilepath = normalize(filepath)
+                .replace(normalize(process.cwd()), "")
+                .replace(/^[/\\]/, "");
             file.data.astro.frontmatter.lastModifiedCommitUrl = `${githubUrl}/commits/${branch}/${relativeFilepath}`;
         } catch {
             // Fallback to filesystem modification time if git commands fail
