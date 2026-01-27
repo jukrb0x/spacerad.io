@@ -56,6 +56,10 @@ export default defineConfig({
         imageService: "compile",
     }),
     site: "https://spacerad.io",
+    redirects: {
+        "/posts/a-look-under-the-hood-at-unreal-engine-landscape-grass":
+            "/posts/ue5-landscape-grass",
+    },
     integrations: [
         mdx(),
         sitemap(),
