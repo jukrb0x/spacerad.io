@@ -9,10 +9,9 @@ export const DEFAULT_POST_SOCIAL_IMAGE = "/og-image.png";
 
 // Social links - customize these to your own links
 export const SOCIAL_LINKS = {
-    github: "https://github.com/yourusername",
-    twitter: "https://twitter.com/yourusername",
-    email: "mailto:hello@spacerad.io",
-    telegram: "https://t.me/yourchannel",
+    github: "https://github.com/jukrb0x",
+    email: "mailto:fm@spacerad.io",
+    telegram: "https://t.me/SpaceRad_io",
     rss: "/rss.xml",
 } as const;
 
