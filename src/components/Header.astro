@@ -1,5 +1,5 @@
 ---
-import { SITE_TITLE, SITE_TITLE_ALT, NAV_LINKS } from "../consts";
+import { SITE_TITLE, SITE_TITLE_ALT, NAV_LINKS } from "../consts"; 
 import SearchModal from "./SearchModal.astro";
 import SearchOverlay from "./SearchOverlay.astro";
 import NavDrawer from "./NavDrawer.astro";
@@ -122,6 +122,10 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 <script>
     import "../scripts/header-scroll.ts";
 
+    const STORAGE_KEY_LAST_TITLE = "site-title-last";
+    const STORAGE_KEY_LAST_ANIM = "site-title-last-anim";
+    const ANIM_COOLDOWN_MS = 15000; // 15 seconds between auto-animations
+
     // Site title animation
     function initTitleAnimation() {
         const wrapper = document.querySelector<HTMLElement>("[data-site-title]");
@@ -136,27 +140,54 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
         let isAnimating = false;
         let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
-        let lastTitle = "";
+
+        function getLastTitle(): string {
+            return localStorage.getItem(STORAGE_KEY_LAST_TITLE) || "";
+        }
+
+        function setLastTitle(title: string) {
+            localStorage.setItem(STORAGE_KEY_LAST_TITLE, title);
+        }
+
+        function getLastAnimTime(): number {
+            try {
+                return parseInt(localStorage.getItem(STORAGE_KEY_LAST_ANIM) || "0", 10);
+            } catch {
+                return 0;
+            }
+        }
+
+        function setLastAnimTime() {
+            localStorage.setItem(STORAGE_KEY_LAST_ANIM, Date.now().toString());
+        }
 
         function pickRandomTitle() {
-            if (altTitles.length === 1) return altTitles[0];
+            const lastTitle = getLastTitle();
+            if (altTitles.length === 1) {
+                setLastTitle(altTitles[0]);
+                return altTitles[0];
+            }
             let title: string;
             do {
                 title = altTitles[Math.floor(Math.random() * altTitles.length)];
             } while (title === lastTitle);
-            lastTitle = title;
+            setLastTitle(title);
             return title;
         }
 
-        function playAnimation() {
+        function playAnimation(updateTimestamp = true) {
             if (isAnimating) return;
             isAnimating = true;
 
-            altEl.textContent = pickRandomTitle();
+            if (updateTimestamp) {
+                setLastAnimTime();
+            }
 
-            wrapper.classList.add("show-alt");
+            altEl!.textContent = pickRandomTitle();
+
+            wrapper!.classList.add("show-alt");
             setTimeout(() => {
-                wrapper.classList.remove("show-alt");
+                wrapper!.classList.remove("show-alt");
                 // Wait for exit transition to complete
                 setTimeout(() => {
                     isAnimating = false;
@@ -164,13 +195,16 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             }, 2500);
         }
 
-        // Initial animation after page load
-        setTimeout(playAnimation, 1000);
+        // Only auto-animate if enough time has passed since last animation
+        const timeSinceLastAnim = Date.now() - getLastAnimTime();
+        if (timeSinceLastAnim >= ANIM_COOLDOWN_MS) {
+            setTimeout(() => playAnimation(true), 500);
+        }
 
-        // Hover trigger with delay (includes logo)
+        // Hover trigger with delay (includes logo) - always allowed
         trigger.addEventListener("mouseenter", () => {
             if (isAnimating) return;
-            hoverTimeout = setTimeout(playAnimation, 10);
+            hoverTimeout = setTimeout(() => playAnimation(false), 10);
         });
 
         trigger.addEventListener("mouseleave", () => {
