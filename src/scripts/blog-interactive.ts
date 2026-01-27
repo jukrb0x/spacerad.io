@@ -263,6 +263,7 @@ function initMobileTocDrawer() {
         drawer.setAttribute("aria-hidden", "false");
         overlay.classList.remove("opacity-0", "pointer-events-none");
         content.classList.remove("translate-x-full");
+        content.classList.add("shadow-2xl");
         lockScroll();
     };
 
@@ -270,6 +271,7 @@ function initMobileTocDrawer() {
         isOpen = false;
         overlay.classList.add("opacity-0", "pointer-events-none");
         content.classList.add("translate-x-full");
+        content.classList.remove("shadow-2xl");
         unlockScroll();
         // Wait for animation to complete before hiding
         setTimeout(() => {
