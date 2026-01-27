@@ -14,7 +14,7 @@ const { title, description, avatar, username } = Astro.props;
         <img src={avatar} alt={title} class="channel-sidebar__avatar" />
         <h2 class="channel-sidebar__title">{title}</h2>
         {description && (
-            <div class="channel-sidebar__description text-center" set:html={description} />
+            <div class="channel-sidebar__description text-left" set:html={description} />
         )}
         <div class="channel-sidebar__actions">
             <a href={`https://t.me/${username}`}
