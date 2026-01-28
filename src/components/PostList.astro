@@ -64,7 +64,8 @@ const groupedPosts = Array.from(postsByYear.entries());
 								>
 									<div class="text-base sm:text-lg leading-tight text-primary">
 										{lang === 'zh' && (
-											<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle">中文</span>
+												<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle hidden sm:inline">中文</span>
+												<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle ml-0 sm:hidden">中</span>
 										)}
 										<span class="break-words align-middle">{post.data.title}</span>
 									</div>
@@ -91,7 +92,7 @@ const groupedPosts = Array.from(postsByYear.entries());
 	@media (max-width: 640px) {
 		.zh-badge {
 			margin-left: 0;
-			margin-right: 0.5rem;
+			// margin-right: 0.5rem;
 		}
 	}
 
