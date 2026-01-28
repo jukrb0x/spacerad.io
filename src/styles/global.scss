@@ -11,6 +11,7 @@
 
 :root {
   accent-color: var(--color-accent);
+  --vh: 1vh; // Fallback, overridden by JS for iOS Safari support
 }
 
 html {
@@ -60,9 +61,26 @@ body {
   letter-spacing: 0.01em;
 
   // Scroll lock utility - used by drawers, lightboxes, modals
+  // NOTE: We intentionally avoid overflow:hidden here as it triggers
+  // iOS Safari viewport recalculation (address bar show/hide).
+  // Instead, scrolling is prevented via JavaScript event handlers.
   &.scroll-locked {
-    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
   }
+}
+
+// Scroll lock for html element
+html.scroll-locked {
+  scroll-behavior: auto !important;
+}
+
+// Scrollable containers within modals (touch scroll support)
+[data-scroll-container] {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 // =============================================
@@ -1022,6 +1040,8 @@ a {
 .toc {
   position: static;
   max-height: calc(100vh - 8rem);
+  max-height: calc((var(--vh, 1vh) * 100) - 8rem);
+  max-height: calc(100dvh - 8rem);
   overflow-y: auto;
   padding: 0;
 
@@ -1371,6 +1391,8 @@ a {
   background: transparent;
   width: 100vw;
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+  height: 100dvh;
   max-width: none;
   max-height: none;
 
