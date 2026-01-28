@@ -46,7 +46,8 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
   <body>
     <Header />
     <main
-      class="page-shell flex min-h-[calc(100vh-18rem)] items-center justify-center"
+      class="page-shell flex items-center justify-center"
+      style="min-height: calc(100vh - 18rem); min-height: calc((var(--vh, 1vh) * 100) - 18rem); min-height: calc(100dvh - 18rem);"
     >
       <section
         class="intro-container mx-auto max-w-2xl space-y-6 px-4 py-12"

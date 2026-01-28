@@ -51,6 +51,18 @@ const { title, description, image = SITE_SOCIAL_IMAGE } = Astro.props;
         root.dataset.theme = theme;
     })();
 </script>
+
+<!-- Viewport height initialization (prevents FOUC on iOS Safari) -->
+<script is:inline>
+    (function(){
+        var vh = (window.visualViewport?.height ?? window.innerHeight) * 0.01;
+        document.documentElement.style.setProperty('--vh', vh + 'px');
+    })();
+</script>
+<script>
+    import { initViewportHeight } from "../utils/viewportHeight";
+    initViewportHeight();
+</script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link
