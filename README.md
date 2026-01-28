@@ -1,6 +1,6 @@
 # Spacerad.io
 
-Personal blog based on Astro.
+Personal blog based on Astro. Still working in progress, documents will come later.
 
 ## Roadmap
 
