@@ -2,66 +2,47 @@
  * Initialize Mermaid diagrams client-side
  */
 
-export function initMermaid() {
-    // Check if there are any mermaid code blocks
-    const mermaidBlocks = document.querySelectorAll("pre > code.language-mermaid");
+import { getThemeState, onThemeChange } from "./theme";
 
-    if (mermaidBlocks.length === 0) {
-        return; // No mermaid diagrams on this page
+export function initMermaid() {
+    const mermaidDivs = document.querySelectorAll(".mermaid");
+
+    if (mermaidDivs.length === 0) {
+        return;
     }
 
-    // Dynamically import mermaid
+    // Store original source before mermaid replaces it with SVG
+    for (const el of mermaidDivs) {
+        el.setAttribute("data-mermaid-src", el.textContent || "");
+    }
+
     import("mermaid").then(({ default: mermaid }) => {
-        // Initialize mermaid with theme that respects dark mode
-        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        const themeForState = (theme: string) =>
+            theme === "dark" ? "dark" : "default";
 
         mermaid.initialize({
             startOnLoad: false,
-            theme: isDark ? "dark" : "default",
+            theme: themeForState(getThemeState().theme),
         });
 
-        // Convert code blocks to mermaid diagrams
-        mermaidBlocks.forEach((block, index) => {
-            const pre = block.parentElement;
-            if (!pre) return;
+        mermaid.run({ querySelector: ".mermaid" });
 
-            const code = block.textContent || "";
-            const id = `mermaid-${index}`;
-
-            // Create a div with the mermaid class
-            const div = document.createElement("div");
-            div.className = "mermaid";
-            div.id = id;
-            div.textContent = code;
-
-            // Replace the pre block with the mermaid div
-            pre.replaceWith(div);
-        });
-
-        // Render all mermaid diagrams
-        mermaid.run({
-            querySelector: ".mermaid",
-        });
-
-        // Re-initialize on theme change
-        document.addEventListener("theme-changed", () => {
-            const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        onThemeChange(async (state) => {
             mermaid.initialize({
                 startOnLoad: false,
-                theme: isDark ? "dark" : "default",
+                theme: themeForState(state.theme),
             });
 
-            // Re-render all diagrams
-            document.querySelectorAll(".mermaid").forEach((el) => {
-                const code = el.getAttribute("data-processed");
-                if (code) {
-                    el.removeAttribute("data-processed");
-                }
-            });
+            // Render each diagram off-DOM, then swap SVG in place (no flash)
+            const elements = document.querySelectorAll<HTMLElement>(".mermaid");
+            for (const el of elements) {
+                const src = el.getAttribute("data-mermaid-src");
+                if (!src) continue;
 
-            mermaid.run({
-                querySelector: ".mermaid",
-            });
+                const id = `mermaid-rerender-${Math.random().toString(36).slice(2)}`;
+                const { svg } = await mermaid.render(id, src);
+                el.innerHTML = svg;
+            }
         });
     });
 }
