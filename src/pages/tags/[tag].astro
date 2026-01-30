@@ -1,44 +1,30 @@
 ---
-import { getCollection } from "astro:content";
 import Back from "../../components/Back.astro";
 import BaseHead from "../../components/BaseHead.astro";
 import Footer from "../../components/Footer.astro";
-import FormattedDate from "../../components/FormattedDate.astro";
 import Header from "../../components/Header.astro";
+import PostItem from "../../components/PostItem.astro";
 import { SITE_TITLE } from "../../consts";
+import { getPublishedPosts, groupPostsByYear } from "../../utils/posts";
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-    const blogPosts = await getCollection("blog");
-    const allPosts = [...blogPosts].filter((post) => !post.data.hidden);
-    const uniqueTags = [...new Set(allPosts.flatMap((post) => post.data.tags || []))];
+    const posts = await getPublishedPosts();
+    const uniqueTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
 
-    return uniqueTags.map((tag) => {
-        const filteredPosts = allPosts.filter((post) => (post.data.tags || []).includes(tag));
-        return {
-            params: { tag },
-            props: { posts: filteredPosts },
-        };
-    });
+    return uniqueTags.map((tag) => ({
+        params: { tag },
+        props: {
+            posts: posts.filter((post) => (post.data.tags || []).includes(tag)),
+        },
+    }));
 }
 
 const { tag } = Astro.params;
 const { posts } = Astro.props;
 
-const sortedPosts = posts.filter((post) => !post.data.hidden).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-// Group posts by year
-const postsByYear = sortedPosts.reduce((acc, post) => {
-    const year = String(post.data.pubDate.getFullYear());
-    if (!acc.has(year)) {
-        acc.set(year, []);
-    }
-    acc.get(year)?.push(post);
-    return acc;
-}, new Map<string, typeof sortedPosts>());
-
-const groupedPosts = Array.from(postsByYear.entries());
+const groupedPosts = groupPostsByYear(posts);
 ---
 
 <!doctype html>
@@ -64,30 +50,9 @@ const groupedPosts = Array.from(postsByYear.entries());
 						</div>
 
 						<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
-							{yearPosts.map((post) => {
-								const isZh = post.data.lang === 'zh';
-								return (
-									<li class="post-item-wrapper">
-										<a
-											href={`/posts/${post.id}`}
-											class="post-item group flex flex-col gap-0 py-1 no-underline"
-											data-post-id={post.id}
-										>
-											<div class="text-base sm:text-lg leading-tight text-primary">
-												{isZh && (
-													<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle hidden sm:inline">中文</span>
-													<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle sm:hidden">中</span>
-												)}
-												<span class="break-words align-middle">{post.data.title}</span>
-											</div>
-
-											<time class="block text-xs opacity-50 tabular-nums" data-no-preview>
-												<FormattedDate date={post.data.pubDate} />
-											</time>
-										</a>
-									</li>
-								);
-							})}
+							{yearPosts.map((post) => (
+								<PostItem post={post} />
+							))}
 						</ul>
 					</div>
 				))}
@@ -96,15 +61,3 @@ const groupedPosts = Array.from(postsByYear.entries());
 		<Footer />
 	</body>
 </html>
-
-<style lang="scss">
-	.zh-badge {
-		margin-left: -2.75rem;
-	}
-
-	@media (max-width: 640px) {
-		.zh-badge {
-			margin-left: 0;
-		}
-	}
-</style>

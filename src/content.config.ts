@@ -12,6 +12,7 @@ const createSharedSchema = (image: ImageFunction) =>
         socialImage: z.union([image(), z.string()]).optional(),
         tags: z.array(z.string()).optional().default([]),
         hidden: z.boolean().optional().default(false),
+        draft: z.boolean().optional().default(false),
         // Language field for Chinese post detection
         lang: z.enum(["en", "zh"]).optional().default("en"),
         // Comment system override: "cusdis" | "remark42" | false (to disable)
