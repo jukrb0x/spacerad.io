@@ -1,0 +1,59 @@
+---
+import type { BlogPost } from "../utils/posts";
+import FormattedDate from "./FormattedDate.astro";
+
+interface Props {
+	post: BlogPost;
+}
+
+const { post } = Astro.props;
+const { lang = "en", draft } = post.data;
+---
+
+<li data-lang={lang} class="post-item-wrapper">
+	<a
+		href={`/posts/${post.id}`}
+		class="post-item group flex flex-col gap-0 py-1 no-underline"
+		data-post-id={post.id}
+	>
+		<div class="text-base sm:text-lg leading-tight text-primary">
+			{draft && (
+				<span class="draft-badge text-xs border border-current rounded px-1 opacity-60 align-middle">Draft</span>
+			)}
+			{lang === "zh" && (
+				<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle hidden sm:inline">中文</span>
+				<span class="zh-badge text-xs border border-current rounded px-1 opacity-60 align-middle ml-0 sm:hidden">中</span>
+			)}
+			<span class="break-words align-middle">{post.data.title}</span>
+		</div>
+
+		<time class="block text-xs opacity-50 tabular-nums" data-no-preview>
+			<FormattedDate date={post.data.pubDate} />
+		</time>
+	</a>
+</li>
+
+<style lang="scss">
+	.draft-badge {
+		margin-left: -2.75rem;
+		color: var(--color-accent);
+		border-color: var(--color-accent);
+	}
+
+	/* When both draft and zh badges are present, only the first needs negative margin */
+	.draft-badge + .zh-badge {
+		margin-left: 0.25rem;
+	}
+
+	.zh-badge {
+		margin-left: -2.75rem;
+	}
+
+	/* If a draft badge precedes zh-badge, zh-badge shouldn't have negative margin */
+	@media (max-width: 640px) {
+		.draft-badge,
+		.zh-badge {
+			margin-left: 0;
+		}
+	}
+</style>
