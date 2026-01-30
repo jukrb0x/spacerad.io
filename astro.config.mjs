@@ -15,6 +15,7 @@ import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./remark-modified-time.mjs";
+import { rehypeMermaidPre } from "./rehype-mermaid-pre.mjs";
 
 import vue from "@astrojs/vue";
 
@@ -97,6 +98,7 @@ export default defineConfig({
         // Disable Astro's built-in syntax highlighting - using rehype-pretty-code instead
         syntaxHighlight: false,
         rehypePlugins: [
+            rehypeMermaidPre,
             [rehypePrettyCode, rehypePrettyCodeOptions],
             rehypeKatex,
             rehypeSlug,
