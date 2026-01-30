@@ -1,0 +1,131 @@
+---
+import type { TelegramPost } from "../../utils/telegram";
+import FormattedDate from "../FormattedDate.astro";
+
+interface Props {
+  posts: TelegramPost[];
+}
+
+const { posts } = Astro.props;
+const latestPosts = posts.slice(0, 5);
+
+// Strip HTML and truncate text for preview
+function getTextPreview(post: TelegramPost, maxLength = 150): string {
+  const text = post.text || post.title;
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).trim() + "...";
+}
+---
+
+<section class="latest-channel">
+  <div class="section-header">
+    <h2 class="section-title">Telegram Channel</h2>
+    <a href="/channel" class="section-link">
+      → More
+    </a>
+  </div>
+
+  {latestPosts.length > 0 ? (
+    <ul class="channel-list">
+      {latestPosts.map((post) => (
+        <li class="channel-item">
+          <a href={`/channel#${post.id}`} class="channel-link">
+            <p class="channel-text">{getTextPreview(post)}</p>
+            <time class="channel-date">
+              <FormattedDate date={new Date(post.datetime)} />
+            </time>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <div class="channel-empty">
+      <p>Channel unavailable</p>
+    </div>
+  )}
+</section>
+
+<style lang="scss">
+  @use "../../styles/tokens" as *;
+
+  .latest-channel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .section-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .section-link {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-base);
+
+    &:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  .channel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .channel-item {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .channel-link {
+    display: block;
+    padding: var(--space-3);
+    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all var(--transition-base);
+
+    &:hover {
+      background: var(--color-bg-surface);
+      border-color: var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  .channel-text {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-2) 0;
+  }
+
+  .channel-date {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
+
+  .channel-empty {
+    padding: var(--space-6);
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
+</style>

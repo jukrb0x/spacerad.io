@@ -1,0 +1,225 @@
+---
+const avatarUrl = "https://avatars.githubusercontent.com/u/15688641?v=4";
+const name = "Jabriel";
+
+const rotatingThings = [
+  "products",
+  "experiences",
+  "connections",
+  "ideas",
+  "stories",
+].map((s) => `${s}.`);
+---
+
+<div class="profile-card">
+  <div class="avatar-container">
+    <img class="avatar-image" src={avatarUrl} alt={name} />
+
+    <svg class="avatar-ring" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path
+          id="circlePath"
+          d="M 100, 100 m -90, 0 a 90,90 0 1,1 180,0 a 90,90 0 1,1 -180,0"
+        />
+      </defs>
+
+      <text class="ring-text" fill="currentColor">
+        <textPath href="#circlePath" startOffset="0%">
+          SPACE RADIO 466.FM · SPACE RADIO 466.FM · SPACE RADIO 466.FM ·&nbsp;
+        </textPath>
+      </text>
+    </svg>
+  </div>
+
+  <div class="profile-info">
+    <h1 class="profile-name">{name}</h1>
+    <h2 class="profile-tagline">
+      👋 I build <span
+        class="typewriter"
+        data-words={JSON.stringify(rotatingThings)}
+      ><span class="typewriter-text">{rotatingThings[0]}</span><span class="typewriter-cursor">|</span></span>
+    </h2>
+  </div>
+</div>
+
+<style lang="scss">
+  @use "../../styles/tokens" as *;
+
+  .profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    padding: var(--space-6);
+
+    @include breakpoint('md') {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-8);
+    }
+  }
+
+  .avatar-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
+  }
+
+  .avatar-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .avatar-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    animation: rotate 30s linear infinite;
+    pointer-events: none;
+
+    @include reduced-motion {
+      animation: none;
+    }
+  }
+
+  .ring-text {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    fill: var(--color-text-primary);
+    opacity: 0.6;
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: center;
+
+    @include breakpoint('md') {
+      text-align: left;
+      flex: 1;
+    }
+  }
+
+  .profile-name {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: var(--line-height-tight);
+
+    @include breakpoint('md') {
+      font-size: var(--font-size-3xl);
+    }
+  }
+
+  .profile-tagline {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-relaxed);
+    margin: 0;
+
+    @include breakpoint('md') {
+      font-size: var(--font-size-xl);
+    }
+  }
+
+  .typewriter {
+    // inherits font from parent — no overrides
+  }
+
+  .typewriter-text {
+    // inherits everything from parent h2
+  }
+
+  .typewriter-cursor {
+    display: inline-block;
+    color: var(--color-accent);
+    font-weight: var(--font-weight-normal);
+    animation: blink 0.8s step-end infinite;
+    margin-left: -0.05em;
+    user-select: none;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  function initTypewriter() {
+    const container = document.querySelector<HTMLElement>(".typewriter");
+    if (!container) return;
+
+    const words: string[] = JSON.parse(container.dataset.words || "[]");
+    if (words.length === 0) return;
+
+    const textEl = container.querySelector<HTMLElement>(".typewriter-text")!;
+    let wordIndex = 0;
+    let charIndex = words[0].length;
+    let isDeleting = true; // first word is already rendered, start by deleting
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    // Clean up previous instance
+    if ((container as any).__typewriterTimeout) {
+      clearTimeout((container as any).__typewriterTimeout);
+    }
+
+    function tick() {
+      const currentWord = words[wordIndex];
+
+      if (isDeleting) {
+        charIndex--;
+        textEl.textContent = currentWord.slice(0, charIndex);
+
+        if (charIndex === 0) {
+          isDeleting = false;
+          wordIndex = (wordIndex + 1) % words.length;
+          timeout = setTimeout(tick, 200);
+        } else {
+          timeout = setTimeout(tick, 40 + Math.random() * 30);
+        }
+      } else {
+        charIndex++;
+        textEl.textContent = currentWord.slice(0, charIndex);
+
+        if (charIndex === currentWord.length) {
+          isDeleting = true;
+          timeout = setTimeout(tick, 2000);
+        } else {
+          timeout = setTimeout(tick, 60 + Math.random() * 50);
+        }
+      }
+
+      (container as any).__typewriterTimeout = timeout;
+    }
+
+    // Pause on first word, then start deleting
+    timeout = setTimeout(tick, 2500);
+    (container as any).__typewriterTimeout = timeout;
+  }
+
+  initTypewriter();
+  document.addEventListener("astro:page-load", initTypewriter);
+</script>

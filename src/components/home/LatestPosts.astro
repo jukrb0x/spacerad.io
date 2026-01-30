@@ -1,0 +1,67 @@
+---
+import { getPublishedPosts } from "../../utils/posts";
+import PostItem from "../PostItem.astro";
+
+const allPosts = await getPublishedPosts();
+const latestPosts = allPosts.slice(0, 5);
+---
+
+<section class="latest-posts">
+  <div class="section-header">
+    <h2 class="section-title">Latest Posts</h2>
+    <a href="/posts" class="section-link">
+      → More
+    </a>
+  </div>
+
+  <ul class="posts-list">
+    {latestPosts.map((post) => (
+      <PostItem post={post} />
+    ))}
+  </ul>
+</section>
+
+<style lang="scss">
+  @use "../../styles/tokens" as *;
+
+  .latest-posts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .section-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .section-link {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-base);
+
+    &:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  .posts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+</style>

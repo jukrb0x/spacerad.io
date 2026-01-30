@@ -2,79 +2,98 @@
 import BaseHead from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import ProfileCard from "../components/home/ProfileCard.astro";
+import LatestPosts from "../components/home/LatestPosts.astro";
+import LatestChannel from "../components/home/LatestChannel.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import { fetchTelegramChannel } from "../utils/telegram";
+
+// Enable SSR for fresh Telegram data
+export const prerender = false;
+
+// Fetch Telegram channel data with graceful fallback
+let telegramPosts = [];
+try {
+  const channel = await fetchTelegramChannel("SpaceRad_io");
+  telegramPosts = channel.posts;
+} catch (error) {
+  console.error("Failed to fetch Telegram channel:", error);
+}
+
+// Set cache header
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, max-age=300, stale-while-revalidate=30"
+);
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-    <style>
-      .intro-container {
-        animation: fadeIn 0.6s ease-out;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .intro-link {
-        text-decoration: underline;
-        text-decoration-color: rgba(128, 128, 128, 0.3);
-        text-underline-offset: 0.2em;
-        transition: text-decoration-color 0.3s ease;
-      }
-
-      .intro-link:hover {
-        text-decoration-color: currentColor;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .intro-container {
-          animation: none;
-        }
-      }
-    </style>
   </head>
   <body>
     <Header />
-    <main
-      class="page-shell flex items-center justify-center"
-      style="min-height: calc(100vh - 18rem); min-height: calc((var(--vh, 1vh) * 100) - 18rem); min-height: calc(100dvh - 18rem);"
-    >
-      <section
-        class="intro-container mx-auto max-w-2xl space-y-6 px-4 py-12"
-      >
-        <p class="text-xl sm:text-2xl leading-relaxed text-secondary">
-          Hey there!
-        </p>
+    <main class="page-shell">
+      <div class="home-container">
+        <!-- Profile Section -->
+        <section class="profile-section">
+          <ProfileCard />
+        </section>
 
-        <p class="text-base sm:text-lg leading-relaxed text-secondary">
-          I'm actively working on this website. Please visit again soon.
-        </p>
+        <!-- Content Grid: Posts + Channel -->
+        <div class="content-grid">
+          <div class="content-section">
+            <LatestPosts />
+          </div>
 
-        <blockquote class="border-l-2 border-accent pl-4 text-muted italic">
-          <p class="mb-2">
-            <strong class="text-secondary not-italic">This website is actively under development. Please excuse the mess.</strong>
-          </p>
-          <p>
-            Repository: <a
-              href="https://github.com/jukrb0x/spacerad.io"
-              class="intro-link text-secondary hover:text-accent"
-              target="_blank"
-              rel="noopener noreferrer"
-            >jukrb0x/spacerad.io</a>
-          </p>
-        </blockquote>
-      </section>
+          <div class="content-section">
+            <LatestChannel posts={telegramPosts} />
+          </div>
+        </div>
+      </div>
     </main>
     <Footer />
   </body>
 </html>
+
+<style lang="scss">
+  @use "../styles/tokens" as *;
+
+  .home-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    animation: fadeIn 0.6s ease-out;
+
+    @include reduced-motion {
+      animation: none;
+    }
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+
+    @include breakpoint('md') {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+    }
+  }
+
+  .content-section {
+    min-width: 0; // Prevent grid overflow
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
