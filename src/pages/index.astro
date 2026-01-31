@@ -6,25 +6,22 @@ import ProfileCard from "../components/home/ProfileCard.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
 import LatestChannel from "../components/home/LatestChannel.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
-import { fetchTelegramChannel } from "../utils/telegram";
+import { fetchTelegramChannel, type TelegramPost } from "../utils/telegram";
 
 // Enable SSR for fresh Telegram data
 export const prerender = false;
 
 // Fetch Telegram channel data with graceful fallback
-let telegramPosts = [];
+let telegramPosts: TelegramPost[] | null = [];
 try {
-  const channel = await fetchTelegramChannel("SpaceRad_io");
-  telegramPosts = channel.posts;
+    const channel = await fetchTelegramChannel("SpaceRad_io");
+    telegramPosts = channel.posts;
 } catch (error) {
-  console.error("Failed to fetch Telegram channel:", error);
+    console.error("Failed to fetch Telegram channel:", error);
 }
 
 // Set cache header
-Astro.response.headers.set(
-  "Cache-Control",
-  "public, max-age=300, stale-while-revalidate=30"
-);
+Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=30");
 ---
 
 <!doctype html>

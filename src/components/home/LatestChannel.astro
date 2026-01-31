@@ -3,11 +3,11 @@ import type { TelegramPost } from "../../utils/telegram";
 import FormattedDate from "../FormattedDate.astro";
 
 interface Props {
-  posts: TelegramPost[];
+  posts: TelegramPost[] | null;
 }
 
 const { posts } = Astro.props;
-const latestPosts = posts.slice(0, 5);
+const latestPosts = posts?.slice(0, 5);
 
 // Strip HTML and truncate text for preview
 function getTextPreview(post: TelegramPost, maxLength = 150): string {
@@ -25,7 +25,7 @@ function getTextPreview(post: TelegramPost, maxLength = 150): string {
     </a>
   </div>
 
-  {latestPosts.length > 0 ? (
+  {latestPosts && latestPosts.length > 0 ? (
     <ul class="channel-list">
       {latestPosts.map((post) => (
         <li class="channel-item">
