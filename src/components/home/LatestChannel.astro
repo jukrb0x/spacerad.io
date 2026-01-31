@@ -1,6 +1,7 @@
 ---
 import type { TelegramPost } from "../../utils/telegram";
 import FormattedDate from "../FormattedDate.astro";
+import SectionHeader from "./SectionHeader.astro";
 
 interface Props {
   posts: TelegramPost[] | null;
@@ -27,14 +28,11 @@ function getFirstImage(post: TelegramPost): string | null {
 ---
 
 <section class="radio-station">
-  <div class="station-header">
-    <h2 class="station-title">Radio Station</h2>
-    <a href="/channel" class="station-more-link">→ More</a>
-  </div>
+  <SectionHeader title="Radio Station" moreHref="/channel" />
 
   {latestPosts && latestPosts.length > 0 ? (
     <div class="scroll-wrapper">
-      <div class="fade-left fade-hidden" aria-hidden="true"></div>
+      <div class="fade-left" style="opacity:0" aria-hidden="true"></div>
       <div class="fade-right" aria-hidden="true"></div>
 
       <div class="scroll-track">
@@ -79,32 +77,6 @@ function getFirstImage(post: TelegramPost): string | null {
     gap: var(--space-4);
   }
 
-  .station-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .station-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    margin: 0;
-  }
-
-  .station-more-link {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    flex-shrink: 0;
-    transition: color var(--transition-base);
-
-    &:hover {
-      color: var(--color-accent);
-    }
-  }
-
   /* ---- Horizontal scroll ---- */
 
   .scroll-wrapper {
@@ -122,10 +94,6 @@ function getFirstImage(post: TelegramPost): string | null {
     z-index: 2;
     pointer-events: none;
     transition: opacity 0.2s ease;
-  }
-
-  .fade-hidden {
-    opacity: 0;
   }
 
   .fade-left {
@@ -146,6 +114,7 @@ function getFirstImage(post: TelegramPost): string | null {
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--space-4);
     padding: var(--space-2) var(--space-4);
     cursor: grab;
 
@@ -276,6 +245,10 @@ function getFirstImage(post: TelegramPost): string | null {
     const track = document.querySelector<HTMLElement>(".scroll-track");
     if (!track) return;
 
+    // Prevent duplicate init on same element
+    if ((track as any).__scrollInited) return;
+    (track as any).__scrollInited = true;
+
     const wrapper = track.closest(".scroll-wrapper");
     if (!wrapper) return;
 
@@ -289,12 +262,36 @@ function getFirstImage(post: TelegramPost): string | null {
       const atStart = scrollLeft <= 2;
       const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
 
-      fadeLeft!.classList.toggle("fade-hidden", atStart);
-      fadeRight!.classList.toggle("fade-hidden", atEnd);
+      fadeLeft!.style.opacity = atStart ? "0" : "1";
+      fadeRight!.style.opacity = atEnd ? "0" : "1";
     }
 
     track.addEventListener("scroll", updateFades, { passive: true });
+    // Catch final position after scroll-snap settles
+    track.addEventListener("scrollend", updateFades, { passive: true });
     updateFades();
+
+    // --- Shared: temporarily disable scroll-snap and re-enable after idle ---
+    let snapTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function disableSnap() {
+      if (snapTimer) clearTimeout(snapTimer);
+      track.style.scrollSnapType = "none";
+    }
+
+    function scheduleSnapRestore(delay = 500) {
+      if (snapTimer) clearTimeout(snapTimer);
+      snapTimer = setTimeout(() => {
+        track.style.scrollSnapType = "";
+        setTimeout(updateFades, 350);
+      }, delay);
+    }
+
+    // --- Wheel scroll: disable snap while wheeling ---
+    track.addEventListener("wheel", () => {
+      disableSnap();
+      scheduleSnapRestore();
+    }, { passive: true });
 
     // --- Drag to scroll (mouse only, touch uses native scroll) ---
     let isDown = false;
@@ -317,8 +314,7 @@ function getFirstImage(post: TelegramPost): string | null {
       if (!didDrag && Math.abs(dx) > 5) {
         didDrag = true;
         track.style.cursor = "grabbing";
-        // Disable scroll-snap so manual scrollLeft isn't fought
-        track.style.scrollSnapType = "none";
+        disableSnap();
       }
       if (didDrag) {
         track.scrollLeft = startScroll - dx;
@@ -329,11 +325,8 @@ function getFirstImage(post: TelegramPost): string | null {
       if (!isDown) return;
       isDown = false;
       track.style.cursor = "";
-      // Re-enable scroll-snap after a tick so it settles naturally
       if (didDrag) {
-        requestAnimationFrame(() => {
-          track.style.scrollSnapType = "";
-        });
+        scheduleSnapRestore();
       }
     });
 

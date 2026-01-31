@@ -1,0 +1,45 @@
+---
+interface Props {
+  title: string;
+  moreHref: string;
+  moreLabel?: string;
+}
+
+const { title, moreHref, moreLabel = "→ More" } = Astro.props;
+---
+
+<div class="section-header">
+  <h2 class="section-header__title">{title}</h2>
+  <a href={moreHref} class="section-header__link">{moreLabel}</a>
+</div>
+
+<style lang="scss">
+  @use "../../styles/tokens" as *;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .section-header__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  .section-header__link {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: color var(--transition-base);
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+</style>

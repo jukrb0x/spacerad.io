@@ -1,6 +1,7 @@
 ---
 import { getPublishedPosts } from "../../utils/posts";
 import PostItem from "../PostItem.astro";
+import SectionHeader from "./SectionHeader.astro";
 
 const allPosts = await getPublishedPosts();
 const NUM_LATEST_POSTS = 10;
@@ -22,12 +23,7 @@ const topTags = Array.from(tagCountMap.entries())
 ---
 
 <section class="latest-posts">
-  <div class="section-header">
-    <h2 class="section-title">Latest Posts</h2>
-    <a href="/posts" class="section-link">
-      → More
-    </a>
-  </div>
+  <SectionHeader title="Latest Posts" moreHref="/posts" />
 
   <div class="tags-row">
     <span class="font-size-sm">Tags: </span>
@@ -42,6 +38,10 @@ const topTags = Array.from(tagCountMap.entries())
       <PostItem post={post} />
     ))}
   </ul>
+
+  <div class="view-all-wrapper">
+    <a href="/posts" class="view-all">See All Posts →</a>
+  </div>
 </section>
 
 <style lang="scss">
@@ -51,33 +51,6 @@ const topTags = Array.from(tagCountMap.entries())
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-  }
-
-  .section-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    margin: 0;
-  }
-
-  .section-link {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    text-decoration: none;
-    transition: color var(--transition-base);
-    flex-shrink: 0;
-
-    &:hover {
-      color: var(--color-accent);
-    }
   }
 
   .tags-row {
@@ -119,5 +92,29 @@ const topTags = Array.from(tagCountMap.entries())
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+  }
+
+  .view-all-wrapper {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--space-2);
+  }
+
+  .view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    transition: color var(--transition-base), background var(--transition-base);
+
+    &:hover {
+      color: var(--color-text-primary);
+      background: var(--color-bg-muted);
+    }
   }
 </style>
