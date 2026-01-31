@@ -4,6 +4,19 @@ import PostItem from "../PostItem.astro";
 
 const allPosts = await getPublishedPosts();
 const latestPosts = allPosts.slice(0, 5);
+
+// Collect top tags by frequency
+const tagCountMap = new Map<string, number>();
+allPosts.forEach((post) => {
+  (post.data.tags || []).forEach((tag: string) => {
+    if (!tag) return;
+    tagCountMap.set(tag, (tagCountMap.get(tag) ?? 0) + 1);
+  });
+});
+const topTags = Array.from(tagCountMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6)
+  .map(([tag]) => tag);
 ---
 
 <section class="latest-posts">
@@ -12,6 +25,13 @@ const latestPosts = allPosts.slice(0, 5);
     <a href="/posts" class="section-link">
       → More
     </a>
+  </div>
+
+  <div class="tags-row">
+    {topTags.map((tag) => (
+      <a href={`/tags/${tag}`} class="tag-pill">#{tag}</a>
+    ))}
+    <a href="/tags" class="tag-pill tag-more">[...]</a>
   </div>
 
   <ul class="posts-list">
@@ -50,9 +70,42 @@ const latestPosts = allPosts.slice(0, 5);
     color: var(--color-text-secondary);
     text-decoration: none;
     transition: color var(--transition-base);
+    flex-shrink: 0;
 
     &:hover {
       color: var(--color-accent);
+    }
+  }
+
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .tag-pill {
+    display: inline-block;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    background: var(--color-bg-muted);
+    padding: 0.15em 0.6em;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: color var(--transition-base), background var(--transition-base);
+
+    &:hover {
+      color: var(--color-text-primary);
+      background: var(--color-accent-soft);
+    }
+  }
+
+  .tag-more {
+    color: var(--color-text-muted);
+
+    &:hover {
+      color: var(--color-text-secondary);
     }
   }
 

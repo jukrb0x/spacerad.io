@@ -7,72 +7,80 @@ interface Props {
 }
 
 const { posts } = Astro.props;
-const latestPosts = posts?.slice(0, 5);
+const maxMessages = 8;
+const latestPosts = posts?.slice(0, maxMessages);
 
-// Strip HTML and truncate text for preview
-function getTextPreview(post: TelegramPost, maxLength = 150): string {
+function getTextPreview(post: TelegramPost, maxLength = 120): string {
   const text = post.text || post.title;
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + "...";
+  return text.slice(0, maxLength).trim() + "…";
 }
 ---
 
-<section class="latest-channel">
-  <div class="section-header">
-    <h2 class="section-title">Telegram Channel</h2>
-    <a href="/channel" class="section-link">
-      → More
-    </a>
+<section class="radio-station">
+  <div class="station-header">
+    <h2 class="station-title">Radio Station</h2>
+    <a href="/channel" class="station-more-link">→ More</a>
   </div>
 
   {latestPosts && latestPosts.length > 0 ? (
-    <ul class="channel-list">
-      {latestPosts.map((post) => (
-        <li class="channel-item">
-          <a href={`/channel#${post.id}`} class="channel-link">
-            <p class="channel-text">{getTextPreview(post)}</p>
-            <time class="channel-date">
-              <FormattedDate date={new Date(post.datetime)} />
-            </time>
+    <div class="scroll-wrapper">
+      <div class="fade-left" aria-hidden="true"></div>
+      <div class="fade-right" aria-hidden="true"></div>
+
+      <div class="scroll-track">
+        {latestPosts.map((post) => (
+          <a href={`/channel#${post.id}`} class="msg-card surface-card">
+            <p class="msg-body">{getTextPreview(post)}</p>
+            <footer class="msg-footer">
+              <time class="msg-date" datetime={post.datetime}>
+                <FormattedDate date={new Date(post.datetime)} />
+              </time>
+              {post.hashtags && post.hashtags.length > 0 && (
+                <span class="msg-tag">#{post.hashtags[0]}</span>
+              )}
+            </footer>
           </a>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <div class="channel-empty">
-      <p>Channel unavailable</p>
+        ))}
+
+        <a href="/channel" class="msg-card surface-card card-more">
+          <span class="card-more-text">More →</span>
+        </a>
+      </div>
     </div>
+  ) : (
+    <p class="station-empty">Channel unavailable</p>
   )}
 </section>
 
 <style lang="scss">
   @use "../../styles/tokens" as *;
 
-  .latest-channel {
+  .radio-station {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }
 
-  .section-header {
+  .station-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
   }
 
-  .section-title {
+  .station-title {
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
     margin: 0;
   }
 
-  .section-link {
+  .station-more-link {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
     text-decoration: none;
+    flex-shrink: 0;
     transition: color var(--transition-base);
 
     &:hover {
@@ -80,52 +88,146 @@ function getTextPreview(post: TelegramPost, maxLength = 150): string {
     }
   }
 
-  .channel-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+  /* ---- Horizontal scroll ---- */
+
+  .scroll-wrapper {
+    position: relative;
+    // Allow bleed past page-shell padding for edge-to-edge scroll feel
+    margin-inline: calc(var(--space-1) * -1);
   }
 
-  .channel-item {
-    border-radius: var(--radius-sm);
+  .fade-left,
+  .fade-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 48px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .fade-left {
+    left: 0;
+    background: linear-gradient(to right, var(--color-bg-page), transparent);
+  }
+
+  .fade-right {
+    right: 0;
+    background: linear-gradient(to left, var(--color-bg-page), transparent);
+  }
+
+  .scroll-track {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-4);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    padding: var(--space-2) var(--space-4);
+
+    // Hide scrollbar across browsers
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* ---- Message cards ---- */
+
+  .msg-card {
+    flex: 0 0 280px;
+    min-height: 140px;
+    padding: var(--space-4) var(--space-4) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-3);
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition:
+      border-color var(--transition-base),
+      box-shadow var(--transition-base),
+      transform var(--transition-base);
+
+    &:hover {
+      border-color: var(--color-border);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+  }
+
+  .msg-body {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-primary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  .channel-link {
-    display: block;
-    padding: var(--space-3);
+  .msg-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border-soft);
+  }
+
+  .msg-date {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .msg-tag {
+    font-size: var(--font-size-xs);
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+
+  /* ---- "More" card ---- */
+
+  .card-more {
+    flex: 0 0 140px;
+    min-height: 140px;
+    align-items: center;
+    justify-content: center;
     background: var(--color-bg-muted);
-    border: 1px solid var(--color-border-soft);
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    transition: all var(--transition-base);
+    border-style: dashed;
+    border-color: var(--color-border);
+    box-shadow: none;
 
     &:hover {
       background: var(--color-bg-surface);
-      border-color: var(--color-border);
       box-shadow: var(--shadow-sm);
     }
   }
 
-  .channel-text {
+  .card-more-text {
     font-size: var(--font-size-sm);
-    line-height: var(--line-height-relaxed);
-    color: var(--color-text-primary);
-    margin: 0 0 var(--space-2) 0;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+    transition: color var(--transition-base);
+
+    .card-more:hover & {
+      color: var(--color-accent);
+    }
   }
 
-  .channel-date {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-  }
+  /* ---- Empty state ---- */
 
-  .channel-empty {
-    padding: var(--space-6);
+  .station-empty {
+    padding: var(--space-8);
     text-align: center;
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
+    margin: 0;
   }
 </style>
