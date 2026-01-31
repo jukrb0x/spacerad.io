@@ -15,6 +15,15 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + "…";
 }
+
+function getFirstImage(post: TelegramPost): string | null {
+  // Try extracting from content HTML (images are prepended as <img> tags)
+  const imgMatch = post.content.match(/<img[^>]+src="([^"]+)"/);
+  if (imgMatch?.[1]) return imgMatch[1];
+  // Fall back to link preview image
+  if (post.linkPreview?.imageUrl) return post.linkPreview.imageUrl;
+  return null;
+}
 ---
 
 <section class="radio-station">
@@ -25,23 +34,31 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
 
   {latestPosts && latestPosts.length > 0 ? (
     <div class="scroll-wrapper">
-      <div class="fade-left" aria-hidden="true"></div>
+      <div class="fade-left fade-hidden" aria-hidden="true"></div>
       <div class="fade-right" aria-hidden="true"></div>
 
       <div class="scroll-track">
-        {latestPosts.map((post) => (
-          <a href={`/channel#${post.id}`} class="msg-card surface-card">
-            <p class="msg-body">{getTextPreview(post)}</p>
-            <footer class="msg-footer">
-              <time class="msg-date" datetime={post.datetime}>
-                <FormattedDate date={new Date(post.datetime)} />
-              </time>
-              {post.hashtags && post.hashtags.length > 0 && (
-                <span class="msg-tag">#{post.hashtags[0]}</span>
+        {latestPosts.map((post) => {
+          const img = getFirstImage(post);
+          return (
+            <a href={`/channel#${post.id}`} class="msg-card surface-card">
+              {img && (
+                <div class="msg-thumb">
+                  <img src={img} alt="" loading="lazy" />
+                </div>
               )}
-            </footer>
-          </a>
-        ))}
+              <p class="msg-body">{getTextPreview(post)}</p>
+              <footer class="msg-footer">
+                <time class="msg-date" datetime={post.datetime}>
+                  <FormattedDate date={new Date(post.datetime)} />
+                </time>
+                {post.hashtags && post.hashtags.length > 0 && (
+                  <span class="msg-tag">#{post.hashtags[0]}</span>
+                )}
+              </footer>
+            </a>
+          );
+        })}
 
         <a href="/channel" class="msg-card surface-card card-more">
           <span class="card-more-text">More →</span>
@@ -104,6 +121,11 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
     width: 48px;
     z-index: 2;
     pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .fade-hidden {
+    opacity: 0;
   }
 
   .fade-left {
@@ -125,6 +147,7 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
     padding: var(--space-2) var(--space-4);
+    cursor: grab;
 
     // Hide scrollbar across browsers
     scrollbar-width: none;
@@ -140,13 +163,14 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
   .msg-card {
     flex: 0 0 280px;
     min-height: 140px;
-    padding: var(--space-4) var(--space-4) var(--space-3);
+    padding: var(--space-3) var(--space-3) var(--space-3);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--space-2);
     text-decoration: none;
     scroll-snap-align: start;
+    box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
     transition:
       border-color var(--transition-base),
       box-shadow var(--transition-base),
@@ -154,8 +178,23 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
 
     &:hover {
       border-color: var(--color-border);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+  }
+
+  .msg-thumb {
+    width: 100%;
+    height: 80px;
+    border-radius: var(--radius-sm, 4px);
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
   }
 
@@ -206,7 +245,7 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
 
     &:hover {
       background: var(--color-bg-surface);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.04));
     }
   }
 
@@ -231,3 +270,86 @@ function getTextPreview(post: TelegramPost, maxLength = 120): string {
     margin: 0;
   }
 </style>
+
+<script>
+  function initScrollTrack() {
+    const track = document.querySelector<HTMLElement>(".scroll-track");
+    if (!track) return;
+
+    const wrapper = track.closest(".scroll-wrapper");
+    if (!wrapper) return;
+
+    const fadeLeft = wrapper.querySelector<HTMLElement>(".fade-left");
+    const fadeRight = wrapper.querySelector<HTMLElement>(".fade-right");
+    if (!fadeLeft || !fadeRight) return;
+
+    // --- Fade visibility ---
+    function updateFades() {
+      const { scrollLeft, scrollWidth, clientWidth } = track!;
+      const atStart = scrollLeft <= 2;
+      const atEnd = scrollLeft + clientWidth >= scrollWidth - 2;
+
+      fadeLeft!.classList.toggle("fade-hidden", atStart);
+      fadeRight!.classList.toggle("fade-hidden", atEnd);
+    }
+
+    track.addEventListener("scroll", updateFades, { passive: true });
+    updateFades();
+
+    // --- Drag to scroll (mouse only, touch uses native scroll) ---
+    let isDown = false;
+    let startX = 0;
+    let startScroll = 0;
+    let didDrag = false;
+
+    track.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      isDown = true;
+      didDrag = false;
+      startX = e.pageX;
+      startScroll = track.scrollLeft;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      const dx = e.pageX - startX;
+      // Only enter drag mode after a clear threshold
+      if (!didDrag && Math.abs(dx) > 5) {
+        didDrag = true;
+        track.style.cursor = "grabbing";
+        // Disable scroll-snap so manual scrollLeft isn't fought
+        track.style.scrollSnapType = "none";
+      }
+      if (didDrag) {
+        track.scrollLeft = startScroll - dx;
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (!isDown) return;
+      isDown = false;
+      track.style.cursor = "";
+      // Re-enable scroll-snap after a tick so it settles naturally
+      if (didDrag) {
+        requestAnimationFrame(() => {
+          track.style.scrollSnapType = "";
+        });
+      }
+    });
+
+    // Capture-phase: swallow click only when a real drag happened
+    track.addEventListener("click", (e) => {
+      if (didDrag) {
+        e.preventDefault();
+        e.stopPropagation();
+        didDrag = false;
+      }
+    }, true);
+
+    // Prevent browser's native link/image ghost drag
+    track.addEventListener("dragstart", (e) => e.preventDefault());
+  }
+
+  initScrollTrack();
+  document.addEventListener("astro:page-load", initScrollTrack);
+</script>
