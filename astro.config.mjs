@@ -10,6 +10,7 @@ import pagefind from "astro-pagefind";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeFigure from "rehype-figure";
 import rehypeSlug from "rehype-slug";
+import rehypeExternalLinks from "rehype-external-links";
 import { rehypePrettyCode } from "rehype-pretty-code";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
@@ -102,6 +103,13 @@ export default defineConfig({
             [rehypePrettyCode, rehypePrettyCodeOptions],
             rehypeKatex,
             rehypeSlug,
+            [
+                rehypeExternalLinks,
+                {
+                    target: "_blank",
+                    rel: ["noopener", "noreferrer"],
+                },
+            ],
             [
                 rehypeAutolinkHeadings,
                 {
