@@ -6,19 +6,13 @@ const avatarUrl = "https://avatars.githubusercontent.com/u/15688641?v=4";
 const name = "Jabriel";
 const description = "Developer, designer, and digital gardener. Exploring the intersection of technology and creativity.";
 
-const rotatingThings = [
-  "products",
-  "experiences",
-  "connections",
-  "ideas",
-  "stories",
-].map((s) => `${s}.`);
+const rotatingThings = ["products", "experiences", "connections", "ideas", "stories"].map((s) => `${s}.`);
 
 const socialLinks = [
-  { href: SOCIAL_LINKS.rss, icon: "ri:rss-fill", label: "RSS", color: "#ee802f" },
-  { href: SOCIAL_LINKS.github, icon: "ri:github-fill", label: "GitHub", color: "#333", darkColor: "#e6edf3" },
-  { href: SOCIAL_LINKS.email, icon: "ri:mail-fill", label: "Email", color: "#d44638" },
-  { href: SOCIAL_LINKS.telegram, icon: "ri:telegram-fill", label: "Telegram", color: "#26a5e4" },
+    { href: SOCIAL_LINKS.rss, icon: "ri:rss-fill", label: "RSS", color: "#ee802f" },
+    { href: SOCIAL_LINKS.github, icon: "ri:github-fill", label: "GitHub", color: "#333", darkColor: "#e6edf3" },
+    { href: SOCIAL_LINKS.email, icon: "ri:mail-fill", label: "Email", color: "#d44638" },
+    { href: SOCIAL_LINKS.telegram, icon: "ri:telegram-fill", label: "Telegram", color: "#26a5e4" },
 ];
 ---
 
@@ -80,6 +74,7 @@ const socialLinks = [
     align-items: center;
     gap: var(--space-6);
     padding: var(--space-6);
+    justify-content: center;
 
     @include breakpoint('md') {
       flex-direction: row;
@@ -157,9 +152,11 @@ const socialLinks = [
     display: flex;
     align-items: center;
     gap: var(--space-3);
+    justify-content: center;
 
     @include breakpoint('md') {
       // inherit text-align: left from parent
+      justify-content: flex-start;
     }
   }
 
@@ -186,6 +183,7 @@ const socialLinks = [
   }
 
   .profile-description {
+    text-align: left;
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
     line-height: var(--line-height-relaxed);
@@ -194,6 +192,7 @@ const socialLinks = [
   }
 
   .profile-tagline {
+    text-align: left;
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);

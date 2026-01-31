@@ -12,7 +12,7 @@ interface Props {
 const { post, channelUsername } = Astro.props;
 ---
 
-<article class="post-card surface-card">
+<article id={post.id} class="post-card surface-card">
     {/* Reply quote */}
     {post.replyInfo && <ReplyQuote reply={post.replyInfo} />}
 
