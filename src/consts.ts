@@ -23,7 +23,7 @@ type NavLink = {
 
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
-    { href: "/", label: "Home", drawer_only: true },
+    { href: "/", label: "Home" },
     { href: "/posts", label: "Blog" },
     { href: "/tags", label: "Tags" },
     { href: "/channel", label: "Channel" },
