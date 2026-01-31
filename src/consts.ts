@@ -6,7 +6,7 @@ export const SITE_TITLE_SHORT = "Spacerad.io";
 export const SITE_TITLE_ALT = ["太空来电", "宇宙频道", "星际广播", "I'm Jabriel", "智人大冲浪"] as const;
 export const SITE_DESCRIPTION = "Space Radio by Jabriel, another random blog.";
 export const SITE_SOCIAL_IMAGE = "/og-image.png";
-export const DEFAULT_POST_SOCIAL_IMAGE = "/og-image.png";
+export const DEFAULT_POST_SOCIAL_IMAGE = "/placeholder.png";
 
 // Social links - customize these to your own links
 export const SOCIAL_LINKS = {
