@@ -1,10 +1,10 @@
 // Place any global data in this file.
 // You can import this data from anywhere in your site by using the `import` keyword.
 
-export const SITE_TITLE = "Spacerad.io by Jabriel";
-export const SITE_TITLE_SHORT = "Spacerad.io";
+export const SITE_TITLE = "Spacerad.io";
+export const SITE_TITLE_OG = "Spacerad.io · On air with Jabriel";
 export const SITE_TITLE_ALT = ["太空来电", "宇宙频道", "星际广播", "I'm Jabriel", "智人大冲浪"] as const;
-export const SITE_DESCRIPTION = "Space Radio by Jabriel, another random blog.";
+export const SITE_DESCRIPTION = "Space Radio, another random blog. I am the host, Jabriel. Sharing my thoughts on game development, web technology, and other interesting stuff.";
 export const SITE_SOCIAL_IMAGE = "/og-image.png";
 export const DEFAULT_POST_SOCIAL_IMAGE = "/placeholder.png";
 
