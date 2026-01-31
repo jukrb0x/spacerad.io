@@ -1,5 +1,5 @@
 ---
-import { SITE_TITLE, SITE_TITLE_ALT, NAV_LINKS, SITE_TITLE_SHORT } from "../consts"; 
+import { SITE_TITLE, SITE_TITLE_ALT, NAV_LINKS } from "../consts"; 
 import SearchModal from "./SearchModal.astro";
 import SearchOverlay from "./SearchOverlay.astro";
 import NavDrawer from "./NavDrawer.astro";
@@ -46,7 +46,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             >
                 <span class="text-xl" aria-hidden="true">📻</span>
                 <span class="site-title-wrapper" data-site-title data-alt-titles={JSON.stringify(SITE_TITLE_ALT)}>
-                    <span class="site-title-text" data-title-main>{SITE_TITLE_SHORT}</span>
+                    <span class="site-title-text" data-title-main>{SITE_TITLE}</span>
                     <span class="site-title-text site-title-alt" data-title-alt aria-hidden="true"></span>
                 </span>
             </a>

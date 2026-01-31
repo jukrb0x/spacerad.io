@@ -5,7 +5,7 @@ import Header from "../components/Header.astro";
 import ProfileCard from "../components/home/ProfileCard.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
 import LatestChannel from "../components/home/LatestChannel.astro";
-import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import { SITE_DESCRIPTION, SITE_TITLE_OG } from "../consts";
 import { fetchTelegramChannel, type TelegramPost } from "../utils/telegram";
 
 // Enable SSR for fresh Telegram data
@@ -27,7 +27,7 @@ Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-re
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <BaseHead title={SITE_TITLE_OG} description={SITE_DESCRIPTION} />
   </head>
   <body>
     <Header />
