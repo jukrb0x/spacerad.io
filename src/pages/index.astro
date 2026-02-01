@@ -31,7 +31,7 @@ Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-re
   </head>
   <body>
     <Header />
-    <main class="page-shell">
+    <main class="page-shell" transition:animate="fade">
       <div class="home-container">
         <!-- Profile Section -->
         <section>
@@ -53,28 +53,10 @@ Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-re
   </body>
 </html>
 
-<style lang="scss">
-  @use "../styles/tokens" as *;
-
+<style>
   .home-container {
     display: flex;
     flex-direction: column;
     gap: var(--space-12);
-    animation: fadeIn 0.6s ease-out;
-
-    @include reduced-motion {
-      animation: none;
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 </style>

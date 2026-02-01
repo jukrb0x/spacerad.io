@@ -11,6 +11,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
     data-nav-overlay
     class="fixed inset-0 z-50 flex items-start justify-end bg-black/30 opacity-0 transition-opacity duration-200 pointer-events-none md:hidden"
     data-nav-state="closed"
+    transition:animate="none"
 >
     <button
         type="button"
@@ -61,6 +62,9 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 <script>
     import { lockScroll, unlockScroll } from "../utils/scrollLock";
 
+    // AbortController for document-level listeners so we can clean up on re-init
+    let drawerAbort: AbortController | null = null;
+
     function initNavDrawer() {
         const toggleButton = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
         const overlay = document.querySelector<HTMLElement>("[data-nav-overlay]");
@@ -71,6 +75,13 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const barMiddle = toggleButton?.querySelector<HTMLElement>("[data-bar-middle]");
         const barBottom = toggleButton?.querySelector<HTMLElement>("[data-bar-bottom]");
         let lastFocusedElement: Element | null = null;
+
+        if (!overlay || !drawer) return;
+
+        // Clean up previous document-level listeners
+        drawerAbort?.abort();
+        drawerAbort = new AbortController();
+        const { signal } = drawerAbort;
 
         const toggleClasses = (el: Element | null | undefined, add: string[], remove: string[]) => {
             if (!el) return;
@@ -107,20 +118,41 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             }
         };
 
+        // Element-level listeners (auto-cleaned when DOM swaps)
         toggleButton?.addEventListener("click", () => setNavOpen(overlay?.dataset.navState !== "open"));
         closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
         overlay?.addEventListener("click", (e) => e.target === overlay && setNavOpen(false));
+        navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+
+        // Document-level listeners (cleaned via AbortController)
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape" && overlay?.dataset.navState === "open") {
                 setNavOpen(false);
             }
-        });
-        navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+        }, { signal });
+
+        // Close drawer instantly before page swap to prevent flash
+        document.addEventListener("astro:before-swap", () => {
+            if (overlay.dataset.navState === "open") {
+                overlay.dataset.navState = "closed";
+                overlay.classList.add("opacity-0", "pointer-events-none");
+                overlay.classList.remove("opacity-100");
+                drawer.classList.add("translate-x-6");
+                drawer.classList.remove("translate-x-0");
+                toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
+                toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
+                toggleClasses(barMiddle, [], ["opacity-0"]);
+                unlockScroll();
+            }
+        }, { signal });
 
         const mdQuery = window.matchMedia("(min-width: 768px)");
-        mdQuery.addEventListener("change", (e) => e.matches && setNavOpen(false));
+        const handleMdChange = (e: MediaQueryListEvent) => e.matches && setNavOpen(false);
+        mdQuery.addEventListener("change", handleMdChange);
+        // Clean up media query listener on abort too
+        signal.addEventListener("abort", () => mdQuery.removeEventListener("change", handleMdChange));
     }
 
     initNavDrawer();
-    document.addEventListener("astro:after-swap", initNavDrawer);
+    document.addEventListener("astro:page-load", initNavDrawer);
 </script>

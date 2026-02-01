@@ -63,7 +63,7 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
   </head>
   <body>
     <Header />
-    <main class="page-shell">
+    <main class="page-shell" transition:animate="fade">
       {error ? (
         <div class="error-message surface-card">
           <h1>Failed to load channel</h1>
@@ -127,13 +127,16 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
 
 <script>
   // Mark channel images for lightbox and lazy load
-  document.addEventListener('DOMContentLoaded', () => {
+  function initChannelImages() {
     document.querySelectorAll('.post-card__content img').forEach((element) => {
       const img = element as HTMLImageElement;
       img.classList.add('telegram-post-image');
       img.loading = img.loading || 'lazy';
     });
-  });
+  }
+
+  initChannelImages();
+  document.addEventListener('astro:page-load', initChannelImages);
 </script>
 
 <style>

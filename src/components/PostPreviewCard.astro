@@ -60,6 +60,7 @@ const serializedMeta = JSON.stringify(postMetaMap).replace(/</g, "\\u003c");
 <script>
     import { initPostPreview } from "../scripts/post-preview.ts";
     initPostPreview(document);
+    document.addEventListener("astro:page-load", () => initPostPreview(document));
 </script>
 
 <style lang="scss" is:global>

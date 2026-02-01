@@ -116,7 +116,7 @@ if (document.readyState === "loading") {
     initCodeBlocks();
 }
 
-// Handle Astro navigation
-window.addEventListener("astro:after-swap", initCodeBlocks);
+// Handle Astro navigation (dispatched on document, not window)
+document.addEventListener("astro:after-swap", initCodeBlocks);
 
 export { initCodeBlocks };

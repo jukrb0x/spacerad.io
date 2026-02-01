@@ -72,7 +72,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 
 	<body>
 		<Header />
-		<main class="page-shell max-w-none relative">
+		<main class="page-shell max-w-none relative" transition:animate="fade">
 			<!-- Article main body: always centered -->
 			<article class="mx-auto max-w-[50rem] sm:px-6">
 				<Back />
@@ -221,14 +221,12 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 		import { initMermaid } from '../scripts/mermaid-init';
 		import '../scripts/code-blocks';
 
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', () => {
-				initBlogInteractive();
-				initMermaid();
-			}, { once: true });
-		} else {
+		function initBlogPage() {
 			initBlogInteractive();
 			initMermaid();
 		}
+
+		initBlogPage();
+		document.addEventListener('astro:page-load', initBlogPage);
 	</script>
 </html>

@@ -83,12 +83,12 @@ const { label = "Toggle theme", class: className = "", variant = "header" } = (A
 <script>
 	import { bindThemeToggles } from "../scripts/theme.ts";
 
-	const container =
-		document.currentScript?.previousElementSibling?.closest(
-			"[data-theme-toggle-root]",
-		) ?? document;
+	function initToggles() {
+		bindThemeToggles(document);
+	}
 
-	bindThemeToggles(container);
+	initToggles();
+	document.addEventListener("astro:page-load", initToggles);
 </script>
 
 <style>

@@ -186,8 +186,12 @@ export const bindThemeToggles = (root: ParentNode = document) => {
     const toggles = Array.from(root.querySelectorAll<HTMLElement>("[data-theme-toggle]"));
     if (!toggles.length) return;
 
+    // Filter to only unbound toggles to prevent duplicate listeners
+    const unboundToggles = toggles.filter((t) => !t.dataset.themeBound);
+
     const update = (state: ThemeState) => {
         const { nextPreference, message } = describeState(state);
+        // Always update ALL toggles (including previously bound ones)
         toggles.forEach((toggle) => {
             toggle.dataset.themePreference = state.preference;
             toggle.dataset.themeState = state.theme;
@@ -208,7 +212,8 @@ export const bindThemeToggles = (root: ParentNode = document) => {
         setThemePreference(next);
     };
 
-    toggles.forEach((toggle) => {
+    unboundToggles.forEach((toggle) => {
+        toggle.dataset.themeBound = "true";
         toggle.addEventListener("click", handleClick);
     });
 
@@ -218,7 +223,8 @@ export const bindThemeToggles = (root: ParentNode = document) => {
 
     return () => {
         unsubscribe();
-        toggles.forEach((toggle) => {
+        unboundToggles.forEach((toggle) => {
+            delete toggle.dataset.themeBound;
             toggle.removeEventListener("click", handleClick);
         });
     };

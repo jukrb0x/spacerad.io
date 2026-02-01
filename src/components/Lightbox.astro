@@ -104,9 +104,12 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 		lightboxes.forEach((dialog) => initLightbox(dialog));
 	}
 
+	// Track initialized dialog elements to prevent duplicate listeners
+	const initializedDialogs = new WeakSet<HTMLDialogElement>();
+
 	function initLightbox(dialog: HTMLDialogElement) {
-		if (dialog.dataset.lightboxInitialized) return;
-		dialog.dataset.lightboxInitialized = "true";
+		if (initializedDialogs.has(dialog)) return;
+		initializedDialogs.add(dialog);
 
 		const selector = dialog.dataset.selector;
 		if (!selector) return;

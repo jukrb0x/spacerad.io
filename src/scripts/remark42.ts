@@ -15,6 +15,7 @@ type Remark42Config = {
 type Remark42Global = {
     createInstance?: (config: Remark42Config) => void;
     changeTheme?: (theme: ThemeName) => void;
+    destroy?: () => void;
 };
 
 declare global {
@@ -26,6 +27,8 @@ declare global {
 
 const SCRIPT_ATTR = "data-remark42";
 const CONTAINER_SELECTOR = "[data-remark-host]";
+
+let themeUnsubscribe: (() => void) | null = null;
 
 const ensureEmbedScript = (host: string) => {
     const normalizedHost = host.replace(/\/$/, "");
@@ -42,6 +45,21 @@ const ensureEmbedScript = (host: string) => {
     return script;
 };
 
+const destroyRemark42 = () => {
+    try {
+        window.REMARK42?.destroy?.();
+    } catch {
+        // Remark42 might not have destroy in all versions
+    }
+
+    // Remove stale iframes from previous instance
+    const container = document.getElementById("remark42");
+    if (container) {
+        const iframes = container.querySelectorAll("iframe");
+        iframes.forEach((iframe) => iframe.remove());
+    }
+};
+
 const initRemark42 = (container: HTMLElement) => {
     const { remarkHost, remarkSiteId, remarkUrl } = container.dataset as {
         remarkHost?: string;
@@ -52,6 +70,9 @@ const initRemark42 = (container: HTMLElement) => {
     if (!remarkHost || !remarkSiteId || !remarkUrl) {
         return;
     }
+
+    // Destroy previous instance before re-initializing
+    destroyRemark42();
 
     const host = remarkHost.replace(/\/$/, "");
     const { theme } = initTheme();
@@ -67,13 +88,19 @@ const initRemark42 = (container: HTMLElement) => {
         no_footer: true,
     };
 
+    // Clean up previous theme listener
+    if (themeUnsubscribe) {
+        themeUnsubscribe();
+        themeUnsubscribe = null;
+    }
+
     const applyTheme = (state: ThemeState) => {
         config.theme = state.theme;
         window.REMARK42?.changeTheme?.(state.theme);
     };
 
     applyTheme(getThemeState());
-    onThemeChange(applyTheme);
+    themeUnsubscribe = onThemeChange(applyTheme);
 
     const invokeCreateInstance = () => {
         window.REMARK42?.createInstance?.(config);
@@ -114,4 +141,4 @@ if (document.readyState === "loading") {
 }
 
 // Handle Astro page transitions
-window.addEventListener("astro:after-swap", initAllContainers);
+document.addEventListener("astro:after-swap", initAllContainers);
