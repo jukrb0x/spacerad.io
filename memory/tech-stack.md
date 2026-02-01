@@ -25,6 +25,11 @@
 | `@unocss/reset` | ^66.6.0 | CSS reset |
 | `sass` | ^1.97.2 | SCSS processing (devDep) |
 
+### State Management
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `nanostores` | ^1.1.0 | Reactive state store for theme (persists across SPA navigation) |
+
 ### Content & Markdown
 | Package | Version | Purpose |
 |---------|---------|---------|
@@ -104,7 +109,7 @@
 - **Persistent listeners** (scroll, resize): Use module-level guard (`let attached = false`) to bind only once.
 - **Per-navigation listeners** (click on swapped elements): Re-bind in `astro:page-load` handler.
 - **Document-level listeners**: Use `AbortController` pattern — abort on re-init, create new controller. See `NavDrawer.astro`.
-- **Theme subscriptions**: Store `onThemeChange()` unsubscribe function, call before re-subscribing.
+- **Theme state**: Uses `nanostores` in `src/stores/theme.ts` — reactive state persists across navigation automatically, no manual cleanup needed.
 
 ### Remark Plugins
 1. `remarkMath` — parse math expressions
@@ -146,7 +151,7 @@ All scripts are SPA-aware — they use `astro:page-load` or `astro:after-swap` f
 
 | Script | Purpose | SPA Pattern |
 |--------|---------|-------------|
-| `theme.ts` | Theme management — 3-state cycle, localStorage, matchMedia, observer pattern | `data-theme-bound` guard on elements, `onThemeChange` cleanup |
+| `theme.ts` | Theme toggle bindings — wrapper around `stores/theme` nanostores | Imports nanostores, exports `bindThemeToggles`, `onThemeChange` |
 | `header-scroll.ts` | Header hide/show on scroll, reading progress bar | `let` refs re-queried on `astro:page-load`, persistent scroll listener with guard |
 | `code-blocks.ts` | Copy button, language labels | `astro:after-swap` re-init, `data-codeBlockInitialized` guard |
 | `blog-interactive.ts` | TOC mobile drawer, share sidebar, like button | Called from BlogPost's `astro:page-load`, guard for persistent listeners |
