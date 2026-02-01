@@ -5,6 +5,8 @@
  * - Works with rehype-pretty-code's [data-rehype-pretty-code-figure] wrapper
  */
 
+import { autoInit } from "../utils/spaLifecycle";
+
 const COPY_TEXT = "Copy";
 const COPIED_TEXT = "Copied!";
 const COPIED_DURATION = 2000;
@@ -109,14 +111,7 @@ function initCodeBlocks() {
     });
 }
 
-// Initialize
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initCodeBlocks, { once: true });
-} else {
-    initCodeBlocks();
-}
-
-// Handle Astro navigation (dispatched on document, not window)
-document.addEventListener("astro:after-swap", initCodeBlocks);
+// Initialize using autoInit helper
+autoInit(initCodeBlocks, "after-swap");
 
 export { initCodeBlocks };

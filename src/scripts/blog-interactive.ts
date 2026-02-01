@@ -4,29 +4,7 @@
  */
 
 import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
-
-// ============ Timing Utilities ============
-function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number): T {
-    let timeoutId: number | null = null;
-    return ((...args: unknown[]) => {
-        if (timeoutId !== null) clearTimeout(timeoutId);
-        timeoutId = window.setTimeout(() => {
-            fn(...args);
-            timeoutId = null;
-        }, delay);
-    }) as T;
-}
-
-function throttle<T extends (...args: unknown[]) => void>(fn: T, delay: number): T {
-    let timeoutId: number | null = null;
-    return ((...args: unknown[]) => {
-        if (timeoutId !== null) return;
-        timeoutId = window.setTimeout(() => {
-            fn(...args);
-            timeoutId = null;
-        }, delay);
-    }) as T;
-}
+import { debounce, throttle } from "../utils/timing";
 
 // ============ Responsive Table Handling ============
 function unwrapCardCells(table: HTMLTableElement) {
