@@ -91,7 +91,7 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 </dialog>
 
 <script>
-	import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
+	import { lockScroll, unlockScroll } from "../utils/scrollLock";
 
 	interface Shot {
 		el?: Element;
@@ -99,20 +99,20 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 		caption: string;
 	}
 
-	function initAllLightboxes() {
-		const lightboxes = document.querySelectorAll<HTMLDialogElement>("[data-lightbox]");
-		lightboxes.forEach((dialog) => initLightbox(dialog));
-	}
+	// AbortController for document-level listeners so we can clean up on re-init
+	let lightboxAbort: AbortController | null = null;
 
-	// Track initialized dialog elements to prevent duplicate listeners
-	const initializedDialogs = new WeakSet<HTMLDialogElement>();
-
-	function initLightbox(dialog: HTMLDialogElement) {
-		if (initializedDialogs.has(dialog)) return;
-		initializedDialogs.add(dialog);
+	function initLightbox() {
+		const dialog = document.querySelector<HTMLDialogElement>("[data-lightbox]");
+		if (!dialog) return;
 
 		const selector = dialog.dataset.selector;
 		if (!selector) return;
+
+		// Clean up previous document-level listeners
+		lightboxAbort?.abort();
+		lightboxAbort = new AbortController();
+		const { signal } = lightboxAbort;
 
 		const imgEl = dialog.querySelector<HTMLImageElement>("[data-lightbox-img]");
 		const captionEl = dialog.querySelector<HTMLElement>("[data-lightbox-caption]");
@@ -159,19 +159,6 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 			});
 		};
 
-		document.addEventListener("click", (event) => {
-			const target = (event.target as Element).closest(selector);
-			if (!target) return;
-
-			event.preventDefault();
-			const allShots = getShots();
-			const index = allShots.findIndex((s) => s.el === target);
-			if (index !== -1) {
-				shots = allShots.map(({ src, caption }) => ({ src, caption }));
-				open(index);
-			}
-		});
-
 		const setLoading = (loading: boolean) => {
 			if (container) {
 				container.classList.toggle("is-loading", loading);
@@ -208,13 +195,14 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 			showImage(current);
 			dialog.showModal();
 			dialog.classList.add("is-open");
-			lockScrollForDialog();
+			lockScroll();
 		};
 
 		const close = () => {
+			if (!dialog.open) return;
 			dialog.close();
 			dialog.classList.remove("is-open");
-			unlockScrollForDialog();
+			unlockScroll();
 		};
 
 		const step = (delta: number) => {
@@ -225,21 +213,13 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 			showImage(newIndex);
 		};
 
+		// Element-level listeners (auto-cleaned when DOM swaps)
 		closeButtons.forEach((btn) => btn.addEventListener("click", close));
 		prevBtn?.addEventListener("click", () => step(-1));
 		nextBtn?.addEventListener("click", () => step(1));
 
 		dialog.addEventListener("click", (event) => {
 			if (event.target === dialog) close();
-		});
-
-		document.addEventListener("keydown", (event) => {
-			if (!dialog.open) return;
-			switch (event.key) {
-				case "Escape": close(); break;
-				case "ArrowLeft": step(-1); break;
-				case "ArrowRight": step(1); break;
-			}
 		});
 
 		// Touch swipe support
@@ -252,8 +232,39 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 			const diff = touchEndX - touchStartX;
 			if (Math.abs(diff) > 50) step(diff > 0 ? -1 : 1);
 		});
+
+		// Document-level listeners (cleaned via AbortController on re-init)
+		document.addEventListener("click", (event) => {
+			const target = (event.target as Element).closest(selector);
+			if (!target) return;
+
+			event.preventDefault();
+			const allShots = getShots();
+			const index = allShots.findIndex((s) => s.el === target);
+			if (index !== -1) {
+				shots = allShots.map(({ src, caption }) => ({ src, caption }));
+				open(index);
+			}
+		}, { signal });
+
+		document.addEventListener("keydown", (event) => {
+			if (!dialog.open) return;
+			switch (event.key) {
+				case "Escape": close(); break;
+				case "ArrowLeft": step(-1); break;
+				case "ArrowRight": step(1); break;
+			}
+		}, { signal });
+
+		// Close lightbox before page swap to prevent stale state
+		document.addEventListener("astro:before-swap", () => {
+			if (dialog.open) {
+				dialog.close();
+				dialog.classList.remove("is-open");
+				unlockScroll();
+			}
+		}, { signal });
 	}
 
-	initAllLightboxes();
-	document.addEventListener("astro:after-swap", initAllLightboxes);
+	document.addEventListener("astro:page-load", initLightbox);
 </script>
