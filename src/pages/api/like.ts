@@ -1,25 +1,25 @@
 /**
- * Like API - 文章点赞接口（支持多次点赞）
+ * Like API - Post like endpoint (supports multiple likes)
  *
- * GET /api/like?slug=xxx - 获取点赞数和当前用户已点赞次数
- * POST /api/like { slug } - 点赞（每次 +1，每人最多 16 次）
+ * GET /api/like?slug=xxx - Get like count and current user's like count
+ * POST /api/like { slug } - Like (+1 per click, max 16 per user)
  */
 
 import type { APIRoute } from "astro";
 
 export const prerender = false;
 
-// 每人最多点赞次数
+// Maximum likes per user
 const MAX_LIKES_PER_USER = 16;
 
 interface LikeData {
     count: number;
-    // 每个 IP 哈希对应的点赞次数
+    // Like count per IP hash
     likes: Record<string, number>;
 }
 
 /**
- * 将 IP 地址转换为 SHA-256 哈希（保护隐私）
+ * Convert IP address to SHA-256 hash (privacy protection)
  */
 async function hashIP(ip: string): Promise<string> {
     const encoder = new TextEncoder();
@@ -30,18 +30,18 @@ async function hashIP(ip: string): Promise<string> {
 }
 
 /**
- * 获取客户端 IP 地址
+ * Get client IP address
  */
 function getClientIP(request: Request): string {
-    // Cloudflare 提供的真实 IP
+    // Real IP provided by Cloudflare
     const cfIP = request.headers.get("CF-Connecting-IP");
     if (cfIP) return cfIP;
 
-    // 标准代理头
+    // Standard proxy headers
     const forwardedFor = request.headers.get("X-Forwarded-For");
     if (forwardedFor) return forwardedFor.split(",")[0].trim();
 
-    // 本地开发环境
+    // Local development environment
     return "127.0.0.1";
 }
 
@@ -57,9 +57,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
     }
 
     try {
-        const kv = locals.runtime?.env?.LIKES;
+        const kv = locals.runtime.env.LIKES;
 
-        // 本地开发环境没有 KV，返回模拟数据
+        // Local dev environment has no KV, return mock data
         if (!kv) {
             return new Response(JSON.stringify({ count: 0, userLikes: 0, maxLikes: MAX_LIKES_PER_USER }), {
                 status: 200,
@@ -102,9 +102,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
             });
         }
 
-        const kv = locals.runtime?.env?.LIKES;
+        const kv = locals.runtime.env.LIKES;
 
-        // 本地开发环境没有 KV，返回模拟数据
+        // Mock data for local KV
         if (!kv) {
             return new Response(JSON.stringify({ count: 1, userLikes: 1, maxLikes: MAX_LIKES_PER_USER }), {
                 status: 200,
@@ -115,7 +115,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const clientIP = getClientIP(request);
         const ipHash = await hashIP(clientIP);
 
-        // 获取当前数据
+        // Get current data
         const data: LikeData = (await kv.get<LikeData>(`like:${slug}`, "json")) ?? {
             count: 0,
             likes: {},
@@ -123,7 +123,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         const currentUserLikes = data.likes[ipHash] ?? 0;
 
-        // 检查是否已达到上限
+        // Check if limit reached
         if (currentUserLikes >= MAX_LIKES_PER_USER) {
             return new Response(
                 JSON.stringify({
@@ -142,11 +142,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
             );
         }
 
-        // 增加点赞
+        // Increment like
         data.count += 1;
         data.likes[ipHash] = currentUserLikes + 1;
 
-        // 保存数据
+        // Save data
         await kv.put(`like:${slug}`, JSON.stringify(data));
 
         return new Response(
