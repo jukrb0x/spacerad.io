@@ -25,7 +25,7 @@ The site uses a **monochrome gray accent** palette. All tokens are CSS custom pr
 
 | Token | Value |
 |-------|-------|
-| `--font-family-sans` | `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, emoji stack` |
+| `--font-family-sans` | `'MiSans Latin', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, emoji stack` |
 | `--font-family-mono` | `'Fira Code', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace` |
 
 | Token | Value |

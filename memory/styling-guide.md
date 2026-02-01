@@ -82,6 +82,7 @@ transition($key)  // -> var(--transition-#{$key})
 ### Presets
 - `presetWind3()` — Tailwind v3 compatible atomic classes
 - `presetWebFonts()` — Inter (400/600/800), Fira Code (400/500)
+- **MiSans Latin** — loaded via `@font-face` in `global.scss` (CDN jsDelivr + local `/fonts/` fallback), weights 400–800
 
 ### Transformers
 - `transformerDirectives()` — `@apply`, `@screen` in `<style>` blocks

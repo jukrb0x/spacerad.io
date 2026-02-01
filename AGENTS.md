@@ -11,6 +11,15 @@ Personal blog by Jabriel. Astro 5 + UnoCSS + SCSS + Vue 3, deployed on Cloudflar
 | Theme system, SCSS mixins/functions, UnoCSS config, naming conventions, component patterns | [memory/styling-guide.md](memory/styling-guide.md) |
 | Dependencies, Astro config, plugins, client scripts, Cloudflare deployment | [memory/tech-stack.md](memory/tech-stack.md) |
 
+## Principles
+- Be excellent to others even there is only me
+- Write clean, maintainable, reusable code
+- Optimize for performance and accessibility
+- Use modern web standards and best practices
+- Prefer simplicity and minimalism over complexity
+- Document decisions and architecture for future reference
+- Automate repetitive tasks where possible
+
 ## Commands
 
 ```bash

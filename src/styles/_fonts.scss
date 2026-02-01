@@ -1,0 +1,59 @@
+// =============================================
+// MiSans Latin Web Font
+// =============================================
+// Loaded from jsDelivr CDN (misans@4.1.0/lib/Latin).
+// Custom font-weight mapping to standard CSS values since
+// MiSans ships with non-standard weights (330, 380, 520, etc.)
+
+$_misans-cdn: 'https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Latin';
+$_misans-local: '/fonts';
+
+@font-face {
+  font-family: 'MiSans Latin';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url('#{$_misans-cdn}/MiSansLatin-Regular.woff2') format('woff2'),
+    url('#{$_misans-local}/MiSansLatin-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'MiSans Latin';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url('#{$_misans-cdn}/MiSansLatin-Medium.woff2') format('woff2'),
+    url('#{$_misans-local}/MiSansLatin-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'MiSans Latin';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    url('#{$_misans-cdn}/MiSansLatin-Semibold.woff2') format('woff2'),
+    url('#{$_misans-local}/MiSansLatin-Semibold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'MiSans Latin';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    url('#{$_misans-cdn}/MiSansLatin-Bold.woff2') format('woff2'),
+    url('#{$_misans-local}/MiSansLatin-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'MiSans Latin';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src:
+    url('#{$_misans-cdn}/MiSansLatin-Heavy.woff2') format('woff2'),
+    url('#{$_misans-local}/MiSansLatin-Heavy.woff2') format('woff2');
+}
