@@ -83,6 +83,29 @@
 5. Pagefind (full-text search)
 6. Vue 3
 
+### SPA Navigation (Client Router)
+- `<ClientRouter />` from `astro:transitions` imported in `BaseHead.astro`
+- Intercepts internal link clicks, fetches new pages via fetch API, swaps DOM without full reload
+- Fonts, CSS, and JS remain cached across navigations
+- **Header:** `transition:animate="none"` — DOM swaps instantly (no animation), but listeners are lost
+- **Footer:** No transition attribute (adding one breaks fixed-position FABs)
+- **Main content:** `transition:animate="fade"` on all `<main>` elements
+
+#### Astro Lifecycle Events (dispatched on `document`)
+| Event | When | Use for |
+|-------|------|---------|
+| `astro:before-swap` | Before DOM swap | Close modals/drawers, cleanup |
+| `astro:after-swap` | After DOM swap, before hydration | DOM manipulation on new content |
+| `astro:page-load` | After swap + hydration complete | Re-initialize scripts, re-bind listeners |
+
+#### Script Patterns for SPA
+- **Module scripts** (`<script>`): Execute once. Register `astro:page-load` listener for re-init.
+- **Inline scripts** (`<script is:inline>`): Add `data-astro-rerun` attribute to re-execute on navigation.
+- **Persistent listeners** (scroll, resize): Use module-level guard (`let attached = false`) to bind only once.
+- **Per-navigation listeners** (click on swapped elements): Re-bind in `astro:page-load` handler.
+- **Document-level listeners**: Use `AbortController` pattern — abort on re-init, create new controller. See `NavDrawer.astro`.
+- **Theme subscriptions**: Store `onThemeChange()` unsubscribe function, call before re-subscribing.
+
 ### Remark Plugins
 1. `remarkMath` — parse math expressions
 2. `remarkAlert` — GitHub blockquote alerts (`> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!CAUTION]`)
@@ -119,18 +142,20 @@
 
 ## Client-Side Scripts (`src/scripts/`)
 
-| Script | Purpose |
-|--------|---------|
-| `theme.ts` | Theme management — 3-state cycle (system/light/dark), localStorage, matchMedia, observer pattern |
-| `header-scroll.ts` | Header glow effect, hide/show on scroll, reading progress bar |
-| `code-blocks.ts` | Copy button with "Copied!" feedback, language labels, execCommand fallback |
-| `blog-interactive.ts` | TOC mobile drawer, share sidebar interactions, like button |
-| `mermaid-init.ts` | Initialize and render Mermaid diagrams |
-| `post-preview.ts` | Hover preview card for post links |
-| `viewport-height.ts` | iOS 100vh fix (tracks `--vh` CSS variable) |
-| `scroll-lock.ts` | Prevent body scroll during modals (adds `.scroll-locked`) |
-| `cusdis.ts` | Cusdis comment system initialization |
-| `remark42.ts` | Remark42 comment system initialization |
+All scripts are SPA-aware — they use `astro:page-load` or `astro:after-swap` for re-init after Client Router navigation.
+
+| Script | Purpose | SPA Pattern |
+|--------|---------|-------------|
+| `theme.ts` | Theme management — 3-state cycle, localStorage, matchMedia, observer pattern | `data-theme-bound` guard on elements, `onThemeChange` cleanup |
+| `header-scroll.ts` | Header hide/show on scroll, reading progress bar | `let` refs re-queried on `astro:page-load`, persistent scroll listener with guard |
+| `code-blocks.ts` | Copy button, language labels | `astro:after-swap` re-init, `data-codeBlockInitialized` guard |
+| `blog-interactive.ts` | TOC mobile drawer, share sidebar, like button | Called from BlogPost's `astro:page-load`, guard for persistent listeners |
+| `mermaid-init.ts` | Mermaid diagram rendering | Caches module after first import, re-renders from `data-mermaid-src` |
+| `post-preview.ts` | Hover preview card for post links | `astro:page-load` re-init |
+| `viewport-height.ts` | iOS 100vh fix (`--vh` CSS variable) | Persistent resize listener |
+| `scroll-lock.ts` | Prevent body scroll during modals (`.scroll-locked`) | Stateless utility |
+| `cusdis.ts` | Cusdis comment system | `astro:after-swap` re-init, theme cleanup |
+| `remark42.ts` | Remark42 comment system | `astro:after-swap` re-init, `destroyRemark42()` cleanup, theme cleanup |
 
 ---
 
