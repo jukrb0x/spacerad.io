@@ -153,6 +153,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         signal.addEventListener("abort", () => mdQuery.removeEventListener("change", handleMdChange));
     }
 
-    initNavDrawer();
+    // astro:page-load fires on initial load AND after each SPA navigation,
+    // so a direct call here would cause double-init (duplicate listeners) on first load.
     document.addEventListener("astro:page-load", initNavDrawer);
 </script>
