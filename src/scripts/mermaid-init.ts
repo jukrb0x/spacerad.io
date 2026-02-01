@@ -2,7 +2,7 @@
  * Initialize Mermaid diagrams client-side
  */
 
-import { getThemeState, onThemeChange } from "./theme";
+import { getThemeState, onThemeChange } from "../lib/theme-effects";
 
 let mermaidModule: typeof import("mermaid")["default"] | null = null;
 let themeListenerAttached = false;

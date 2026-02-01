@@ -1,4 +1,4 @@
-import { getThemeState, initTheme, onThemeChange, type ThemeName, type ThemeState } from "./theme";
+import { getThemeState, initTheme, onThemeChange, type ThemeName, type ThemeState } from "../lib/theme-effects";
 
 type Remark42Config = {
     host: string;
