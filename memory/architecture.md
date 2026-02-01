@@ -99,12 +99,12 @@ Defined in `src/content.config.ts`. Loader: `glob("./src/content/blog/**/*.{md,m
 
 ### Page.astro
 Generic layout for static MDX pages. Structure:
-1. `BaseHead` (SEO, meta)
-2. `Header` (navigation)
-3. Prose wrapper (markdown content)
+1. `BaseHead` (SEO, meta, `<ClientRouter />` for SPA navigation)
+2. `Header` (navigation) — `transition:animate="none"`
+3. Prose wrapper (markdown content) — `<main transition:animate="fade">`
 4. `Comments` (conditional)
 5. `Lightbox` (optional)
-6. `Footer`
+6. `Footer` (no transition attribute — adding one breaks fixed FABs)
 
 ### BlogPost.astro
 Specialized blog layout. Additional features on top of Page:
@@ -114,7 +114,7 @@ Specialized blog layout. Additional features on top of Page:
 - **Share sidebar** — sticky left sidebar (desktop), floating FAB (mobile)
 - Social sharing (Twitter, Telegram, WeChat, etc.)
 - Like button with Cloudflare KV persistence
-- Blog-interactive and mermaid init scripts
+- Blog-interactive and mermaid init scripts (re-initialized via `astro:page-load`)
 
 ---
 
@@ -123,7 +123,7 @@ Specialized blog layout. Additional features on top of Page:
 ### Layout Shell
 | Component | Lines | Purpose |
 |-----------|-------|---------|
-| `BaseHead.astro` | — | SEO head (meta, OG, fonts) |
+| `BaseHead.astro` | — | SEO head (meta, OG, fonts, `<ClientRouter />`) |
 | `Header.astro` | ~411 | Sticky nav, search trigger, theme toggle, mobile drawer, reading progress, neon glow |
 | `Footer.astro` | — | Social links (Telegram, GitHub, Email, RSS), copyright |
 | `NavDrawer.astro` | — | Mobile navigation drawer |
