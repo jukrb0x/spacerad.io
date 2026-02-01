@@ -3,7 +3,7 @@
  *
  * Features:
  * - Auto-hide header when scrolling down
- * - Show header when scrolling up
+ * - Show header when scrolling up (with threshold to avoid jitter)
  * - Blur backdrop when scrolled
  * - Reading progress indicator
  * - Exposes --header-offset CSS variable for sticky elements
@@ -13,13 +13,13 @@
 let lastScrollY = 0;
 let ticking = false;
 
-const header = document.querySelector("[data-header]") as HTMLElement;
-const progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
+let header = document.querySelector("[data-header]") as HTMLElement;
+let progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
 
-// Set header height CSS variable for sticky elements positioning
-function updateHeaderOffset(isHidden: boolean) {
+// Set header height CSS variable (only on page-load, not during scroll)
+function updateHeaderOffset() {
     const headerHeight = header?.offsetHeight || 0;
-    document.documentElement.style.setProperty("--header-offset", isHidden ? "0px" : `${headerHeight}px`);
+    document.documentElement.style.setProperty("--header-offset", `${headerHeight}px`);
 }
 
 // Scroll threshold before hiding header
@@ -27,6 +27,12 @@ const SCROLL_THRESHOLD = 100;
 const BLUR_THRESHOLD = 10;
 // Minimum scrollable distance (in vh) to show progress bar
 const MIN_SCROLL_DISTANCE_VH = 1.5;
+// Minimum scroll-up distance (px) before showing header again
+const SCROLL_UP_THRESHOLD = 500;
+
+// Track the highest scroll position since last direction change
+let scrollDirectionAnchor = 0;
+let isHeaderHidden = false;
 
 // Check if user prefers reduced motion
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -42,18 +48,27 @@ function updateHeader() {
         // Auto-hide logic - only after scrolling past threshold
         if (scrollY > SCROLL_THRESHOLD) {
             if (scrollY > lastScrollY) {
-                // Scrolling down - hide header
-                header.classList.add("header--hidden");
-                updateHeaderOffset(true);
+                // Scrolling down — update anchor and hide
+                scrollDirectionAnchor = scrollY;
+                if (!isHeaderHidden) {
+                    isHeaderHidden = true;
+                    header.classList.add("header--hidden");
+                }
             } else {
-                // Scrolling up - show header
-                header.classList.remove("header--hidden");
-                updateHeaderOffset(false);
+                // Scrolling up — only show after scrolling up SCROLL_UP_THRESHOLD px
+                const scrolledUp = scrollDirectionAnchor - scrollY;
+                if (scrolledUp >= SCROLL_UP_THRESHOLD && isHeaderHidden) {
+                    isHeaderHidden = false;
+                    header.classList.remove("header--hidden");
+                }
             }
         } else {
             // At top - always show header
-            header.classList.remove("header--hidden");
-            updateHeaderOffset(false);
+            scrollDirectionAnchor = scrollY;
+            if (isHeaderHidden) {
+                isHeaderHidden = false;
+                header.classList.remove("header--hidden");
+            }
         }
 
         // Add scrolled state for blur backdrop
@@ -96,21 +111,21 @@ function onScroll() {
 
 // Initialize on page load
 if (header) {
-    // Set initial header offset
-    updateHeaderOffset(false);
-
-    // Set initial state
+    updateHeaderOffset();
     updateHeader();
-
-    // Listen to scroll events (passive for better performance)
     window.addEventListener("scroll", onScroll, { passive: true });
 }
 
 // Update on page navigation (for SPAs or view transitions)
 document.addEventListener("astro:page-load", () => {
+    header = document.querySelector("[data-header]") as HTMLElement;
+    progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
     if (header) {
         lastScrollY = 0;
-        updateHeaderOffset(false);
+        scrollDirectionAnchor = 0;
+        isHeaderHidden = false;
+        header.classList.remove("header--hidden");
+        updateHeaderOffset();
         updateHeader();
     }
 });

@@ -4,6 +4,9 @@
 
 import { getThemeState, onThemeChange } from "./theme";
 
+let mermaidModule: typeof import("mermaid")["default"] | null = null;
+let themeListenerAttached = false;
+
 export function initMermaid() {
     const mermaidDivs = document.querySelectorAll(".mermaid");
 
@@ -13,36 +16,54 @@ export function initMermaid() {
 
     // Store original source before mermaid replaces it with SVG
     for (const el of mermaidDivs) {
-        el.setAttribute("data-mermaid-src", el.textContent || "");
+        if (!el.getAttribute("data-mermaid-src")) {
+            el.setAttribute("data-mermaid-src", el.textContent || "");
+        }
     }
 
-    import("mermaid").then(({ default: mermaid }) => {
-        const themeForState = (theme: string) =>
-            theme === "dark" ? "dark" : "default";
+    const themeForState = (theme: string) =>
+        theme === "dark" ? "dark" : "default";
+
+    const renderAll = async (mermaid: typeof mermaidModule) => {
+        if (!mermaid) return;
 
         mermaid.initialize({
             startOnLoad: false,
             theme: themeForState(getThemeState().theme),
         });
 
-        mermaid.run({ querySelector: ".mermaid" });
+        // Re-render from stored source to ensure clean state
+        const elements = document.querySelectorAll<HTMLElement>(".mermaid");
+        for (const el of elements) {
+            const src = el.getAttribute("data-mermaid-src");
+            if (!src) continue;
 
-        onThemeChange(async (state) => {
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: themeForState(state.theme),
-            });
-
-            // Render each diagram off-DOM, then swap SVG in place (no flash)
-            const elements = document.querySelectorAll<HTMLElement>(".mermaid");
-            for (const el of elements) {
-                const src = el.getAttribute("data-mermaid-src");
-                if (!src) continue;
-
-                const id = `mermaid-rerender-${Math.random().toString(36).slice(2)}`;
+            const id = `mermaid-render-${Math.random().toString(36).slice(2)}`;
+            try {
                 const { svg } = await mermaid.render(id, src);
                 el.innerHTML = svg;
+            } catch {
+                // Mermaid render can fail for invalid syntax
             }
+        }
+    };
+
+    if (mermaidModule) {
+        // Already loaded — just re-render current diagrams
+        renderAll(mermaidModule);
+    } else {
+        import("mermaid").then(({ default: mermaid }) => {
+            mermaidModule = mermaid;
+            renderAll(mermaid);
         });
-    });
+    }
+
+    // Attach theme listener only once
+    if (!themeListenerAttached) {
+        themeListenerAttached = true;
+        onThemeChange(async () => {
+            if (!mermaidModule) return;
+            await renderAll(mermaidModule);
+        });
+    }
 }

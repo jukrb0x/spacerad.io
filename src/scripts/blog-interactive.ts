@@ -365,26 +365,20 @@ function initSidebars(): void {
 }
 
 // ============ Initialize All Features ============
+let blogInteractiveInitialized = false;
+
 export function initBlogInteractive() {
-    // Responsive tables
-    const ensureResponsiveTables = () => window.requestAnimationFrame(applyResponsiveTables);
-    ensureResponsiveTables();
-    window.addEventListener("astro:after-swap", ensureResponsiveTables);
-
-    // Iframe handling
+    // Run feature init immediately for current DOM
+    window.requestAnimationFrame(applyResponsiveTables);
     handleEmbedIframes();
-    window.addEventListener("astro:after-swap", handleEmbedIframes);
-
-    // TOC features
     initTocObserver();
-    window.addEventListener("astro:after-swap", initTocObserver);
-
     initMobileTocDrawer();
-    window.addEventListener("astro:after-swap", initMobileTocDrawer);
-
-    // Sidebar positioning - use RAF directly for scroll (no throttle needed, RAF handles timing)
     initSidebars();
-    window.addEventListener("resize", debouncedAdjustTocPosition);
-    window.addEventListener("scroll", adjustSidebarPositions, { passive: true });
-    window.addEventListener("astro:after-swap", initSidebars);
+
+    // Only add persistent listeners once
+    if (!blogInteractiveInitialized) {
+        blogInteractiveInitialized = true;
+        window.addEventListener("resize", debouncedAdjustTocPosition);
+        window.addEventListener("scroll", adjustSidebarPositions, { passive: true });
+    }
 }

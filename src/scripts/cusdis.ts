@@ -21,6 +21,8 @@ declare global {
 const SCRIPT_ATTR = "data-cusdis";
 const CONTAINER_SELECTOR = "[data-cusdis-host]";
 
+let themeUnsubscribe: (() => void) | null = null;
+
 const ensureEmbedScript = (host: string) => {
     const normalizedHost = host.replace(/\/$/, "");
     let script = document.querySelector<HTMLScriptElement>(`script[${SCRIPT_ATTR}]`);
@@ -51,6 +53,9 @@ const initCusdis = (container: HTMLElement) => {
     const host = cusdisHost.replace(/\/$/, "");
     const { theme } = initTheme();
 
+    // Clear stale content from previous navigation
+    container.innerHTML = "";
+
     // Set up the iframe container with data attributes
     container.setAttribute("data-host", host);
     container.setAttribute("data-app-id", cusdisAppId);
@@ -58,13 +63,19 @@ const initCusdis = (container: HTMLElement) => {
     container.setAttribute("data-page-title", cusdisPageTitle || document.title);
     container.setAttribute("data-theme", theme);
 
+    // Clean up previous theme listener
+    if (themeUnsubscribe) {
+        themeUnsubscribe();
+        themeUnsubscribe = null;
+    }
+
     const applyTheme = (state: ThemeState) => {
         container.setAttribute("data-theme", state.theme);
         window.CUSDIS?.setTheme?.(state.theme);
     };
 
     applyTheme(getThemeState());
-    onThemeChange(applyTheme);
+    themeUnsubscribe = onThemeChange(applyTheme);
 
     const script = ensureEmbedScript(host);
 
@@ -98,4 +109,4 @@ if (document.readyState === "loading") {
 }
 
 // Handle Astro page transitions
-window.addEventListener("astro:after-swap", initAllContainers);
+document.addEventListener("astro:after-swap", initAllContainers);

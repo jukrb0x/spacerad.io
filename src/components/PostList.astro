@@ -64,8 +64,8 @@ const groupedPosts = groupPostsByYear(posts);
 	}
 </style>
 
-<script is:inline>
-	document.addEventListener('DOMContentLoaded', function() {
+<script is:inline data-astro-rerun>
+	(function() {
 		const yearGroups = document.querySelectorAll('[data-year-group]');
 		const langButtons = document.querySelectorAll('.lang-btn');
 
@@ -113,5 +113,5 @@ const groupedPosts = groupPostsByYear(posts);
 		});
 
 		applyFilter(currentLang);
-	});
+	})();
 </script>
