@@ -6,7 +6,7 @@ Personal blog by Jabriel. Astro 5 + UnoCSS + SCSS + Vue 3, deployed on Cloudflar
 
 Project memory is split into several documents in the `memory/` folder.
 
-**Start here:** [memory/index.md](memory/index.md) — Structured index for LLMs with searchable sections and quick lookup tables.
+**Start here:** [@memory/index.md](memory/index.md) — Structured index for LLMs with searchable sections and quick lookup tables.
 
 | What you need | Document |
 |---------------|----------|
