@@ -73,7 +73,8 @@ const { title, description, image = SITE_SOCIAL_IMAGE } = Astro.props;
 />
 <meta name="generator" content={Astro.generator} />
 
-<!-- Font preloads (Inter from UnoCSS web fonts) -->
+<!-- Font preloads -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
