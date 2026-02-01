@@ -1,19 +1,16 @@
 ---
-// SearchOverlay.astro - Search modal overlay (rendered outside header to avoid transform issues)
+// SearchOverlay.astro - Search modal overlay using <dialog> for proper iOS Safari viewport handling
 ---
 
-<div
+<dialog
     data-search-overlay
-    class="fixed inset-0 z-[60] flex items-start justify-center bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-200 pointer-events-none"
-    data-search-state="closed"
-    role="dialog"
-    aria-modal="true"
+    class="search-dialog"
     aria-label="Site Search"
 >
     <!-- Backdrop close button -->
     <button
         type="button"
-        class="absolute inset-0 h-full w-full cursor-default"
+        class="search-dialog__backdrop"
         data-search-close
         aria-label="Close Search"
     ></button>
@@ -21,7 +18,7 @@
     <!-- Search Container -->
     <div
         data-search-container
-        class="relative z-10 mt-[10vh] w-full max-w-2xl translate-y-4 rounded-xl border border-border bg-surface p-4 shadow-2xl transition-transform duration-200 mx-4 sm:mx-6"
+        class="search-dialog__container translate-y-4 transition-transform duration-200"
     >
         <!-- Search Header -->
         <div class="flex items-center gap-3 border-b border-subtle pb-3">
@@ -106,14 +103,14 @@
             </span>
         </div>
     </div>
-</div>
+</dialog>
 
 <script>
-    import { lockScroll, unlockScroll } from "../utils/scrollLock";
+    import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
     function initSearchOverlay() {
         const searchTrigger = document.querySelector<HTMLButtonElement>("[data-search-trigger]");
-        const searchOverlay = document.querySelector<HTMLElement>("[data-search-overlay]");
+        const searchDialog = document.querySelector<HTMLDialogElement>("[data-search-overlay]");
         const searchContainer = document.querySelector<HTMLElement>("[data-search-container]");
         const searchInput = document.querySelector<HTMLInputElement>("[data-search-input]");
         const searchCloseButtons = document.querySelectorAll<HTMLButtonElement>("[data-search-close]");
@@ -243,27 +240,29 @@
         }
 
         function setSearchOpen(open: boolean) {
-            if (!searchOverlay || !searchContainer) return;
-
-            searchOverlay.dataset.searchState = open ? "open" : "closed";
+            if (!searchDialog || !searchContainer) return;
 
             if (open) {
                 lastFocusedElement = document.activeElement;
-                searchOverlay.classList.remove("pointer-events-none", "opacity-0");
-                searchOverlay.classList.add("opacity-100");
-                searchContainer.classList.remove("translate-y-4");
-                searchContainer.classList.add("translate-y-0");
-                lockScroll();
+                searchDialog.showModal();
+                lockScrollForDialog();
+                // Animate in next frame
+                requestAnimationFrame(() => {
+                    searchDialog.classList.add("is-open");
+                });
                 requestAnimationFrame(() => {
                     searchInput?.focus();
                     searchInput?.select();
                 });
             } else {
-                searchOverlay.classList.add("pointer-events-none", "opacity-0");
-                searchOverlay.classList.remove("opacity-100");
-                searchContainer.classList.add("translate-y-4");
-                searchContainer.classList.remove("translate-y-0");
-                unlockScroll();
+                searchDialog.classList.remove("is-open");
+                unlockScrollForDialog();
+                // Close dialog after transition
+                setTimeout(() => {
+                    if (!searchDialog.classList.contains("is-open")) {
+                        searchDialog.close();
+                    }
+                }, 200);
                 if (lastFocusedElement && "focus" in lastFocusedElement) {
                     (lastFocusedElement as HTMLElement).focus();
                 }
@@ -277,8 +276,10 @@
             btn.addEventListener("click", () => setSearchOpen(false))
         );
 
-        searchOverlay?.addEventListener("click", (e) => {
-            if (e.target === searchOverlay) setSearchOpen(false);
+        // Intercept browser Escape to run animated close instead
+        searchDialog?.addEventListener("cancel", (e) => {
+            e.preventDefault();
+            setSearchOpen(false);
         });
 
         document.addEventListener("keydown", (e) => {
@@ -288,7 +289,7 @@
                 return;
             }
 
-            if (searchOverlay?.dataset.searchState !== "open") return;
+            if (!searchDialog?.open) return;
 
             if (e.key === "Escape") {
                 e.preventDefault();

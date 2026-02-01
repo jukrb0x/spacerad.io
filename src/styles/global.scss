@@ -48,19 +48,6 @@ body {
   line-height: var(--line-height-base);
   letter-spacing: 0.01em;
 
-  // Scroll lock utility - used by drawers, lightboxes, modals
-  // NOTE: We intentionally avoid overflow:hidden here as it triggers
-  // iOS Safari viewport recalculation (address bar show/hide).
-  // Instead, scrolling is prevented via JavaScript event handlers.
-  &.scroll-locked {
-    touch-action: none;
-    overscroll-behavior: none;
-  }
-}
-
-// Scroll lock for html element
-html.scroll-locked {
-  scroll-behavior: auto !important;
 }
 
 // Scrollable containers within modals (touch scroll support)
@@ -69,6 +56,179 @@ html.scroll-locked {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y;
+}
+
+// =============================================
+// Dialog-based drawer shared styles
+// All overlays use <dialog> + showModal()/close() so iOS Safari
+// handles viewport recalculation (address bar) correctly via the top layer.
+// =============================================
+
+// Shared reset for full-screen dialog drawers
+.nav-drawer,
+.toc-drawer {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+
+  // Hide browser default backdrop — we use our own
+  &::backdrop {
+    background: transparent;
+  }
+
+  // dialog:not([open]) is display:none by default; override when open
+  &[open] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+}
+
+// Nav drawer
+.nav-drawer {
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 200ms;
+    cursor: default;
+  }
+
+  &.is-open &__backdrop {
+    opacity: 1;
+  }
+
+  &__panel {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: 100%;
+    width: 18rem;
+    max-width: 80vw;
+    padding: 1.5rem;
+    border-left: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transform: translateX(1.5rem);
+    transition: transform 200ms;
+  }
+
+  &.is-open &__panel {
+    transform: translateX(0);
+  }
+}
+
+// TOC drawer
+.toc-drawer {
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 300ms;
+    cursor: default;
+  }
+
+  &.is-open &__backdrop {
+    opacity: 1;
+  }
+
+  &__panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 20rem;
+    max-width: 85vw;
+    background: var(--color-bg-surface);
+    transition: transform 300ms;
+  }
+
+  &.is-open &__panel {
+    transform: translateX(0) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+// Search dialog
+.search-dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+
+  &::backdrop {
+    background: transparent;
+  }
+
+  &[open] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 200ms;
+    cursor: default;
+  }
+
+  &.is-open &__backdrop {
+    opacity: 1;
+  }
+
+  &__container {
+    position: relative;
+    z-index: 1;
+    margin-top: 10vh;
+    width: 100%;
+    max-width: 42rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    padding: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: transform 200ms;
+
+    @media (min-width: 640px) {
+      margin-left: 1.5rem;
+      margin-right: 1.5rem;
+    }
+  }
+
+  &.is-open &__container {
+    transform: translateY(0) !important;
+  }
 }
 
 // =============================================

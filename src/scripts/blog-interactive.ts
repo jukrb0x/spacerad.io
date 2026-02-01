@@ -3,7 +3,7 @@
  * Includes: responsive tables, TOC navigation, mobile drawer, etc.
  */
 
-import { lockScroll, unlockScroll } from "../utils/scrollLock";
+import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
 // ============ Timing Utilities ============
 function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number): T {
@@ -247,55 +247,45 @@ function initTocObserver() {
 // ============ Mobile TOC Drawer ============
 function initMobileTocDrawer() {
     const toggleBtn = document.querySelector("[data-toc-mobile-toggle]");
-    const drawer = document.querySelector("[data-toc-mobile-drawer]");
-    const overlay = document.querySelector("[data-toc-mobile-overlay]");
+    const dialog = document.querySelector<HTMLDialogElement>("[data-toc-mobile-drawer]");
     const content = document.querySelector("[data-toc-mobile-content]");
-    const closeBtn = document.querySelector("[data-toc-mobile-close]");
-    const tocLinks = drawer?.querySelectorAll("[data-toc-link]");
+    const closeBtns = dialog?.querySelectorAll("[data-toc-mobile-close]");
+    const tocLinks = dialog?.querySelectorAll("[data-toc-link]");
 
-    if (!toggleBtn || !drawer || !overlay || !content || !closeBtn) return;
-
-    let isOpen = false;
+    if (!toggleBtn || !dialog || !content) return;
 
     const openDrawer = () => {
-        isOpen = true;
-        drawer.classList.remove("pointer-events-none");
-        drawer.setAttribute("aria-hidden", "false");
-        overlay.classList.remove("opacity-0", "pointer-events-none");
-        content.classList.remove("translate-x-full");
-        content.classList.add("shadow-2xl");
-        lockScroll();
+        dialog.showModal();
+        lockScrollForDialog();
+        // Animate in next frame after dialog is visible
+        requestAnimationFrame(() => {
+            dialog.classList.add("is-open");
+        });
     };
 
     const closeDrawer = () => {
-        isOpen = false;
-        overlay.classList.add("opacity-0", "pointer-events-none");
-        content.classList.add("translate-x-full");
-        content.classList.remove("shadow-2xl");
-        unlockScroll();
-        // Wait for animation to complete before hiding
+        dialog.classList.remove("is-open");
+        unlockScrollForDialog();
+        // Close dialog after CSS transition completes
         setTimeout(() => {
-            if (!isOpen) {
-                drawer.classList.add("pointer-events-none");
-                drawer.setAttribute("aria-hidden", "true");
+            if (!dialog.classList.contains("is-open")) {
+                dialog.close();
             }
         }, 300);
     };
 
     toggleBtn.addEventListener("click", openDrawer);
-    closeBtn.addEventListener("click", closeDrawer);
-    overlay.addEventListener("click", closeDrawer);
+    closeBtns?.forEach((btn) => btn.addEventListener("click", closeDrawer));
+
+    // Intercept browser Escape to run animated close instead
+    dialog.addEventListener("cancel", (e) => {
+        e.preventDefault();
+        closeDrawer();
+    });
 
     // Auto-close drawer when clicking TOC links
     tocLinks?.forEach((link) => {
         link.addEventListener("click", closeDrawer);
-    });
-
-    // Close on ESC key
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && isOpen) {
-            closeDrawer();
-        }
     });
 }
 
