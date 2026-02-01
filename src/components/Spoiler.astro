@@ -5,22 +5,29 @@
 	class="spoiler inline-block cursor-pointer select-none rounded px-1 transition-colors"
 	style="background: var(--color-text-primary); color: var(--color-text-primary);"
 >
-  <slot />
+	<slot />
 </span>
 
 <script>
-  // Client-side script (runs in browser)
-  document.addEventListener('DOMContentLoaded', function() {
-    const spoilers = document.querySelectorAll('.spoiler');
+	// Client-side script (runs in browser)
+	function initSpoilers() {
+		const spoilers = document.querySelectorAll(".spoiler");
 
-    spoilers.forEach(spoiler => {
-      spoiler.addEventListener('click', function(event) {
-        const target = event.currentTarget as HTMLElement;
-        target.classList.toggle('revealed');
-        target.style.color = target.classList.contains('revealed')
-          ? 'var(--color-bg-surface)'
-          : 'var(--color-text-primary)';
-      });
-    });
-  });
+		spoilers.forEach((spoiler) => {
+			// Skip if already initialized
+			if (spoiler.hasAttribute("data-spoiler-init")) return;
+			spoiler.setAttribute("data-spoiler-init", "true");
+
+			spoiler.addEventListener("click", function (event) {
+				const target = event.currentTarget as HTMLElement;
+				target.classList.toggle("revealed");
+				target.style.color = target.classList.contains("revealed")
+					? "var(--color-bg-surface)"
+					: "var(--color-text-primary)";
+			});
+		});
+	}
+
+	// Initialize on page load (SPA-safe)
+	document.addEventListener("astro:page-load", initSpoilers);
 </script>

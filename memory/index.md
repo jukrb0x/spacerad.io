@@ -146,8 +146,21 @@
 | `extractDescription.ts` | `extractDescription()` |
 | `readingTime.ts` | `readingTime()` |
 | `telegram.ts` | `fetchTelegramChannel()` |
-| `scrollLock.ts` | `lockScroll()`, `unlockScroll()` |
+| `scrollLock.ts` | `lockScrollForDialog()`, `unlockScrollForDialog()` |
 | `viewportHeight.ts` | iOS `--vh` variable |
+| `timing.ts` | `debounce()`, `throttle()` |
+| `imagePreloader.ts` | `preloadImage()`, `getImageState()`, `clearImageCache()` |
+| `spaLifecycle.ts` | `autoInit()`, `createPersistentListener()`, `createNavigationListener()`, `once()` |
+| `imageUrl.ts` | `getImageUrl()`, `getAbsoluteImageUrl()` |
+| `dialogUtils.ts` | `closeDialogWithAnimation()`, `openDialogWithAnimation()`, `toggleDialog()` |
+| `navigationUtils.ts` | `isActiveLink()`, `getParentPath()` |
+
+## Library Abstractions (`src/lib/`)
+
+| File | Exports |
+|------|---------|
+| `theme-effects.ts` | `initTheme()`, `getThemeState()`, `onThemeChange()`, `setThemePreference()`, `cycleTheme()` |
+| `embedSystem.ts` | `EmbedSystem`, `createEmbedSystem()` |
 
 ## State Management (`src/stores/`)
 
@@ -163,14 +176,15 @@
 |--------|---------|-------------|
 | `theme.ts` | Theme toggle bindings — wrapper around `stores/theme` nanostores | Imports nanostores, exports `bindThemeToggles`, `onThemeChange` |
 | `header-scroll.ts` | Header hide/show, reading progress | `astro:page-load` re-query refs, persistent scroll guard |
-| `code-blocks.ts` | Copy button, language labels | `astro:after-swap` re-init |
-| `blog-interactive.ts` | TOC, share sidebar, like button | Called from BlogPost, persistent listener guard |
+| `code-blocks.ts` | Copy button, language labels | Uses `autoInit()` helper |
+| `blog-interactive.ts` | TOC, responsive tables, iframe embeds, sidebar positioning | Uses `autoInit()`, persistent listener guard |
 | `mermaid-init.ts` | Mermaid diagram rendering | Cache module, re-render from `data-mermaid-src` |
-| `post-preview.ts` | Hover preview card | `astro:page-load` re-init |
+| `post-preview.ts` | Hover preview card | Uses image preloader utility, `astro:page-load` re-init |
 | `viewport-height.ts` | iOS 100vh fix | Persistent resize listener |
-| `scroll-lock.ts` | Prevent body scroll | Stateless utility |
-| `cusdis.ts` | Cusdis comments | `astro:after-swap` re-init, theme cleanup |
-| `remark42.ts` | Remark42 comments | `astro:after-swap` re-init, `destroyRemark42()` cleanup |
+| `cusdis.ts` | Cusdis comments | Uses `embedSystem` abstraction and `autoInit()` |
+| `remark42.ts` | Remark42 comments | Uses `embedSystem` abstraction and `autoInit()` |
+| `likes.ts` | Like button system | Uses `autoInit()`, localStorage + API sync |
+| `shareMenu.ts` | Mobile share menu | Uses `autoInit()`, menu animations and clipboard |
 
 ---
 

@@ -153,14 +153,47 @@ All scripts are SPA-aware — they use `astro:page-load` or `astro:after-swap` f
 |--------|---------|-------------|
 | `theme.ts` | Theme toggle bindings — wrapper around `stores/theme` nanostores | Imports nanostores, exports `bindThemeToggles`, `onThemeChange` |
 | `header-scroll.ts` | Header hide/show on scroll, reading progress bar | `let` refs re-queried on `astro:page-load`, persistent scroll listener with guard |
-| `code-blocks.ts` | Copy button, language labels | `astro:after-swap` re-init, `data-codeBlockInitialized` guard |
-| `blog-interactive.ts` | TOC mobile drawer, share sidebar, like button | Called from BlogPost's `astro:page-load`, guard for persistent listeners |
+| `code-blocks.ts` | Copy button, language labels | Uses `autoInit()` helper for SPA-safe initialization |
+| `blog-interactive.ts` | TOC navigation, responsive tables, iframe embeds, sidebar positioning | Uses `autoInit()` for persistent listeners, guard for scroll/resize |
 | `mermaid-init.ts` | Mermaid diagram rendering | Caches module after first import, re-renders from `data-mermaid-src` |
-| `post-preview.ts` | Hover preview card for post links | `astro:page-load` re-init |
+| `post-preview.ts` | Hover preview card for post links | Uses image preloader utility, `astro:page-load` re-init |
 | `viewport-height.ts` | iOS 100vh fix (`--vh` CSS variable) | Persistent resize listener |
-| `scroll-lock.ts` | Prevent body scroll during modals (`.scroll-locked`) | Stateless utility |
-| `cusdis.ts` | Cusdis comment system | `astro:after-swap` re-init, theme cleanup |
-| `remark42.ts` | Remark42 comment system | `astro:after-swap` re-init, `destroyRemark42()` cleanup, theme cleanup |
+| `cusdis.ts` | Cusdis comment system | Uses `embedSystem` abstraction and `autoInit()` helper |
+| `remark42.ts` | Remark42 comment system | Uses `embedSystem` abstraction and `autoInit()` helper |
+| `likes.ts` | Like button system with localStorage + API sync | Uses `autoInit()`, manages like state and animations |
+| `shareMenu.ts` | Mobile share menu toggle and copy link | Uses `autoInit()`, handles menu animations and clipboard |
+
+---
+
+## Utility Functions (`src/utils/`)
+
+Reusable utilities extracted from component code for better maintainability.
+
+| File | Exports | Purpose |
+|------|---------|---------|
+| `posts.ts` | `getPublishedPosts()`, `getAllRenderablePosts()`, `groupPostsByYear()` | Post filtering and organization |
+| `extractDescription.ts` | `extractDescription()` | Extract description from MDX content |
+| `readingTime.ts` | `readingTime()` | Calculate reading time estimate |
+| `telegram.ts` | `fetchTelegramChannel()` | Fetch Telegram channel posts |
+| `scrollLock.ts` | `lockScrollForDialog()`, `unlockScrollForDialog()` | Prevent body scroll during modals |
+| `viewportHeight.ts` | iOS `--vh` variable | Fix iOS viewport height issues |
+| `timing.ts` | `debounce()`, `throttle()` | Rate-limiting function calls |
+| `imagePreloader.ts` | `preloadImage()`, `getImageState()`, `clearImageCache()` | Image preloading with state tracking |
+| `spaLifecycle.ts` | `autoInit()`, `createPersistentListener()`, `createNavigationListener()`, `once()` | Standardized SPA initialization patterns |
+| `imageUrl.ts` | `getImageUrl()`, `getAbsoluteImageUrl()` | Extract URLs from ImageMetadata objects |
+| `dialogUtils.ts` | `closeDialogWithAnimation()`, `openDialogWithAnimation()`, `toggleDialog()` | Dialog animation helpers |
+| `navigationUtils.ts` | `isActiveLink()`, `getParentPath()` | Navigation and active link detection |
+
+---
+
+## Library Abstractions (`src/lib/`)
+
+Higher-level abstractions for complex functionality.
+
+| File | Exports | Purpose |
+|------|---------|---------|
+| `theme-effects.ts` | `initTheme()`, `getThemeState()`, `onThemeChange()`, `setThemePreference()`, `cycleTheme()` | Theme system with FOUC prevention and nanostores integration |
+| `embedSystem.ts` | `EmbedSystem`, `createEmbedSystem()` | Generic abstraction for third-party embed widgets (comments, etc.) |
 
 ---
 

@@ -22,6 +22,7 @@ const title = pageTitle || Astro.url.pathname;
 	<h2 class="comments-title">Comments</h2>
 	{CUSDIS_APP_ID ? (
 		<div
+			class="comments-container"
 			id="cusdis_thread"
 			data-cusdis-host={CUSDIS_HOST}
 			data-cusdis-app-id={CUSDIS_APP_ID}
@@ -37,19 +38,8 @@ const title = pageTitle || Astro.url.pathname;
 	import "../scripts/cusdis.ts";
 </script>
 
-<style>
-	.comments-section {
-		margin-top: var(--space-12);
-		padding-top: var(--space-6);
-		border-top: 1px solid var(--color-border-subtle);
-	}
-
-	.comments-title {
-		margin: 0 0 var(--space-4);
-		font-size: var(--font-size-xl);
-		font-weight: 600;
-		color: var(--color-text-primary);
-	}
+<style lang="scss">
+	@use "../styles/components/comments";
 
 	.comments-disabled {
 		color: var(--color-text-muted);
