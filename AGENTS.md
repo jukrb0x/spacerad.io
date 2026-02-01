@@ -4,6 +4,10 @@ Personal blog by Jabriel. Astro 5 + UnoCSS + SCSS + Vue 3, deployed on Cloudflar
 
 ## Quick Reference
 
+Project memory is split into several documents, you can explore folder `memory`. 
+
+Refer to the table below to find what you need quickly:
+
 | What you need | Document |
 |---------------|----------|
 | Project structure, routing, content schema, layouts, components | [memory/architecture.md](memory/architecture.md) |
