@@ -10,6 +10,7 @@ const DEFAULT_PREFERENCE: ThemePreference = "system";
 // Store for theme state that persists across navigations
 export const themePreference = atom<ThemePreference>(DEFAULT_PREFERENCE);
 export const activeTheme = atom<ThemeName>("light");
+export const isThemeInitialized = atom<boolean>(false);
 
 // Initialize from localStorage on client
 const isClient = typeof window !== "undefined" && typeof document !== "undefined";
@@ -49,8 +50,7 @@ if (isClient) {
 	// Apply initial theme
 	applyTheme(activeTheme.get(), themePreference.get());
 
-	// Mark nanostores as initialized so BaseHead script doesn't duplicate
-	(window as any).__themeInitialized = true;
+	isThemeInitialized.set(true);
 
 	// Listen for preference changes and update active theme + document
 	themePreference.subscribe((preference) => {

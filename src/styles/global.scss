@@ -1470,20 +1470,20 @@ a {
   }
 
   // Active icon states
-  [data-theme-preference='system'] [data-icon='system'],
-  [data-theme-preference='light'] [data-icon='light'],
-  [data-theme-preference='dark'] [data-icon='dark'] {
+  [data-theme-toggle][data-theme-preference='system'] [data-icon='system'],
+  [data-theme-toggle][data-theme-preference='light'] [data-icon='light'],
+  [data-theme-toggle][data-theme-preference='dark'] [data-icon='dark'] {
     opacity: 1;
     transform: scale(1) rotate(0deg);
   }
 
   // Hidden icon states
-  [data-theme-preference='system'] [data-icon='light'],
-  [data-theme-preference='system'] [data-icon='dark'],
-  [data-theme-preference='light'] [data-icon='system'],
-  [data-theme-preference='light'] [data-icon='dark'],
-  [data-theme-preference='dark'] [data-icon='system'],
-  [data-theme-preference='dark'] [data-icon='light'] {
+  [data-theme-toggle][data-theme-preference='system'] [data-icon='light'],
+  [data-theme-toggle][data-theme-preference='system'] [data-icon='dark'],
+  [data-theme-toggle][data-theme-preference='light'] [data-icon='system'],
+  [data-theme-toggle][data-theme-preference='light'] [data-icon='dark'],
+  [data-theme-toggle][data-theme-preference='dark'] [data-icon='system'],
+  [data-theme-toggle][data-theme-preference='dark'] [data-icon='light'] {
     opacity: 0;
     transform: scale(0.5) rotate(90deg);
     pointer-events: none;

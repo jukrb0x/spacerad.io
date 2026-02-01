@@ -45,6 +45,9 @@
 - Markdown plugins → `tech-stack.md#remark-plugins` and `tech-stack.md#rehype-plugins`
 - Cloudflare deployment → `tech-stack.md#cloudflare-deployment`
 
+### State Management
+- Theme state (nanostores) → `src/stores/theme.ts` |
+
 ---
 
 ## Key Conventions (Must-Know)
@@ -146,13 +149,19 @@
 | `scrollLock.ts` | `lockScroll()`, `unlockScroll()` |
 | `viewportHeight.ts` | iOS `--vh` variable |
 
+## State Management (`src/stores/`)
+
+| File | Exports |
+|------|---------|
+| `theme.ts` | `themePreference`, `activeTheme`, `setThemePreference`, `cycleTheme`, `getThemeState` |
+
 ---
 
 ## Client Scripts (`src/scripts/`)
 
 | Script | Purpose | SPA Pattern |
 |--------|---------|-------------|
-| `theme.ts` | Theme management, 3-state cycle | `data-theme-bound` guard, `onThemeChange` cleanup |
+| `theme.ts` | Theme toggle bindings — wrapper around `stores/theme` nanostores | Imports nanostores, exports `bindThemeToggles`, `onThemeChange` |
 | `header-scroll.ts` | Header hide/show, reading progress | `astro:page-load` re-query refs, persistent scroll guard |
 | `code-blocks.ts` | Copy button, language labels | `astro:after-swap` re-init |
 | `blog-interactive.ts` | TOC, share sidebar, like button | Called from BlogPost, persistent listener guard |
@@ -289,3 +298,4 @@ This index reflects the current state of memory documents. Update when:
 - Design tokens are modified
 - SPA patterns evolve
 - New dependencies are added
+- State management patterns change (e.g., nanostores adoption)

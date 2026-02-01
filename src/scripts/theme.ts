@@ -30,8 +30,8 @@ export const onThemeChange = (listener: Listener) => {
 	listeners.add(listener);
 	listener(getThemeState());
 
-	// Subscribe to nanostore changes
-	const unsubscribeTheme = activeTheme.subscribe(() => {
+	// Subscribe to nanostore changes - use themePreference since the toggle shows the preference icon
+	const unsubscribeTheme = themePreference.subscribe(() => {
 		listener(getThemeState());
 	});
 

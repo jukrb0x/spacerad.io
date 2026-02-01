@@ -57,6 +57,15 @@ The site uses Astro's `<ClientRouter />` for SPA-style navigation. This is criti
 4. **Inline `<script is:inline>` tags** need `data-astro-rerun` attribute to re-execute on navigation.
 5. **Use `AbortController` for document-level listener cleanup** to prevent listener leaks across navigations. See `NavDrawer.astro` for the canonical pattern.
 6. **Use module-level guards** (`let scrollListenerAttached = false`) for persistent listeners (scroll, resize) that should only bind once.
-7. **Clean up `onThemeChange` subscriptions** — store the unsubscribe function and call it before re-subscribing.
+7. **Theme state uses nanostores** — `src/stores/theme.ts` provides reactive state that persists across navigation. No need for manual theme subscriptions cleanup.
 8. **Don't put `transition:animate="none"` on footer** — it creates a view-transition stacking context that breaks fixed-position FABs.
 9. **Header scroll offset** (`--header-offset`) — only set on page-load, never during scroll (causes layout thrashing).
+
+### Theme State Management (Nanostores)
+
+**Theme store:** `src/stores/theme.ts`
+- Uses `nanostores` atoms for reactive state: `themePreference` and `activeTheme`
+- State persists across SPA navigation (module executes once)
+- Applies theme on initial load, before swap, and after swap to prevent FOUC
+- Import in `BaseHead.astro` to ensure store is always loaded
+- No need for manual cleanup — nanostores subscriptions handle it automatically

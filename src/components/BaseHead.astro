@@ -5,8 +5,6 @@ import "../styles/global.scss";
 import "katex/dist/katex.min.css";
 import { ClientRouter } from "astro:transitions";
 import { SITE_TITLE, SITE_SOCIAL_IMAGE } from "../consts";
-// Import theme store to ensure it's always loaded
-import "../stores/theme";
 
 interface Props {
     title: string;
@@ -26,10 +24,11 @@ const { title, description, image = SITE_SOCIAL_IMAGE } = Astro.props;
 
 <!-- Theme initialization script (prevents FOUC) - only runs on initial load -->
 <script is:inline>
+import { isThemeInitialized } from "../stores/theme"
+
     (() => {
         // Only run on initial page load, not during navigation
-        if (window.__themeInitialized) return;
-        window.__themeInitialized = true;
+        if (isThemeInitialized.get()) return;
 
         const storageKey = "theme-preference";
         const root = document.documentElement;
