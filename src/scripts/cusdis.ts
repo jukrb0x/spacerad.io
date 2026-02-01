@@ -1,4 +1,4 @@
-import { getThemeState, initTheme, onThemeChange, type ThemeState } from "./theme";
+import { getThemeState, initTheme, onThemeChange, type ThemeState } from "../lib/theme-effects";
 
 type CusdisGlobal = {
     setTheme?: (theme: "light" | "dark") => void;

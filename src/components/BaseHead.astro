@@ -24,11 +24,17 @@ const { title, description, image = SITE_SOCIAL_IMAGE } = Astro.props;
 
 <!-- Theme initialization script (prevents FOUC) - only runs on initial load -->
 <script is:inline>
-import { isThemeInitialized } from "../stores/theme"
-
     (() => {
         // Only run on initial page load, not during navigation
-        if (isThemeInitialized.get()) return;
+        // Check sessionStorage flag to prevent re-running
+        const initFlag = "theme-fouc-init";
+        if (window.sessionStorage?.getItem(initFlag)) return;
+
+        try {
+            window.sessionStorage?.setItem(initFlag, "1");
+        } catch {
+            /* noop */
+        }
 
         const storageKey = "theme-preference";
         const root = document.documentElement;
@@ -68,7 +74,10 @@ import { isThemeInitialized } from "../stores/theme"
 </script>
 <script>
     import { initViewportHeight } from "../utils/viewportHeight";
+    import { initTheme } from "../lib/theme-effects";
+
     initViewportHeight();
+    initTheme();
 </script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="sitemap" href="/sitemap-index.xml" />
