@@ -91,7 +91,7 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 </dialog>
 
 <script>
-	import { lockScroll, unlockScroll } from "../utils/scrollLock";
+	import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
 	interface Shot {
 		el?: Element;
@@ -195,14 +195,14 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 			showImage(current);
 			dialog.showModal();
 			dialog.classList.add("is-open");
-			lockScroll();
+			lockScrollForDialog();
 		};
 
 		const close = () => {
 			if (!dialog.open) return;
 			dialog.close();
 			dialog.classList.remove("is-open");
-			unlockScroll();
+			unlockScrollForDialog();
 		};
 
 		const step = (delta: number) => {
@@ -261,7 +261,7 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 			if (dialog.open) {
 				dialog.close();
 				dialog.classList.remove("is-open");
-				unlockScroll();
+				unlockScrollForDialog();
 			}
 		}, { signal });
 	}

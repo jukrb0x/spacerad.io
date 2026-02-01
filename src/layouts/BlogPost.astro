@@ -171,22 +171,21 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 					</svg>
 				</button>
 
-				<!-- Mobile: Drawer -->
-				<div
+				<!-- Mobile: Drawer (dialog for proper iOS Safari viewport handling) -->
+				<dialog
 					data-toc-mobile-drawer
-					class="min-[1400px]:hidden fixed inset-0 z-50 pointer-events-none"
-					aria-hidden="true"
+					class="toc-drawer min-[1400px]:hidden"
 				>
-					<!-- Overlay -->
-					<div
-						data-toc-mobile-overlay
-						class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300 pointer-events-none"
-					></div>
+					<button
+						type="button"
+						data-toc-mobile-close
+						class="toc-drawer__backdrop"
+						aria-label="Close table of contents"></button>
 
 					<!-- Drawer content -->
 					<div
 						data-toc-mobile-content
-						class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-surface translate-x-full transition-transform duration-300 pointer-events-auto"
+						class="toc-drawer__panel translate-x-full transition-transform duration-300"
 					>
 						<div class="flex h-full flex-col">
 							<!-- Header -->
@@ -211,7 +210,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 							</div>
 						</div>
 					</div>
-				</div>
+				</dialog>
 			</>
 		)}
 		<Footer />

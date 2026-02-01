@@ -1,5 +1,5 @@
 ---
-// NavDrawer.astro - Mobile navigation drawer (rendered outside header to avoid transform issues)
+// NavDrawer.astro - Mobile navigation drawer using <dialog> for proper iOS Safari viewport handling
 import { NAV_LINKS } from "../consts";
 
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
@@ -7,21 +7,20 @@ const subpath = pathname.match(/[^/]+/g);
 const isActive = (href: string) => href === pathname || href === `/${subpath?.[0] || ""}`;
 ---
 
-<div
+<dialog
     data-nav-overlay
-    class="fixed inset-0 z-50 flex items-start justify-end bg-black/30 opacity-0 transition-opacity duration-200 pointer-events-none md:hidden"
-    data-nav-state="closed"
+    class="nav-drawer md:hidden"
     transition:animate="none"
 >
     <button
         type="button"
-        class="absolute inset-0 h-full w-full cursor-default"
+        class="nav-drawer__backdrop"
         data-nav-close
         aria-label="Close navigation menu"></button>
     <div
         data-nav-drawer
         data-scroll-container
-        class="relative z-[100] flex h-full w-72 max-w-[80vw] translate-x-6 flex-col gap-6 border-l border-border bg-surface p-6 text-primary shadow-xl transition-transform duration-200 backdrop-blur-sm"
+        class="nav-drawer__panel"
     >
         <div class="flex items-center justify-between">
             <span
@@ -57,17 +56,17 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             }
         </nav>
     </div>
-</div>
+</dialog>
 
 <script>
-    import { lockScroll, unlockScroll } from "../utils/scrollLock";
+    import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
     // AbortController for document-level listeners so we can clean up on re-init
     let drawerAbort: AbortController | null = null;
 
     function initNavDrawer() {
         const toggleButton = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
-        const overlay = document.querySelector<HTMLElement>("[data-nav-overlay]");
+        const overlay = document.querySelector<HTMLDialogElement>("[data-nav-overlay]");
         const drawer = document.querySelector<HTMLElement>("[data-nav-drawer]");
         const closeButtons = document.querySelectorAll<HTMLButtonElement>("[data-nav-close]");
         const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
@@ -92,26 +91,33 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const setNavOpen = (open: boolean) => {
             if (!overlay || !drawer) return;
 
-            overlay.dataset.navState = open ? "open" : "closed";
             toggleButton?.setAttribute("aria-expanded", String(open));
             toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
 
             if (open) {
                 lastFocusedElement = document.activeElement;
-                toggleClasses(overlay, ["opacity-100"], ["pointer-events-none", "opacity-0"]);
-                toggleClasses(drawer, ["translate-x-0"], ["translate-x-6"]);
+                overlay.showModal();
+                lockScrollForDialog();
+                // Animate in next frame after dialog is visible
+                requestAnimationFrame(() => {
+                    overlay.classList.add("is-open");
+                });
                 toggleClasses(barTop, ["translate-y-1.5", "rotate-45"], []);
                 toggleClasses(barBottom, ["-translate-y-1.5", "-rotate-45"], []);
                 toggleClasses(barMiddle, ["opacity-0"], []);
-                lockScroll();
                 requestAnimationFrame(() => navLinks[0]?.focus({ preventScroll: true }));
             } else {
-                toggleClasses(overlay, ["opacity-0", "pointer-events-none"], ["opacity-100"]);
-                toggleClasses(drawer, ["translate-x-6"], ["translate-x-0"]);
+                overlay.classList.remove("is-open");
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
                 toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
                 toggleClasses(barMiddle, [], ["opacity-0"]);
-                unlockScroll();
+                unlockScrollForDialog();
+                // Close dialog after CSS transition completes
+                setTimeout(() => {
+                    if (!overlay.classList.contains("is-open")) {
+                        overlay.close();
+                    }
+                }, 200);
                 if (lastFocusedElement && "focus" in lastFocusedElement) {
                     (lastFocusedElement as HTMLElement).focus({ preventScroll: true });
                 }
@@ -119,30 +125,32 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         };
 
         // Element-level listeners (auto-cleaned when DOM swaps)
-        toggleButton?.addEventListener("click", () => setNavOpen(overlay?.dataset.navState !== "open"));
+        toggleButton?.addEventListener("click", () => setNavOpen(!overlay.open));
         closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
-        overlay?.addEventListener("click", (e) => e.target === overlay && setNavOpen(false));
         navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+
+        // Intercept browser Escape to run animated close instead
+        overlay.addEventListener("cancel", (e) => {
+            e.preventDefault();
+            setNavOpen(false);
+        });
 
         // Document-level listeners (cleaned via AbortController)
         document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && overlay?.dataset.navState === "open") {
+            if (e.key === "Escape" && overlay.open) {
                 setNavOpen(false);
             }
         }, { signal });
 
         // Close drawer instantly before page swap to prevent flash
         document.addEventListener("astro:before-swap", () => {
-            if (overlay.dataset.navState === "open") {
-                overlay.dataset.navState = "closed";
-                overlay.classList.add("opacity-0", "pointer-events-none");
-                overlay.classList.remove("opacity-100");
-                drawer.classList.add("translate-x-6");
-                drawer.classList.remove("translate-x-0");
+            if (overlay.open) {
+                overlay.classList.remove("is-open");
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
                 toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
                 toggleClasses(barMiddle, [], ["opacity-0"]);
-                unlockScroll();
+                unlockScrollForDialog();
+                overlay.close();
             }
         }, { signal });
 
