@@ -19,6 +19,7 @@ Personal blog by Jabriel. Astro 5 + UnoCSS + SCSS + Vue 3, deployed on Cloudflar
 - Prefer simplicity and minimalism over complexity
 - Document decisions and architecture for future reference
 - Automate repetitive tasks where possible
+- Update the memory docs as the project evolves
 
 ## Commands
 
