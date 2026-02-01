@@ -1,10 +1,10 @@
 ---
-import BaseHead from "../components/BaseHead.astro";
-import Comments from "../components/Comments.astro";
-import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
-import Lightbox from "../components/Lightbox.astro";
-import Prose from "../components/Prose.astro";
+import BaseHead from "@components/BaseHead.astro";
+import Comments from "@components/Comments.astro";
+import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
+import Lightbox from "@components/Lightbox.astro";
+import Prose from "@components/Prose.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 
 const { frontmatter = {} } = Astro.props as { frontmatter?: Record<string, unknown> };
