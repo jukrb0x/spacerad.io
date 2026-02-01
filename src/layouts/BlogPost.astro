@@ -14,6 +14,7 @@ import TableOfContents from "@components/TableOfContents.astro";
 import { SITE_TITLE, DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
 import { calculateReadingTime } from "../utils/readingTime";
+import { getImageUrl } from "../utils/imageUrl";
 
 type EntryData = CollectionEntry<"blog">["data"];
 
@@ -51,12 +52,7 @@ const description = providedDescription || (body ? extractDescription(body) : "N
 const readingTime = body ? calculateReadingTime(body) : null;
 
 // Extract image URL from socialImage (can be ImageMetadata or string)
-const getImageUrl = (img: ImageMetadata | string | undefined): string => {
-    if (!img) return DEFAULT_POST_SOCIAL_IMAGE;
-    if (typeof img === "object" && "src" in img) return img.src;
-    return img;
-};
-const imageSrc = getImageUrl(socialImage);
+const imageSrc = getImageUrl(socialImage, DEFAULT_POST_SOCIAL_IMAGE);
 
 // Extract slug from URL path for like API
 const slug = Astro.url.pathname.replace(/^\/|\/$/g, "");

@@ -10,6 +10,7 @@ import type { ImageMetadata } from "astro";
 import { DEFAULT_POST_SOCIAL_IMAGE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
 import { getAllRenderablePosts } from "../utils/posts";
+import { getImageUrl } from "../utils/imageUrl";
 
 interface PostMeta {
     title: string;
@@ -23,15 +24,6 @@ interface Props {
 }
 
 const { meta } = Astro.props as Props;
-
-// Extract image URL from various formats
-function getImageUrl(socialImage: ImageMetadata | string | undefined): string | undefined {
-    if (!socialImage) return undefined;
-    if (typeof socialImage === "object" && "src" in socialImage) {
-        return socialImage.src;
-    }
-    return socialImage;
-}
 
 // Build metadata map from posts collection
 async function buildMetaMap(): Promise<Record<string, PostMeta>> {
