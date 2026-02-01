@@ -15,8 +15,8 @@ import { rehypePrettyCode } from "rehype-pretty-code";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { remarkModifiedTime } from "./remark-modified-time.mjs";
-import { rehypeMermaidPre } from "./rehype-mermaid-pre.mjs";
+import { remarkModifiedTime } from "./scripts/remark-modified-time.mjs";
+import { rehypeMermaidPre } from "./scripts/rehype-mermaid-pre.mjs";
 
 import vue from "@astrojs/vue";
 
