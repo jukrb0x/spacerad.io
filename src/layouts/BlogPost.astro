@@ -125,64 +125,6 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 					)}
 				</div>
 
-				<!-- Mobile TOC -->
-				{showToc && (
-					<>
-						<!-- Mobile: Floating toggle button -->
-						<button
-							data-toc-mobile-toggle
-							class="min-[1400px]:hidden fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(251,143,104,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(251,143,104,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(251,143,104,0.95)] hover:shadow-[0_12px_40px_rgba(251,143,104,0.45)] active:scale-95"
-							aria-label="Open table of contents"
-						>
-							<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-								<path d="M3 4h18M3 12h18M3 20h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-							</svg>
-						</button>
-
-						<!-- Mobile: Drawer -->
-						<div
-							data-toc-mobile-drawer
-							class="min-[1400px]:hidden fixed inset-0 z-50 pointer-events-none"
-							aria-hidden="true"
-						>
-							<!-- Overlay -->
-							<div
-								data-toc-mobile-overlay
-								class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300 pointer-events-none"
-							></div>
-
-							<!-- Drawer content -->
-							<div
-								data-toc-mobile-content
-								class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-surface translate-x-full transition-transform duration-300 pointer-events-auto"
-							>
-								<div class="flex h-full flex-col">
-									<!-- Header -->
-									<div class="flex items-center justify-between border-b border-subtle px-6 py-4">
-										<h2 class="text-lg font-semibold text-primary">Contents</h2>
-										<button
-											data-toc-mobile-close
-											class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-											aria-label="Close"
-										>
-											<svg class="h-5 w-5 text-muted" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-												<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-											</svg>
-										</button>
-									</div>
-
-									<!-- TOC content -->
-									<div class="flex-1 overflow-y-auto px-6 pt-4 pb-8" data-scroll-container>
-										<div class="toc-mobile">
-											<TableOfContents headings={headings} />
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</>
-				)}
-
 				<!-- Content -->
 				<div class="pt-10 space-y-10 text-secondary">
 					<Prose class="max-w-none text-secondary">
@@ -214,6 +156,64 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 			<!-- Share sidebar: Desktop left side, Mobile floating button -->
 			<ShareSidebar title={title} description={description} tags={tags} slug={slug} hasToc={showToc} />
 		</main>
+
+		<!-- Mobile TOC: rendered outside main to avoid view-transition stacking context -->
+		{showToc && (
+			<>
+				<!-- Mobile: Floating toggle button -->
+				<button
+					data-toc-mobile-toggle
+					class="min-[1400px]:hidden fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(251,143,104,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(251,143,104,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(251,143,104,0.95)] hover:shadow-[0_12px_40px_rgba(251,143,104,0.45)] active:scale-95"
+					aria-label="Open table of contents"
+				>
+					<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<path d="M3 4h18M3 12h18M3 20h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+				</button>
+
+				<!-- Mobile: Drawer -->
+				<div
+					data-toc-mobile-drawer
+					class="min-[1400px]:hidden fixed inset-0 z-50 pointer-events-none"
+					aria-hidden="true"
+				>
+					<!-- Overlay -->
+					<div
+						data-toc-mobile-overlay
+						class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-300 pointer-events-none"
+					></div>
+
+					<!-- Drawer content -->
+					<div
+						data-toc-mobile-content
+						class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-surface translate-x-full transition-transform duration-300 pointer-events-auto"
+					>
+						<div class="flex h-full flex-col">
+							<!-- Header -->
+							<div class="flex items-center justify-between border-b border-subtle px-6 py-4">
+								<h2 class="text-lg font-semibold text-primary">Contents</h2>
+								<button
+									data-toc-mobile-close
+									class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
+									aria-label="Close"
+								>
+									<svg class="h-5 w-5 text-muted" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+									</svg>
+								</button>
+							</div>
+
+							<!-- TOC content -->
+							<div class="flex-1 overflow-y-auto px-6 pt-4 pb-8" data-scroll-container>
+								<div class="toc-mobile">
+									<TableOfContents headings={headings} />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</>
+		)}
 		<Footer />
 	</body>
 	<script>
@@ -226,7 +226,8 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 			initMermaid();
 		}
 
-		initBlogPage();
+		// Only use astro:page-load (fires on initial load + SPA navigations).
+		// A direct call here would double-init on first load, causing duplicate listeners.
 		document.addEventListener('astro:page-load', initBlogPage);
 	</script>
 </html>
