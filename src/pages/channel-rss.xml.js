@@ -169,7 +169,7 @@ export async function GET(context) {
                 return {
                     title: cleanTitle,
                     description: description,
-                    pubDate: new Date(post.datetime),
+                    published: new Date(post.datetime),
                     link: `https://t.me/${CHANNEL_USERNAME}/${post.id}`,
                     content: sanitizeHtml(fixedContent, {
                         allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),

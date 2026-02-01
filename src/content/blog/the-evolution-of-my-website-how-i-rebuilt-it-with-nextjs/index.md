@@ -2,7 +2,7 @@
 title: 'The Evolution of My Website: How I rebuilt it with Next.js'
 description: 'My renovated blog, based on Next.js + Nextra'
 socialImage: './mindmap.png'
-pubDate: 2023-05-04
+published: 2023-05-04
 lang: en
 tags: ['Frontend', 'Next.js', 'Nextra']
 comment: true

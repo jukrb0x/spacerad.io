@@ -25,17 +25,17 @@ type Props = EntryData & {
     frontmatter: Props;
 };
 
-// If it come from a page instead of a collection, we need to handle the pubDate from the frontmatter also
+// If it come from a page instead of a collection, we need to handle the published date from the frontmatter also
 const rawProps = Astro.props.body ? Astro.props : { ...Astro.props.frontmatter, ...Astro.props };
 const props = {
     ...rawProps,
-    pubDate: new Date(rawProps.pubDate ?? rawProps.frontmatter.pubDate),
+    published: new Date(rawProps.published ?? rawProps.frontmatter.published),
 };
 
 const {
     title,
     description: providedDescription,
-    pubDate,
+    published,
     updatedDate,
     socialImage,
     body,
@@ -81,7 +81,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 					<h1 class="text-2xl leading-tight font-bold text-primary sm:text-3xl">{title}</h1>
 					<div class="space-y-0.5 text-sm text-muted">
 						<p>
-							<FormattedDate date={pubDate} />
+							<FormattedDate date={published} />
 							{readingTime && (
 								<>
 									<span class="px-2 opacity-50">&middot;</span>
