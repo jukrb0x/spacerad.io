@@ -3,6 +3,7 @@ title: "Cusdis 到 Remark42 的评论迁移：PostgreSQL 到 BoltDB"
 description: "从 Cusdis (PostgreSQL) 迁移到 Remark42 (BoltDB) 的技术实现：数据库差异、数据转换和实现细节"
 published: 2026-01-30
 tags: ["数据库", "go", "迁移", "postgresql", "boltdb"]
+draft: true
 ---
 
 最近在重整这套 blog, 让 AI 写了个工具把评论从 Cusdis (PostgreSQL) 迁到 Remark42 (BoltDB)。核心问题：关系型数据转换成嵌套的键值结构。下面讲数据库差异和迁移实现。
