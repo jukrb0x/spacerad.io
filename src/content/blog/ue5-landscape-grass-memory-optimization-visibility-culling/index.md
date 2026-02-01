@@ -1,7 +1,7 @@
 ---
 title: '基于视锥剔除的 Landscape Grass 内存优化算法'
 description: '深入UE5地形草生成原理进行内存优化，节省大约一半的草地内存 Landscape Grass memory pptimization by visibility culling'
-pubDate: 2023-05-18
+published: 2023-05-18
 lang: zh
 tags: ['Unreal Engine', 'Landscape', 'Foliage', 'Performance']
 comment: true

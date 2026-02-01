@@ -1,7 +1,7 @@
 ---
 title: '🌊 Surgio Tutorial: Get comfortable with Surge'
 description: 'A tutorial for Surge with Surgio, supporting ssr and v2ray.'
-pubDate: 2020-11-20
+published: 2020-11-20
 lang: en
 tags: ['Surge', 'Surgio', 'Network']
 comment: true

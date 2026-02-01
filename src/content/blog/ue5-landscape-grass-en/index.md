@@ -1,7 +1,7 @@
 ---
 title: 'UE5 Landscape Grass Source Analysis: A Look Under the Hood'
 description: 'A breakdown of the principles behind the Landscape Grass system in Unreal Engine 5'
-pubDate: 2023-05-19
+published: 2023-05-19
 lang: en
 tags: ['Unreal Engine', 'Landscape', 'Foliage', 'UE5']
 socialImage: './a-look-under-the-hood-at-unreal-engine-landscape-grass-en.jpg'

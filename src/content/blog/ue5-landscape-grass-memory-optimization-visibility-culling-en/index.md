@@ -1,7 +1,7 @@
 ---
 title: 'Memory Optimization Algorithm for Landscape Grass Based on Visibility Culling in UE5'
 description: 'In-depth memory optimization of Landscape Grass, achieving approximately 50% reduction in grass memory usage on mobile devices.'
-pubDate: 2023-05-20
+published: 2023-05-20
 lang: en
 tags: ['Unreal Engine', 'Landscape', 'Foliage', 'Performance']
 comment: true

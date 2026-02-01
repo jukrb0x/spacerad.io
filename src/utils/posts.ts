@@ -16,7 +16,7 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
 	});
 
 	return posts.sort(
-		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+		(a, b) => b.data.published.valueOf() - a.data.published.valueOf(),
 	);
 }
 
@@ -37,7 +37,7 @@ export function groupPostsByYear(
 ): [string, BlogPost[]][] {
 	const byYear = new Map<string, BlogPost[]>();
 	for (const post of posts) {
-		const year = String(post.data.pubDate.getFullYear());
+		const year = String(post.data.published.getFullYear());
 		let group = byYear.get(year);
 		if (!group) {
 			group = [];

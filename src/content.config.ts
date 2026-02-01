@@ -6,7 +6,7 @@ const createSharedSchema = (image: ImageFunction) =>
         title: z.string(),
         description: z.string().optional(),
         // Transform string to Date object
-        pubDate: z.coerce.date(),
+        published: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
         // socialImage: local image (resolved by image()), external URL, or /public/ path
         socialImage: z.union([image(), z.string()]).optional(),

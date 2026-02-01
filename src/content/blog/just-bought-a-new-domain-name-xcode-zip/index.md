@@ -1,7 +1,7 @@
 ---
 title: 'Xcode.zip - Just bought a new domain name'
 description: 'I just bought a new domain name.'
-pubDate: 2023-05-21
+published: 2023-05-21
 tags: ['web']
 comment: true
 ---
