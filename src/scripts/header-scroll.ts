@@ -103,29 +103,40 @@ function updateHeader() {
  * Request animation frame for smooth updates
  */
 function onScroll() {
-    if (!ticking) {
-        requestAnimationFrame(updateHeader);
-        ticking = true;
-    }
+	if (!ticking) {
+		requestAnimationFrame(updateHeader);
+		ticking = true;
+	}
 }
+
+// Guard to ensure scroll listener is only attached once
+let scrollListenerAttached = false;
 
 // Initialize on page load
 if (header) {
-    updateHeaderOffset();
-    updateHeader();
-    window.addEventListener("scroll", onScroll, { passive: true });
+	updateHeaderOffset();
+	updateHeader();
+	if (!scrollListenerAttached) {
+		scrollListenerAttached = true;
+		window.addEventListener("scroll", onScroll, { passive: true });
+	}
 }
 
 // Update on page navigation (for SPAs or view transitions)
 document.addEventListener("astro:page-load", () => {
-    header = document.querySelector("[data-header]") as HTMLElement;
-    progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
-    if (header) {
-        lastScrollY = 0;
-        scrollDirectionAnchor = 0;
-        isHeaderHidden = false;
-        header.classList.remove("header--hidden");
-        updateHeaderOffset();
-        updateHeader();
-    }
+	header = document.querySelector("[data-header]") as HTMLElement;
+	progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
+	if (header) {
+		lastScrollY = 0;
+		scrollDirectionAnchor = 0;
+		isHeaderHidden = false;
+		header.classList.remove("header--hidden");
+		updateHeaderOffset();
+		updateHeader();
+		// Ensure scroll listener is attached (only once)
+		if (!scrollListenerAttached) {
+			scrollListenerAttached = true;
+			window.addEventListener("scroll", onScroll, { passive: true });
+		}
+	}
 });

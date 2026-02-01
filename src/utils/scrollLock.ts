@@ -28,31 +28,29 @@ let touchMoveHandler: ((e: TouchEvent) => void) | null = null;
  * but we still need to prevent iOS Safari touch scrolling on the backdrop
  */
 export function lockScrollForDialog(): void {
-  if (state.lockCount === 0) {
-    state.scrollY = window.scrollY;
+	if (state.lockCount === 0) {
+		state.scrollY = window.scrollY;
 
-    // Only add touch prevention for iOS
-    touchMoveHandler = (e: TouchEvent) => {
-      const target = e.target as Element;
-      // Allow scrolling inside the dialog (scroll containers, dialog content)
-      if (target.closest('dialog')) {
-        return;
-      }
-      e.preventDefault();
-    };
-    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
-  }
-  state.lockCount++;
+		// Only add touch prevention for iOS
+		touchMoveHandler = (e: TouchEvent) => {
+			const target = e.target as Element;
+			// Allow scrolling inside the dialog (scroll containers, dialog content)
+			if (target.closest("dialog")) {
+				return;
+			}
+			e.preventDefault();
+		};
+		document.addEventListener("touchmove", touchMoveHandler, { passive: false });
+	}
+	state.lockCount = Math.max(0, state.lockCount + 1);
 }
 
 export function unlockScrollForDialog(): void {
-  state.lockCount--;
-  if (state.lockCount <= 0) {
-    state.lockCount = 0;
-
-    if (touchMoveHandler) {
-      document.removeEventListener('touchmove', touchMoveHandler);
-      touchMoveHandler = null;
-    }
-  }
+	state.lockCount = Math.max(0, state.lockCount - 1);
+	if (state.lockCount === 0) {
+		if (touchMoveHandler) {
+			document.removeEventListener("touchmove", touchMoveHandler);
+			touchMoveHandler = null;
+		}
+	}
 }

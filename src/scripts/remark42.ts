@@ -1,144 +1,125 @@
-import { getThemeState, initTheme, onThemeChange, type ThemeName, type ThemeState } from "../lib/theme-effects";
+import { type ThemeName, type ThemeState } from "../lib/theme-effects";
+import { createEmbedSystem, type EmbedSystemConfig } from "../lib/embedSystem";
+import { autoInit } from "../utils/spaLifecycle";
 
 type Remark42Config = {
-    host: string;
-    site_id: string;
-    url: string;
-    components: string[];
-    theme: ThemeName;
-    locale: string;
-    show_email_subscription: boolean;
-    simple_view: boolean;
-    no_footer: boolean;
+	host: string;
+	site_id: string;
+	url: string;
+	components: string[];
+	theme: ThemeName;
+	locale: string;
+	show_email_subscription: boolean;
+	simple_view: boolean;
+	no_footer: boolean;
 };
 
 type Remark42Global = {
-    createInstance?: (config: Remark42Config) => void;
-    changeTheme?: (theme: ThemeName) => void;
-    destroy?: () => void;
+	createInstance?: (config: Remark42Config) => void;
+	changeTheme?: (theme: ThemeName) => void;
+	destroy?: () => void;
 };
 
 declare global {
-    interface Window {
-        REMARK42?: Remark42Global;
-        remark_config?: Remark42Config;
-    }
+	interface Window {
+		REMARK42?: Remark42Global;
+		remark_config?: Remark42Config;
+	}
 }
 
-const SCRIPT_ATTR = "data-remark42";
 const CONTAINER_SELECTOR = "[data-remark-host]";
 
-let themeUnsubscribe: (() => void) | null = null;
-
-const ensureEmbedScript = (host: string) => {
-    const normalizedHost = host.replace(/\/$/, "");
-    let script = document.querySelector<HTMLScriptElement>(`script[${SCRIPT_ATTR}]`);
-
-    if (!script) {
-        script = document.createElement("script");
-        script.src = `${normalizedHost}/web/embed.js`;
-        script.defer = true;
-        script.setAttribute(SCRIPT_ATTR, normalizedHost);
-        document.head.appendChild(script);
-    }
-
-    return script;
-};
-
 const destroyRemark42 = () => {
-    try {
-        window.REMARK42?.destroy?.();
-    } catch {
-        // Remark42 might not have destroy in all versions
-    }
+	try {
+		window.REMARK42?.destroy?.();
+	} catch {
+		// Remark42 might not have destroy in all versions
+	}
 
-    // Remove stale iframes from previous instance
-    const container = document.getElementById("remark42");
-    if (container) {
-        const iframes = container.querySelectorAll("iframe");
-        iframes.forEach((iframe) => iframe.remove());
-    }
+	// Remove stale iframes from previous instance
+	const container = document.getElementById("remark42");
+	if (container) {
+		const iframes = container.querySelectorAll("iframe");
+		iframes.forEach((iframe) => iframe.remove());
+	}
 };
 
-const initRemark42 = (container: HTMLElement) => {
-    const { remarkHost, remarkSiteId, remarkUrl } = container.dataset as {
-        remarkHost?: string;
-        remarkSiteId?: string;
-        remarkUrl?: string;
-    };
+// Create embed system configuration
+const remark42Config: EmbedSystemConfig<Remark42Config> = {
+	scriptUrl: "", // Will be set dynamically based on host
+	scriptAttr: "data-remark42",
+	containerSelector: CONTAINER_SELECTOR,
 
-    if (!remarkHost || !remarkSiteId || !remarkUrl) {
-        return;
-    }
+	createConfig: (container: HTMLElement, themeState: ThemeState): Remark42Config => {
+		const { remarkHost, remarkSiteId, remarkUrl } = container.dataset as {
+			remarkHost?: string;
+			remarkSiteId?: string;
+			remarkUrl?: string;
+		};
 
-    // Destroy previous instance before re-initializing
-    destroyRemark42();
+		if (!remarkHost || !remarkSiteId || !remarkUrl) {
+			throw new Error("Missing required Remark42 configuration");
+		}
 
-    const host = remarkHost.replace(/\/$/, "");
-    const { theme } = initTheme();
-    const config: Remark42Config = {
-        host,
-        site_id: remarkSiteId,
-        url: remarkUrl,
-        components: ["embed"],
-        theme,
-        locale: "en",
-        show_email_subscription: true,
-        simple_view: false,
-        no_footer: true,
-    };
+		const host = remarkHost.replace(/\/$/, "");
 
-    // Clean up previous theme listener
-    if (themeUnsubscribe) {
-        themeUnsubscribe();
-        themeUnsubscribe = null;
-    }
+		return {
+			host,
+			site_id: remarkSiteId,
+			url: remarkUrl,
+			components: ["embed"],
+			theme: themeState.theme,
+			locale: "en",
+			show_email_subscription: true,
+			simple_view: false,
+			no_footer: true,
+		};
+	},
 
-    const applyTheme = (state: ThemeState) => {
-        config.theme = state.theme;
-        window.REMARK42?.changeTheme?.(state.theme);
-    };
+	initialize: (config: Remark42Config) => {
+		// Update script URL dynamically based on host
+		const normalizedHost = config.host.replace(/\/$/, "");
+		const scriptUrl = `${normalizedHost}/web/embed.js`;
 
-    applyTheme(getThemeState());
-    themeUnsubscribe = onThemeChange(applyTheme);
+		// Check if script exists, if not create it
+		let script = document.querySelector<HTMLScriptElement>(`script[data-remark42]`);
+		if (!script) {
+			script = document.createElement("script");
+			script.src = scriptUrl;
+			script.defer = true;
+			script.setAttribute("data-remark42", normalizedHost);
+			document.head.appendChild(script);
+		}
 
-    const invokeCreateInstance = () => {
-        window.REMARK42?.createInstance?.(config);
-    };
+		const invokeCreateInstance = () => {
+			window.REMARK42?.createInstance?.(config);
+		};
 
-    const script = ensureEmbedScript(host);
+		if (window.REMARK42 && typeof window.REMARK42.createInstance === "function") {
+			invokeCreateInstance();
+		} else {
+			window.remark_config = config;
+			window.REMARK42 = window.REMARK42 || {};
 
-    if (window.REMARK42 && typeof window.REMARK42.createInstance === "function") {
-        invokeCreateInstance();
-    } else {
-        window.remark_config = config;
-        window.REMARK42 = window.REMARK42 || {};
+			if (typeof window.REMARK42.createInstance !== "function") {
+				window.REMARK42.createInstance = (cfg: Remark42Config) => {
+					window.remark_config = cfg;
+				};
+			}
 
-        if (typeof window.REMARK42.createInstance !== "function") {
-            window.REMARK42.createInstance = (cfg: Remark42Config) => {
-                window.remark_config = cfg;
-            };
-        }
+			script?.addEventListener("load", invokeCreateInstance, { once: true });
+		}
+	},
 
-        script?.addEventListener("load", invokeCreateInstance, { once: true });
-    }
+	updateTheme: (themeState: ThemeState) => {
+		window.REMARK42?.changeTheme?.(themeState.theme);
+	},
+
+	cleanup: destroyRemark42,
 };
 
-const initAllContainers = () => {
-    const containers = Array.from(document.querySelectorAll<HTMLElement>(CONTAINER_SELECTOR));
-    containers.forEach((container) => {
-        initRemark42(container);
-    });
-};
+// Create and initialize the embed system
+const remark42System = createEmbedSystem(remark42Config);
 
-// Initialize
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initAllContainers, {
-        once: true,
-    });
-} else {
-    initAllContainers();
-}
-
-// Handle Astro page transitions
-document.addEventListener("astro:after-swap", initAllContainers);
+// Initialize using autoInit helper
+autoInit(() => remark42System.init(), "after-swap");
