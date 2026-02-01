@@ -1,231 +1,122 @@
-const STORAGE_KEY = "theme-preference";
+import { activeTheme, themePreference, cycleTheme, type ThemeState, type ThemeName } from "../stores/theme";
 
-export type ThemeName = "light" | "dark";
-export type ThemePreference = ThemeName | "system";
-export type ThemeState = {
-    theme: ThemeName;
-    preference: ThemePreference;
-};
+export type { ThemeState };
 
 type Listener = (state: ThemeState) => void;
 
 const listeners = new Set<Listener>();
-const DEFAULT_PREFERENCE: ThemePreference = "system";
 
-let initialized = false;
-let hasResolvedState = false;
-let currentPreference: ThemePreference = DEFAULT_PREFERENCE;
-let currentTheme: ThemeName = "light";
-
-const isPreference = (value: unknown): value is ThemePreference => value === "light" || value === "dark" || value === "system";
-
-const readStoredPreference = (): ThemePreference | null => {
-    try {
-        const value = window.localStorage.getItem(STORAGE_KEY);
-        return isPreference(value) ? value : null;
-    } catch {
-        return null;
-    }
-};
-
-const storePreference = (preference: ThemePreference) => {
-    try {
-        window.localStorage.setItem(STORAGE_KEY, preference);
-    } catch {
-        /* noop */
-    }
-};
-
-const getSystemTheme = (): ThemeName => (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-
-const resolveTheme = (preference: ThemePreference): ThemeName => {
-    switch (preference) {
-        case "dark":
-            return "dark";
-        case "light":
-            return "light";
-        default:
-            return getSystemTheme();
-    }
-};
-
-const applyThemeToDocument = (theme: ThemeName, preference: ThemePreference, doc: Document = document) => {
-    const root = doc.documentElement;
-    root.dataset.theme = theme;
-    root.dataset.themeMode = preference;
-};
-
-const notify = () => {
-    const state = getThemeState();
-    for (const listener of listeners) {
-        listener(state);
-    }
-};
-
-const ensureState = (doc: Document = document) => {
-    if (hasResolvedState) return;
-
-    const { dataset } = doc.documentElement;
-    const attrPreference = dataset.themeMode;
-
-    if (isPreference(attrPreference)) {
-        currentPreference = attrPreference;
-        currentTheme = resolveTheme(currentPreference);
-        hasResolvedState = true;
-        return;
-    }
-
-    const storedPreference = readStoredPreference();
-    currentPreference = storedPreference ?? DEFAULT_PREFERENCE;
-    currentTheme = resolveTheme(currentPreference);
-    applyThemeToDocument(currentTheme, currentPreference, doc);
-    hasResolvedState = true;
-};
-
-const updateState = (preference: ThemePreference, doc: Document = document, { emit } = { emit: true }) => {
-    currentPreference = preference;
-    currentTheme = resolveTheme(preference);
-    applyThemeToDocument(currentTheme, preference, doc);
-    hasResolvedState = true;
-    if (emit) {
-        notify();
-    }
-};
-
+// Helper to get theme state from nanostores
 export const getThemeState = (): ThemeState => ({
-    theme: currentTheme,
-    preference: currentPreference,
+	theme: activeTheme.get(),
+	preference: themePreference.get(),
 });
 
-export const getActiveTheme = (doc: Document = document): ThemeName => {
-    ensureState(doc);
-    return currentTheme;
+export const getActiveTheme = () => activeTheme.get();
+export const getThemePreference = () => themePreference.get();
+
+// Export ThemeName for compatibility
+export type { ThemeName };
+
+// Initialize theme and return state for compatibility with remark42 and cusdis
+export const initTheme = (): ThemeState => getThemeState();
+
+export const setThemePreference = (preference: "light" | "dark" | "system") => {
+	themePreference.set(preference);
 };
 
-export const getThemePreference = (doc: Document = document): ThemePreference => {
-    ensureState(doc);
-    return currentPreference;
-};
-
-export const setThemePreference = (preference: ThemePreference, doc: Document = document) => {
-    ensureState(doc);
-    storePreference(preference);
-    updateState(preference, doc);
-};
-
+// Subscribe to theme changes
 export const onThemeChange = (listener: Listener) => {
-    ensureState();
-    listeners.add(listener);
-    listener(getThemeState());
-    return () => {
-        listeners.delete(listener);
-    };
-};
+	listeners.add(listener);
+	listener(getThemeState());
 
-const attachSystemWatcher = (doc: Document) => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleMediaChange = (event: MediaQueryListEvent) => {
-        if (currentPreference !== "system") return;
-        currentTheme = event.matches ? "dark" : "light";
-        applyThemeToDocument(currentTheme, currentPreference, doc);
-        notify();
-    };
+	// Subscribe to nanostore changes
+	const unsubscribeTheme = activeTheme.subscribe(() => {
+		listener(getThemeState());
+	});
 
-    if (typeof mediaQuery.addEventListener === "function") {
-        mediaQuery.addEventListener("change", handleMediaChange);
-    } else {
-        const legacyAddListener = Reflect.get(mediaQuery, "addListener");
-        if (typeof legacyAddListener === "function") {
-            legacyAddListener.call(mediaQuery, handleMediaChange);
-        }
-    }
-};
-
-export const initTheme = (doc: Document = document): ThemeState => {
-    ensureState(doc);
-
-    if (!initialized) {
-        attachSystemWatcher(doc);
-        initialized = true;
-    }
-
-    notify();
-    return getThemeState();
-};
-
-const cyclePreference = (preference: ThemePreference): ThemePreference => {
-    switch (preference) {
-        case "system":
-            return "light";
-        case "light":
-            return "dark";
-        default:
-            return "system";
-    }
+	return () => {
+		listeners.delete(listener);
+		unsubscribeTheme();
+	};
 };
 
 const preferenceLabel = {
-    light: "Light Mode",
-    dark: "Dark Mode",
-    system: "System",
-} satisfies Record<ThemePreference, string>;
+	light: "Light Mode",
+	dark: "Dark Mode",
+	system: "System",
+} satisfies Record<"light" | "dark" | "system", string>;
+
+const cyclePreference = (preference: "light" | "dark" | "system"): "light" | "dark" | "system" => {
+	switch (preference) {
+		case "system":
+			return "light";
+		case "light":
+			return "dark";
+		default:
+			return "system";
+	}
+};
 
 const describeState = (state: ThemeState) => {
-    const { preference, theme } = state;
-    const nextPreference = cyclePreference(preference);
-    const currentLabel =
-        preference === "system" ? `${preferenceLabel.system} (currently ${theme === "dark" ? "dark" : "light"})` : preferenceLabel[preference];
+	const { preference, theme } = state;
+	const nextPreference = cyclePreference(preference);
+	const currentLabel =
+		preference === "system"
+			? `${preferenceLabel.system} (currently ${theme === "dark" ? "dark" : "light"})`
+			: preferenceLabel[preference];
 
-    return {
-        nextPreference,
-        message: `Current theme: ${currentLabel}. Click to switch to ${preferenceLabel[nextPreference]}`,
-    };
+	return {
+		nextPreference,
+		message: `Current theme: ${currentLabel}. Click to switch to ${preferenceLabel[nextPreference]}`,
+	};
 };
 
 export const bindThemeToggles = (root: ParentNode = document) => {
-    const toggles = Array.from(root.querySelectorAll<HTMLElement>("[data-theme-toggle]"));
-    if (!toggles.length) return;
+	const toggles = Array.from(root.querySelectorAll<HTMLElement>("[data-theme-toggle]"));
+	if (!toggles.length) return;
 
-    // Filter to only unbound toggles to prevent duplicate listeners
-    const unboundToggles = toggles.filter((t) => !t.dataset.themeBound);
+	// Filter to only unbound toggles to prevent duplicate listeners
+	const unboundToggles = toggles.filter((t) => !t.dataset.themeBound);
 
-    const update = (state: ThemeState) => {
-        const { nextPreference, message } = describeState(state);
-        // Always update ALL toggles (including previously bound ones)
-        toggles.forEach((toggle) => {
-            toggle.dataset.themePreference = state.preference;
-            toggle.dataset.themeState = state.theme;
-            toggle.dataset.themeNext = nextPreference;
-            toggle.setAttribute("aria-label", message);
-            toggle.setAttribute("title", message);
+	const update = (state: ThemeState) => {
+		const { nextPreference, message } = describeState(state);
+		// Always update ALL toggles (including previously bound ones)
+		toggles.forEach((toggle) => {
+			toggle.dataset.themePreference = state.preference;
+			toggle.dataset.themeState = state.theme;
+			toggle.dataset.themeNext = nextPreference;
+			toggle.setAttribute("aria-label", message);
+			toggle.setAttribute("title", message);
 
-            const srLabel = toggle.querySelector<HTMLElement>("[data-theme-toggle-label]");
-            if (srLabel) {
-                srLabel.textContent = message;
-            }
-        });
-    };
+			const srLabel = toggle.querySelector<HTMLElement>("[data-theme-toggle-label]");
+			if (srLabel) {
+				srLabel.textContent = message;
+			}
+		});
+	};
 
-    const handleClick = (event: Event) => {
-        event.preventDefault();
-        const next = cyclePreference(getThemePreference());
-        setThemePreference(next);
-    };
+	const handleClick = (event: Event) => {
+		event.preventDefault();
+		cycleTheme();
+	};
 
-    unboundToggles.forEach((toggle) => {
-        toggle.dataset.themeBound = "true";
-        toggle.addEventListener("click", handleClick);
-    });
+	unboundToggles.forEach((toggle) => {
+		toggle.dataset.themeBound = "true";
+		toggle.addEventListener("click", handleClick);
+	});
 
-    update(initTheme());
+	// Initial update
+	update(getThemeState());
 
-    const unsubscribe = onThemeChange(update);
+	// Subscribe to changes
+	const unsubscribe = onThemeChange(update);
 
-    return () => {
-        unsubscribe();
-        unboundToggles.forEach((toggle) => {
-            delete toggle.dataset.themeBound;
-            toggle.removeEventListener("click", handleClick);
-        });
-    };
+	return () => {
+		unsubscribe();
+		unboundToggles.forEach((toggle) => {
+			delete toggle.dataset.themeBound;
+			toggle.removeEventListener("click", handleClick);
+		});
+	};
 };
