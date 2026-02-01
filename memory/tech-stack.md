@@ -162,26 +162,10 @@ All scripts are SPA-aware — they use `astro:page-load` or `astro:after-swap` f
 ## Cloudflare Deployment
 
 ### Wrangler Config (`wrangler.toml`)
-```toml
-name = "space-radio"
-main = "./dist/_worker.js/index.js"
-compatibility_date = "2026-01-18"
-compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
-
-[assets]
-binding = "ASSETS"
-directory = "./dist"
-html_handling = "drop-trailing-slash"
-
-[observability]
-enabled = true
-
-[[kv_namespaces]]
-binding = "LIKES"
-id = "bfca45c77224430683574746d8a7069f"
-```
+Check `wrangler.toml` in repo for actual config when necessary
 
 ### Environment Variables
+Check `.env` files for actual values when necessary
 ```
 PUBLIC_REMARK_URL="https://remark42.spacerad.io"
 PUBLIC_REMARK_SITE_ID="space-radio"
@@ -201,6 +185,8 @@ declare namespace App {
 ---
 
 ## TypeScript Config (`tsconfig.json`)
+Check `tsconfig.json` in repo when necessary
+
 ```json
 {
   "extends": "astro/tsconfigs/strict",
