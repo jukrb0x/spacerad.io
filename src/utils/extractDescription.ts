@@ -1,58 +1,55 @@
 /**
- * 从 Markdown 内容中提取描述
- * @param content - Markdown 内容
- * @param maxLength - 最大长度（默认 160 字符）
- * @returns 提取的描述文本
+ * Extract description from Markdown content
+ * @param content - Markdown content
+ * @param maxLength - Maximum length (default 80 characters)
+ * @returns Extracted description text
  */
 export function extractDescription(content: string, maxLength: number = 80): string {
-    // 移除 frontmatter
+    // Remove frontmatter
     const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\s*/m, "");
 
-    // 移除 Markdown 语法
+    // Remove Markdown syntax
     const plainText = contentWithoutFrontmatter
-        // 移除代码块
+        // Remove code blocks
         .replace(/```[\s\S]*?```/g, "")
-        // 移除行内代码
+        // Remove inline code
         .replace(/`[^`]*`/g, "")
-        // 移除链接
+        // Remove links
         .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-        // 移除图片
+        // Remove images
         .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
-        // 移除标题标记
+        // Remove heading markers
         .replace(/^#{1,6}\s+/gm, "")
-        // 移除加粗和斜体标记
+        // Remove bold and italic markers
         .replace(/(\*{1,2}|_{1,2})([^*_]+)\1/g, "$2")
-        // 移除引用标记
+        // Remove quote markers
         .replace(/^>\s+/gm, "")
-        // 移除列表标记
+        // Remove list markers
         .replace(/^[\s]*[-*+]\s+/gm, "")
         .replace(/^[\s]*\d+\.\s+/gm, "")
-        // 移除水平线
+        // Remove horizontal rules
         .replace(/^(-{3,}|_{3,}|\*{3,})$/gm, "")
-        // 移除 HTML 标签
+        // Remove HTML tags
         .replace(/<[^>]+>/g, "")
-        // 移除多余的空白字符
+        // Remove extra whitespace
         .replace(/\s+/g, " ")
         .trim();
 
-    // 如果内容为空，返回默认描述
+    // Return default description if content is empty
     if (!plainText) {
-        return "暂无描述";
+        return "No description";
     }
 
-    // 截取指定长度
+    // Return text if within max length
     if (plainText.length <= maxLength) {
         return plainText;
     }
 
-    // 在最后一个完整的句子或词边界处截断
+    // Truncate at last complete sentence or word boundary
     let truncated = plainText.substring(0, maxLength);
 
-    // 尝试在句号、问号、感叹号处截断
+    // Try to truncate at sentence endings
     const lastSentenceEnd = Math.max(
-        truncated.lastIndexOf("。"),
-        truncated.lastIndexOf("！"),
-        truncated.lastIndexOf("？"),
         truncated.lastIndexOf("."),
         truncated.lastIndexOf("!"),
         truncated.lastIndexOf("?"),
@@ -61,7 +58,7 @@ export function extractDescription(content: string, maxLength: number = 80): str
     if (lastSentenceEnd > maxLength * 0.8) {
         truncated = truncated.substring(0, lastSentenceEnd + 1);
     } else {
-        // 如果没有合适的句子结束符，在最后一个空格处截断
+        // If no suitable sentence ending, truncate at last space
         const lastSpace = truncated.lastIndexOf(" ");
         if (lastSpace > maxLength * 0.8) {
             truncated = truncated.substring(0, lastSpace);

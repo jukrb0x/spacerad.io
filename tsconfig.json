@@ -4,6 +4,15 @@
     "exclude": ["dist"],
     "compilerOptions": {
         "strictNullChecks": true,
-        "jsx": "preserve"
+        "jsx": "preserve",
+        "plugins": [
+            {
+                "name": "@astrojs/ts-plugin"
+            }
+        ],
+        "paths": {
+            "@components/*": ["./src/components/*"],
+            "@layouts/*": ["./src/layouts/*"]
+        }
     }
 }
