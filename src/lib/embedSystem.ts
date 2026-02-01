@@ -72,13 +72,20 @@ export class EmbedSystem<TConfig = unknown> {
 			});
 		}
 
-		// Ensure script is loaded
-		const script = this.ensureScript();
-
 		// Initialize the embed
 		const initializeEmbed = () => {
 			this.config.initialize(embedConfig);
 		};
+
+		// If scriptUrl is "placeholder", skip automatic script loading
+		// and let the initialize function handle it
+		if (this.config.scriptUrl === "placeholder") {
+			initializeEmbed();
+			return;
+		}
+
+		// Ensure script is loaded
+		const script = this.ensureScript();
 
 		// Check if script is already loaded
 		if (script.getAttribute(this.config.scriptAttr) === "loaded") {
