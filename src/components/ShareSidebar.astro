@@ -107,21 +107,7 @@ const shareLinks = [
     </button>
 </aside>
 
-<!-- Mobile: Floating action button (no wrapper to avoid layout issues) -->
-<button
-    type="button"
-    data-share-mobile-toggle
-    class:list={[
-        "min-[1400px]:hidden fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95",
-        mobileButtonPosition
-    ]}
-    aria-label="Share article"
-    aria-expanded="false"
->
-    <Icon name="ri:share-line" class="h-6 w-6" aria-hidden="true" />
-</button>
-
-<!-- Mobile: Share menu -->
+<!-- Mobile: Share menu (rendered before toggle so toggle paints on top of menu padding) -->
 <div
     data-share-menu
     class:list={[
@@ -169,6 +155,20 @@ const shareLinks = [
         ></span>
     </button>
 </div>
+
+<!-- Mobile: Floating action button (after menu in DOM so it paints on top of menu padding) -->
+<button
+    type="button"
+    data-share-mobile-toggle
+    class:list={[
+        "min-[1400px]:hidden fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95",
+        mobileButtonPosition
+    ]}
+    aria-label="Share article"
+    aria-expanded="false"
+>
+    <Icon name="ri:share-line" class="h-6 w-6" aria-hidden="true" />
+</button>
 
 <!-- Toast notification -->
 <div
