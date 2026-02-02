@@ -147,12 +147,6 @@ function initLikes(): void {
 		// Add click listener
 		newBtn.addEventListener("click", () => {
 			addLike(slug);
-			// Close mobile menu if open
-			const menuOpen = document.querySelector("[data-share-menu]")?.classList.contains("opacity-0") === false;
-			if (menuOpen) {
-				const event = new CustomEvent("share-menu-close");
-				document.dispatchEvent(event);
-			}
 		});
 	});
 

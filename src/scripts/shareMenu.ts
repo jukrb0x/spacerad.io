@@ -1,12 +1,19 @@
 /**
  * Share Menu System
  * Manages mobile share menu toggle and copy link functionality
+ *
+ * Uses a module-level AbortController so every call to initShareMenu()
+ * tears down all previous listeners before re-binding.
+ * This makes double-init harmless (direct page load fires both
+ * DOMContentLoaded and astro:page-load) and prevents listener leaks
+ * across SPA navigations.
  */
 
 import { autoInit } from "../utils/spaLifecycle";
 
 let menuOpen = false;
 let toastTimeout: number;
+let cleanupController: AbortController | null = null;
 
 /**
  * Set menu open state
@@ -76,16 +83,29 @@ async function copyLink(url: string): Promise<void> {
 
 /**
  * Initialize share menu
+ *
+ * Idempotent — safe to call multiple times. Each call aborts every
+ * listener from the previous call via AbortController before binding
+ * fresh ones.
  */
 function initShareMenu(): void {
+	// Abort all listeners from the previous init (handles double-fire
+	// on direct load and SPA re-init)
+	cleanupController?.abort();
+	cleanupController = new AbortController();
+	const { signal } = cleanupController;
+
 	const mobileToggle = document.querySelector<HTMLElement>("[data-share-mobile-toggle]");
 	const copyButtons = document.querySelectorAll<HTMLElement>("[data-copy-link]");
+	const shareMenuItems = document.querySelectorAll<HTMLElement>("[data-share-menu-item]");
 
 	// Reset state
 	menuOpen = false;
 
 	// Mobile toggle
-	mobileToggle?.addEventListener("click", () => setMenuOpen(!menuOpen));
+	mobileToggle?.addEventListener("click", () => {
+		setMenuOpen(!menuOpen);
+	}, { signal });
 
 	// Close on outside click
 	document.addEventListener("click", (e) => {
@@ -93,28 +113,34 @@ function initShareMenu(): void {
 		if (menuOpen && !target.closest("[data-share-menu]") && !target.closest("[data-share-mobile-toggle]")) {
 			setMenuOpen(false);
 		}
-	});
+	}, { signal });
 
 	// Close on Escape
 	document.addEventListener("keydown", (e) => {
-		if (e.key === "Escape" && menuOpen) {
+		if ((e as KeyboardEvent).key === "Escape" && menuOpen) {
 			setMenuOpen(false);
 			mobileToggle?.focus();
 		}
-	});
+	}, { signal });
 
-	// Copy link buttons
+	// Copy link buttons — close menu after copy
 	copyButtons.forEach((btn) => {
 		btn.addEventListener("click", () => {
 			const url = btn.dataset.url;
 			if (url) copyLink(url);
-			if (menuOpen) setMenuOpen(false);
-		});
+			setMenuOpen(false);
+		}, { signal });
 	});
 
-	// Listen for custom close event (from likes module)
-	document.addEventListener("share-menu-close", () => {
-		setMenuOpen(false);
+	// Share link items (Twitter, Telegram) — close menu after click
+	// Skip like button (should stay open for repeat clicks) and
+	// copy button (already handled above with its own close logic)
+	shareMenuItems.forEach((item) => {
+		if (!item.hasAttribute("data-like-button") && !item.hasAttribute("data-copy-link")) {
+			item.addEventListener("click", () => {
+				setMenuOpen(false);
+			}, { signal });
+		}
 	});
 }
 
