@@ -30,7 +30,7 @@ Personal blog based on Astro. Still working in progress, documents will come lat
 
 ---
 
-**Spacerad.io © 2023 Jabriel**
+**Spacerad.io © 2026 Jabriel**
 
 This repository contains code licensed under the MIT license and blog content (including all images and words) licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) by default.
 
