@@ -12,7 +12,7 @@ It has nothing related to Apple.
 
 ## [Xcode.zip](https://xcode.zip)
 
-It redirects all pages to [wh0.is](https://xcode.org) for now. 😆
+It redirects all pages to [spacerad.io](https://spacerad.io) for now. 😆
 
 -   https://xcode.zip
 -   https://xcode.zip/post/just-bought-a-new-domain-name-xcode-zip
