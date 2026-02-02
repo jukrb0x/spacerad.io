@@ -1,6 +1,6 @@
 ---
 title: "Space Radio: 我对数字营地的终极幻想"
-published: 2026-02-03
+published: 2026-02-02
 tags: ["Astro", "Vibe Coding", "Web", "Blog"]
 socialImage: "./image.png"
 lang: zh
