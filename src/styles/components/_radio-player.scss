@@ -4,6 +4,11 @@
 // Fixed bottom-bar radio with retro cassette visuals.
 // Mini bar (collapsed) + drawer (expanded).
 // Persistent across SPA navigation via transition:persist.
+//
+// The player uses backdrop-filter: blur() for a frosted glass effect
+// with semi-transparent backgrounds. view-transition-name: none keeps
+// the element in the live DOM during SPA navigation, avoiding snapshot
+// flash issues.
 
 @use '../tokens' as *;
 
@@ -29,24 +34,6 @@
 }
 
 // ---------------------------------------------
-// View Transition — prevent flash during SPA navigation
-// transition:persist assigns view-transition-name: radio-player.
-// The root group's cross-fade snapshot covers the player briefly
-// because ::view-transition-group(root) renders above it by default.
-// Fix: lift the radio-player group above root and kill all animations.
-// ---------------------------------------------
-
-::view-transition-group(radio-player) {
-  z-index: 1;       // above ::view-transition-group(root) which defaults to 0
-  animation: none;
-}
-
-::view-transition-old(radio-player),
-::view-transition-new(radio-player) {
-  animation: none;
-}
-
-// ---------------------------------------------
 // Container
 // ---------------------------------------------
 
@@ -56,6 +43,15 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: z('modal-backdrop');
+
+  // Opt out of browser View Transitions snapshotting.
+  // transition:persist sets view-transition-name which pulls the element
+  // into the pseudo-element layer during navigation. The real DOM is hidden
+  // and replaced by bitmaps, causing a background flash. By forcing
+  // view-transition-name: none, the element stays in the live DOM throughout
+  // the transition. Astro's JS-level persistence (data-astro-transition-persist)
+  // still moves the DOM node across pages — that's independent of this CSS prop.
+  view-transition-name: none;
   width: 100%;
   max-width: 480px;
   font-family: var(--font-family-sans);
@@ -487,7 +483,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-text-muted) 35%, transparent);
   border-radius: 2px;
   outline: none;
   cursor: pointer;
@@ -498,8 +494,8 @@
     height: 14px;
     border-radius: 50%;
     background: var(--color-text-secondary);
-    border: 2px solid var(--color-bg-surface);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--color-bg-page);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     transition: background var(--transition-fast);
 
@@ -513,23 +509,31 @@
     height: 14px;
     border-radius: 50%;
     background: var(--color-text-secondary);
-    border: 2px solid var(--color-bg-surface);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    border: 2px solid var(--color-bg-page);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     cursor: pointer;
   }
 
   &::-moz-range-track {
     height: 4px;
-    background: var(--color-border-subtle);
+    background: color-mix(in srgb, var(--color-text-muted) 35%, transparent);
     border-radius: 2px;
   }
 
   @include dark-theme {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
 
     &::-webkit-slider-thumb {
       background: var(--color-text-secondary);
-      border-color: var(--color-bg-surface);
+      border-color: var(--color-bg-page);
+    }
+
+    &::-moz-range-thumb {
+      border-color: var(--color-bg-page);
+    }
+
+    &::-moz-range-track {
+      background: rgba(255, 255, 255, 0.15);
     }
   }
 }
@@ -541,13 +545,13 @@
 
 .radio-player__dial-bg {
   fill: none;
-  stroke: var(--color-border-subtle);
+  stroke: color-mix(in srgb, var(--color-text-muted) 25%, transparent);
   stroke-width: 1;
 }
 
 .radio-player__dial-face {
-  fill: var(--color-bg-surface);
-  stroke: var(--color-border-soft);
+  fill: color-mix(in srgb, var(--color-text-muted) 12%, var(--color-bg-surface));
+  stroke: color-mix(in srgb, var(--color-text-muted) 18%, transparent);
   stroke-width: 0.5;
 
   @include dark-theme {
@@ -582,33 +586,5 @@
 
   .radio-player__expand-btn {
     transition: none;
-  }
-}
-
-// ---------------------------------------------
-// SPA Navigation — solid background during swap
-// ---------------------------------------------
-// During Astro's DOM swap the page content behind the player is
-// momentarily empty. backdrop-filter: blur() resolves to transparent
-// (nothing to blur), causing a visible flash. We swap to an opaque
-// background before the swap and restore frosted glass after paint.
-
-// The bar has `transition: background …` for smooth theme switching.
-// That same transition causes the navigating-class background swap to
-// ANIMATE through intermediate alpha values instead of snapping.
-// During those frames backdrop-filter sees empty content → flash.
-// Fix: kill transitions instantly so the solid bg applies in one frame.
-
-.radio-player--navigating {
-  .radio-player__bar,
-  .radio-player__drawer {
-    transition: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgb(250, 251, 252) !important;
-
-    @include dark-theme {
-      background: rgb(13, 17, 23) !important;
-    }
   }
 }
