@@ -1,0 +1,568 @@
+// =============================================
+// Radio Player Component
+// =============================================
+// Fixed bottom-bar radio with retro cassette visuals.
+// Mini bar (collapsed) + drawer (expanded).
+// Persistent across SPA navigation via transition:persist.
+
+@use '../tokens' as *;
+
+// ---------------------------------------------
+// Animations
+// ---------------------------------------------
+
+@keyframes radio-reel-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes radio-reel-spin-fast {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes radio-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes radio-vu-bounce {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+// ---------------------------------------------
+// Container
+// ---------------------------------------------
+
+.radio-player {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: z('modal-backdrop');
+  width: 100%;
+  max-width: 480px;
+  font-family: var(--font-family-sans);
+  pointer-events: none;
+
+  // Mobile: full width
+  @include breakpoint-down('md') {
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  // All interactive children should receive pointer events
+  > * {
+    pointer-events: auto;
+  }
+}
+
+// ---------------------------------------------
+// Mini Bar
+// ---------------------------------------------
+
+.radio-player__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(250, 251, 252, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-soft);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transition: background var(--transition-base), border-color var(--transition-base);
+
+  @include dark-theme {
+    background: rgba(13, 17, 23, 0.8);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  // Mobile: no top radius
+  @include breakpoint-down('md') {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid var(--color-border-soft);
+
+    @include dark-theme {
+      border-top-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+// Reel icon button (left side of bar)
+.radio-player__reel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+
+  &:hover {
+    color: var(--color-accent);
+  }
+
+  // Spinning reels in mini bar SVG
+  .radio-player__reel {
+    transform-origin: center;
+
+    [data-radio-state="playing"] & {
+      animation: radio-reel-spin 2s linear infinite;
+
+      &--left { animation-direction: normal; }
+      &--right { animation-direction: reverse; }
+    }
+
+    [data-radio-state="loading"] & {
+      animation: radio-reel-spin-fast 0.8s linear infinite;
+    }
+  }
+}
+
+// Info section (title + status)
+.radio-player__info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 var(--space-1);
+}
+
+.radio-player__title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-player__status {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 0.875rem;
+}
+
+// Play/Pause button
+.radio-player__play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 50%;
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-base), background var(--transition-base), border-color var(--transition-base);
+
+  &:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  @include dark-theme {
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-surface));
+    border-color: rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-accent) 15%, var(--color-bg-surface));
+    }
+  }
+}
+
+// Icon state toggling
+.radio-player__icon {
+  display: none;
+
+  &--loading {
+    animation: radio-loading-spin 0.8s linear infinite;
+  }
+}
+
+// Default: show play icon
+[data-radio-state="stopped"] .radio-player__icon--play,
+[data-radio-state="error"] .radio-player__icon--play {
+  display: block;
+}
+
+[data-radio-state="playing"] .radio-player__icon--stop {
+  display: block;
+}
+
+[data-radio-state="loading"] .radio-player__icon--loading {
+  display: block;
+}
+
+// Expand button
+.radio-player__expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-base), transform var(--transition-base);
+
+  &:hover {
+    color: var(--color-text-secondary);
+  }
+
+  // Rotate chevron when expanded
+  [data-radio-expanded="true"] & {
+    transform: rotate(180deg);
+  }
+}
+
+// ---------------------------------------------
+// Expanded Drawer
+// ---------------------------------------------
+
+.radio-player__drawer {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s ease;
+  background: rgba(250, 251, 252, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-left: 1px solid var(--color-border-soft);
+  border-right: 1px solid var(--color-border-soft);
+
+  @include dark-theme {
+    background: rgba(13, 17, 23, 0.92);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  @include breakpoint-down('md') {
+    border-left: none;
+    border-right: none;
+    max-height: 0; // will be overridden when expanded
+  }
+
+  [data-radio-expanded="true"] & {
+    max-height: 400px;
+    opacity: 1;
+  }
+}
+
+.radio-player__drawer-content {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+// ---------------------------------------------
+// Cassette Visual
+// ---------------------------------------------
+
+.radio-player__cassette {
+  width: 100%;
+  max-width: 260px;
+}
+
+.radio-player__cassette-svg {
+  width: 100%;
+  height: auto;
+}
+
+.radio-player__cassette-body {
+  fill: var(--color-bg-muted);
+  stroke: var(--color-border-soft);
+  stroke-width: 1;
+
+  @include dark-theme {
+    fill: color-mix(in srgb, var(--color-bg-surface) 80%, #000);
+    stroke: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.radio-player__cassette-label {
+  fill: var(--color-bg-surface);
+  stroke: var(--color-border-subtle);
+  stroke-width: 0.5;
+
+  @include dark-theme {
+    fill: color-mix(in srgb, var(--color-bg-muted) 60%, #000);
+    stroke: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.radio-player__cassette-line {
+  stroke: var(--color-border-subtle);
+  stroke-width: 0.5;
+  opacity: 0.5;
+}
+
+.radio-player__cassette-text {
+  fill: var(--color-text-muted);
+  font-size: 8px;
+  font-family: var(--font-family-mono);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.radio-player__cassette-reel-bg {
+  fill: var(--color-bg-surface);
+
+  @include dark-theme {
+    fill: color-mix(in srgb, var(--color-bg-surface) 50%, #000);
+  }
+}
+
+.radio-player__cassette-reel-circle {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  transform-origin: center;
+
+  [data-radio-state="playing"] & {
+    animation: radio-reel-spin 3s linear infinite;
+
+    &--right {
+      animation-direction: reverse;
+    }
+  }
+
+  [data-radio-state="loading"] & {
+    animation: radio-reel-spin-fast 1s linear infinite;
+
+    &--right {
+      animation-direction: reverse;
+    }
+  }
+}
+
+// Fix transform-origin for SVG circles positioned at specific cx/cy
+.radio-player__cassette-reel-circle--left {
+  transform-origin: 65px 90px;
+}
+
+.radio-player__cassette-reel-circle--right {
+  transform-origin: 135px 90px;
+}
+
+.radio-player__cassette-reel-hub {
+  fill: var(--color-text-muted);
+  opacity: 0.3;
+}
+
+.radio-player__cassette-window {
+  fill: color-mix(in srgb, var(--color-text-muted) 8%, transparent);
+  stroke: var(--color-border-subtle);
+  stroke-width: 0.5;
+}
+
+.radio-player__cassette-tape {
+  stroke: var(--color-text-muted);
+  stroke-width: 0.75;
+  opacity: 0.4;
+}
+
+// ---------------------------------------------
+// VU Meter
+// ---------------------------------------------
+
+.radio-player__vu {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 24px;
+  padding: 0 var(--space-2);
+}
+
+.radio-player__vu-bar {
+  width: 4px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--color-text-muted);
+  opacity: 0.2;
+  transform: scaleY(0.3);
+  transform-origin: bottom;
+  transition: opacity var(--transition-base);
+
+  [data-radio-state="playing"] & {
+    opacity: 0.6;
+    animation: radio-vu-bounce 0.6s ease-in-out infinite;
+    animation-delay: calc(var(--bar-i) * 0.08s);
+  }
+
+  @include dark-theme {
+    background: var(--color-text-muted);
+  }
+}
+
+// ---------------------------------------------
+// Volume Controls
+// ---------------------------------------------
+
+.radio-player__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 280px;
+}
+
+.radio-player__mute-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+
+  &:hover {
+    color: var(--color-accent);
+  }
+}
+
+// Mute icon state
+.radio-player__mute-icon--off {
+  display: none;
+}
+
+[data-radio-muted="true"] .radio-player__mute-icon--on {
+  display: none;
+}
+
+[data-radio-muted="true"] .radio-player__mute-icon--off {
+  display: block;
+}
+
+// Volume slider
+.radio-player__volume {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--color-border-subtle);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+    border: 2px solid var(--color-bg-surface);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+
+    &:hover {
+      background: var(--color-accent);
+    }
+  }
+
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+    border: 2px solid var(--color-bg-surface);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+  }
+
+  &::-moz-range-track {
+    height: 4px;
+    background: var(--color-border-subtle);
+    border-radius: 2px;
+  }
+
+  @include dark-theme {
+    background: rgba(255, 255, 255, 0.1);
+
+    &::-webkit-slider-thumb {
+      background: var(--color-text-secondary);
+      border-color: var(--color-bg-surface);
+    }
+  }
+}
+
+// Volume Dial (decorative)
+.radio-player__dial {
+  flex-shrink: 0;
+}
+
+.radio-player__dial-bg {
+  fill: none;
+  stroke: var(--color-border-subtle);
+  stroke-width: 1;
+}
+
+.radio-player__dial-face {
+  fill: var(--color-bg-surface);
+  stroke: var(--color-border-soft);
+  stroke-width: 0.5;
+
+  @include dark-theme {
+    fill: color-mix(in srgb, var(--color-bg-surface) 60%, #000);
+    stroke: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.radio-player__dial-indicator {
+  stroke: var(--color-text-secondary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transform-origin: 20px 20px;
+  transition: transform 0.15s ease;
+}
+
+// ---------------------------------------------
+// Reduced Motion
+// ---------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+  .radio-player__reel,
+  .radio-player__cassette-reel-circle,
+  .radio-player__icon--loading,
+  .radio-player__vu-bar {
+    animation: none !important;
+  }
+
+  .radio-player__drawer {
+    transition: none;
+  }
+
+  .radio-player__expand-btn {
+    transition: none;
+  }
+}

@@ -13,8 +13,8 @@ interface Props {
 const { title, description, tags = [], url = Astro.url.href, slug, hasToc = false } = Astro.props;
 
 // Mobile button position: if TOC exists, stack above it; otherwise take TOC's position
-const mobileButtonPosition = hasToc ? "bottom-24" : "bottom-6";
-const mobileMenuPosition = hasToc ? "bottom-24" : "bottom-6";
+const mobileButtonPosition = hasToc ? "bottom-34" : "bottom-6";
+const mobileMenuPosition = hasToc ? "bottom-34" : "bottom-6";
 
 // Twitter: hashtags as comma-separated (without #), max 3 tags
 const twitterHashtags = tags.slice(0, 3).join(",");
@@ -173,7 +173,7 @@ const shareLinks = [
 <!-- Toast notification -->
 <div
     data-copy-toast
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-lg bg-surface border border-border px-4 py-3 shadow-lg opacity-0 pointer-events-none transition-all duration-300 translate-y-2"
+    class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-lg bg-surface border border-border px-4 py-3 shadow-lg opacity-0 pointer-events-none transition-all duration-300 translate-y-2"
     role="status"
     aria-live="polite"
 >

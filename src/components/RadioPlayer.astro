@@ -1,0 +1,133 @@
+---
+import { RADIO_STREAM_URL } from "../consts";
+---
+
+<div class="radio-player" transition:persist="radio-player" data-radio-player data-stream-url={RADIO_STREAM_URL}>
+  <audio preload="none" data-radio-audio></audio>
+
+  <!-- Mini Bar (always visible) -->
+  <div class="radio-player__bar" data-radio-bar>
+    <button class="radio-player__reel-icon" data-radio-play aria-label="Play radio">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="8" cy="12" r="3" class="radio-player__reel radio-player__reel--left" />
+        <circle cx="16" cy="12" r="3" class="radio-player__reel radio-player__reel--right" />
+        <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" fill="none" />
+        <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="0.75" opacity="0.4" />
+      </svg>
+    </button>
+
+    <div class="radio-player__info" data-radio-bar-clickable>
+      <span class="radio-player__title" data-radio-title>Space Radio</span>
+      <span class="radio-player__status" role="status" aria-live="polite" data-radio-status></span>
+    </div>
+
+    <button class="radio-player__play-btn" data-radio-play aria-label="Play radio">
+      <!-- Play icon -->
+      <svg class="radio-player__icon radio-player__icon--play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+      <!-- Stop icon -->
+      <svg class="radio-player__icon radio-player__icon--stop" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+        <rect x="6" y="6" width="12" height="12" rx="1" />
+      </svg>
+      <!-- Loading spinner -->
+      <svg class="radio-player__icon radio-player__icon--loading" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" opacity="0.25" />
+        <path d="M12 3a9 9 0 0 1 9 9" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <button class="radio-player__expand-btn" data-radio-expand aria-label="Expand player" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <polyline points="18 15 12 9 6 15" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Expanded Drawer -->
+  <div class="radio-player__drawer" data-radio-drawer aria-hidden="true">
+    <div class="radio-player__drawer-content">
+      <!-- Cassette Visual -->
+      <div class="radio-player__cassette" aria-hidden="true">
+        <svg viewBox="0 0 200 120" class="radio-player__cassette-svg">
+          <!-- Cassette body -->
+          <rect x="4" y="4" width="192" height="112" rx="8" class="radio-player__cassette-body" />
+          <!-- Label area -->
+          <rect x="24" y="16" width="152" height="52" rx="4" class="radio-player__cassette-label" />
+          <!-- Label lines -->
+          <line x1="36" y1="30" x2="164" y2="30" class="radio-player__cassette-line" />
+          <line x1="36" y1="40" x2="164" y2="40" class="radio-player__cassette-line" />
+          <line x1="36" y1="50" x2="130" y2="50" class="radio-player__cassette-line" />
+          <!-- Label text -->
+          <text x="100" y="44" text-anchor="middle" class="radio-player__cassette-text" data-radio-cassette-title>SPACE RADIO</text>
+          <!-- Left reel -->
+          <circle cx="65" cy="90" r="14" class="radio-player__cassette-reel-bg" />
+          <circle cx="65" cy="90" r="14" class="radio-player__cassette-reel-circle radio-player__cassette-reel-circle--left" />
+          <circle cx="65" cy="90" r="4" class="radio-player__cassette-reel-hub" />
+          <!-- Right reel -->
+          <circle cx="135" cy="90" r="14" class="radio-player__cassette-reel-bg" />
+          <circle cx="135" cy="90" r="14" class="radio-player__cassette-reel-circle radio-player__cassette-reel-circle--right" />
+          <circle cx="135" cy="90" r="4" class="radio-player__cassette-reel-hub" />
+          <!-- Tape window -->
+          <rect x="55" y="78" width="90" height="24" rx="3" class="radio-player__cassette-window" />
+          <!-- Tape path between reels -->
+          <line x1="79" y1="90" x2="121" y2="90" class="radio-player__cassette-tape" />
+        </svg>
+      </div>
+
+      <!-- VU Meter -->
+      <div class="radio-player__vu" aria-hidden="true">
+        <div class="radio-player__vu-bar" style="--bar-i: 0"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 1"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 2"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 3"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 4"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 5"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 6"></div>
+        <div class="radio-player__vu-bar" style="--bar-i: 7"></div>
+      </div>
+
+      <!-- Volume Controls -->
+      <div class="radio-player__controls">
+        <button class="radio-player__mute-btn" data-radio-mute aria-label="Mute">
+          <!-- Volume icon -->
+          <svg class="radio-player__mute-icon radio-player__mute-icon--on" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          </svg>
+          <!-- Muted icon -->
+          <svg class="radio-player__mute-icon radio-player__mute-icon--off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />
+            <line x1="23" y1="9" x2="17" y2="15" />
+            <line x1="17" y1="9" x2="23" y2="15" />
+          </svg>
+        </button>
+
+        <input
+          type="range"
+          class="radio-player__volume"
+          min="0"
+          max="1"
+          step="0.01"
+          value="0.7"
+          aria-label="Volume"
+          data-radio-volume
+        />
+
+        <!-- Volume Dial (decorative visual feedback) -->
+        <div class="radio-player__dial" aria-hidden="true">
+          <svg viewBox="0 0 40 40" width="36" height="36">
+            <circle cx="20" cy="20" r="16" class="radio-player__dial-bg" />
+            <circle cx="20" cy="20" r="14" class="radio-player__dial-face" />
+            <line x1="20" y1="20" x2="20" y2="8" class="radio-player__dial-indicator" data-radio-dial-indicator />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import "../scripts/radio-player";
+</script>
