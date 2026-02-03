@@ -29,6 +29,24 @@
 }
 
 // ---------------------------------------------
+// View Transition — prevent flash during SPA navigation
+// transition:persist assigns view-transition-name: radio-player.
+// The root group's cross-fade snapshot covers the player briefly
+// because ::view-transition-group(root) renders above it by default.
+// Fix: lift the radio-player group above root and kill all animations.
+// ---------------------------------------------
+
+::view-transition-group(radio-player) {
+  z-index: 1;       // above ::view-transition-group(root) which defaults to 0
+  animation: none;
+}
+
+::view-transition-old(radio-player),
+::view-transition-new(radio-player) {
+  animation: none;
+}
+
+// ---------------------------------------------
 // Container
 // ---------------------------------------------
 
@@ -564,5 +582,33 @@
 
   .radio-player__expand-btn {
     transition: none;
+  }
+}
+
+// ---------------------------------------------
+// SPA Navigation — solid background during swap
+// ---------------------------------------------
+// During Astro's DOM swap the page content behind the player is
+// momentarily empty. backdrop-filter: blur() resolves to transparent
+// (nothing to blur), causing a visible flash. We swap to an opaque
+// background before the swap and restore frosted glass after paint.
+
+// The bar has `transition: background …` for smooth theme switching.
+// That same transition causes the navigating-class background swap to
+// ANIMATE through intermediate alpha values instead of snapping.
+// During those frames backdrop-filter sees empty content → flash.
+// Fix: kill transitions instantly so the solid bg applies in one frame.
+
+.radio-player--navigating {
+  .radio-player__bar,
+  .radio-player__drawer {
+    transition: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgb(250, 251, 252) !important;
+
+    @include dark-theme {
+      background: rgb(13, 17, 23) !important;
+    }
   }
 }
