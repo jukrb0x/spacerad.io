@@ -87,7 +87,7 @@ lang: zh
 
 ### 评论系统迁移
 
-先前的博客使用 [Cusdis](https://github.com/djyde/cusdis) 作为评论系统。这是一个基于 Next.js、Postgres 和 SQLite 的轻量化评论系统，但是它的拓展性不够强。经过一番调研，我决定使用 [Remark42](https://github.com/umputun/remark42) 作为评论系统。同时我想保留我的评论数据，于是我需要一个数据库之间的迁移工具。
+先前的博客使用 [Cusdis](https://github.com/djyde/cusdis) 作为评论系统。这是一个基于 Next.js、Postgres 的轻量化评论系统，但是它的拓展性不够强。经过一番调研，我决定使用 [Remark42](https://github.com/umputun/remark42) 作为评论系统。同时我想保留我的评论数据，于是我需要一个数据库之间的迁移工具。
 
 这个工具同样是使用 AI 对两套系统之间进行研究后匹配差异，使用 Go 写的从 Cusdis (Postgres-based) 到 Remark42 (BoltDB) 的迁移工具，代码库现已公开：https://github.com/jukrb0x/cusdis-to-remark42-migrator
 
