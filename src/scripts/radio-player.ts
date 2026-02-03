@@ -179,6 +179,50 @@ function initRadioPlayer(): void {
         updateDisplayedTitle(radioState.get());
     });
 
+    // --- Navigation lifecycle: mask backdrop-filter flash during DOM swap ---
+    // Problem: during Astro's body swap the page content behind the player
+    // disappears. backdrop-filter: blur() sees nothing → transparent flash.
+    // The bar's `transition: background` makes it worse by animating through
+    // intermediate alpha values instead of snapping.
+    //
+    // Fix: before swap, instantly switch to a solid opaque background with
+    // transitions disabled. After the new page is painted, remove the class
+    // but suppress the reverse transition so it doesn't animate back.
+    const bar = root.querySelector<HTMLElement>(".radio-player__bar");
+    const drawerEl = root.querySelector<HTMLElement>(".radio-player__drawer");
+
+    document.addEventListener("astro:before-swap", () => {
+        root.classList.add("radio-player--navigating");
+    });
+
+    document.addEventListener("astro:after-swap", () => {
+        // Wait for the new page content to be painted before restoring
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                // Remove navigating class (restores backdrop-filter + alpha bg)
+                root.classList.remove("radio-player--navigating");
+
+                // The element's transition property is now back, so the browser
+                // would animate from solid → semi-transparent. Suppress that by
+                // temporarily disabling transitions on the elements directly.
+                const targets = [bar, drawerEl].filter(Boolean) as HTMLElement[];
+                for (const el of targets) {
+                    el.style.transition = "none";
+                }
+
+                // Force style recalc so the new background is applied without transition
+                root.offsetHeight; // eslint-disable-line @typescript-eslint/no-unused-expressions
+
+                // Re-enable transitions on the next frame
+                requestAnimationFrame(() => {
+                    for (const el of targets) {
+                        el.style.transition = "";
+                    }
+                });
+            });
+        });
+    });
+
     // --- Initialize UI from current store state ---
     radioState.notify();
     radioExpanded.notify();
