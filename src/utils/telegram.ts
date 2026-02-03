@@ -114,8 +114,8 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
             const forwardedFrom = $forwardedFromElem.text().trim();
             const forwardedFromLink = $forwardedFromElem.attr("href") || undefined;
 
-            // Get text content
-            const $text = $message.find(".tgme_widget_message_text");
+            // Get text content (use .js-message_text to avoid matching reply/quote text)
+            const $text = $message.find(".tgme_widget_message_text.js-message_text");
             const text = $text.text().trim();
 
             // Generate title from first sentence or first line
