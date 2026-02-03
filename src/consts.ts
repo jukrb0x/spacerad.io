@@ -22,6 +22,9 @@ type NavLink = {
     drawer_only?: boolean;
 };
 
+// Radio stream URL — replace with your own stream
+export const RADIO_STREAM_URL = "https://live.truckers.fm";
+
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
     { href: "/", label: "Home" },
