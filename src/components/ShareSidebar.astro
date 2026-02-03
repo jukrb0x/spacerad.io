@@ -13,8 +13,8 @@ interface Props {
 const { title, description, tags = [], url = Astro.url.href, slug, hasToc = false } = Astro.props;
 
 // Mobile button position: if TOC exists, stack above it; otherwise take TOC's position
-const mobileButtonPosition = hasToc ? "bottom-34" : "bottom-6";
-const mobileMenuPosition = hasToc ? "bottom-34" : "bottom-6";
+const mobileButtonPosition = hasToc ? "bottom-34" : "bottom-16";
+const mobileMenuPosition = hasToc ? "bottom-34" : "bottom-16";
 
 // Twitter: hashtags as comma-separated (without #), max 3 tags
 const twitterHashtags = tags.slice(0, 3).join(",");
