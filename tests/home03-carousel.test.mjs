@@ -67,7 +67,11 @@ for (const width of [1440, 390, 320]) {
                 "I build Unreal Engine, tools, teams, games, stories and performance.",
             );
             assert.equal(await frame.getAttribute("aria-hidden"), "true");
-            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), width);
+            const viewport = await page.evaluate(() => ({
+                width: document.documentElement.clientWidth,
+                content: document.documentElement.scrollWidth,
+            }));
+            assert.equal(viewport.content, viewport.width, "carousel must not cause horizontal overflow, including with a reserved scrollbar");
         } finally {
             await context.close();
         }

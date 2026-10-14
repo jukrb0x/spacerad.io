@@ -17,7 +17,8 @@ async function open(path, options = {}) {
     await context.route("**/*", (route) => (["GET", "HEAD", "OPTIONS"].includes(route.request().method()) ? route.continue() : route.abort()));
     const page = await context.newPage();
     page.setDefaultTimeout(5000);
-    await page.goto(new URL(path, baseURL).href, { waitUntil: "domcontentloaded", timeout: 15000 });
+    // Cold Vite module transforms use the startup budget; UI assertions retain their 5s deadline.
+    await page.goto(new URL(path, baseURL).href, { waitUntil: "domcontentloaded", timeout: 45000 });
     await page.waitForFunction(() => document.querySelector("[data-theme-toggle]")?.dataset.themeBound === "true");
     return { context, page };
 }
