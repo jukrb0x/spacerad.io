@@ -1,0 +1,6 @@
+---
+import ChannelNotes from "../../components/home/LatestChannel.astro";
+export const prerender = false;
+Astro.response.headers.set("X-Robots-Tag", "noindex");
+---
+<ChannelNotes />

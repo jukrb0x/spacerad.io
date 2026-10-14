@@ -1,142 +1,107 @@
-/**
- * Header Scroll Behavior - Space Radio Design System
- *
- * Features:
- * - Auto-hide header when scrolling down
- * - Show header when scrolling up (with threshold to avoid jitter)
- * - Blur backdrop when scrolled
- * - Reading progress indicator
- * - Exposes --header-offset CSS variable for sticky elements
- * - Respects prefers-reduced-motion
- */
-
+// Float only navigation; the Home profile stays in its original document flow.
+let header: HTMLElement | null = null;
+let navigation: HTMLElement | null = null;
+let progressBar: HTMLElement | null = null;
+let frame: number | undefined;
 let lastScrollY = 0;
-let ticking = false;
-
-let header = document.querySelector("[data-header]") as HTMLElement;
-let progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
-
-// Set header height CSS variable (only on page-load, not during scroll)
-function updateHeaderOffset() {
-    const headerHeight = header?.offsetHeight || 0;
-    document.documentElement.style.setProperty("--header-offset", `${headerHeight}px`);
-}
-
-// Scroll threshold before hiding header
-const SCROLL_THRESHOLD = 100;
-const BLUR_THRESHOLD = 10;
-// Minimum scrollable distance (in vh) to show progress bar
+let directionAnchor = 0;
+let direction = 0;
+let headerTop = 0;
+let navigationHeight = 0;
+let floating = false;
+let hidden = false;
+const REVEAL_DISTANCE = 32;
+const HIDE_DISTANCE = 24;
 const MIN_SCROLL_DISTANCE_VH = 1.5;
-// Minimum scroll-up distance (px) before showing header again
-const SCROLL_UP_THRESHOLD = 500;
 
-// Track the highest scroll position since last direction change
-let scrollDirectionAnchor = 0;
-let isHeaderHidden = false;
+function measureNavigation() {
+    if (!header || !navigation) return;
+    headerTop = header.getBoundingClientRect().top + window.scrollY;
+    navigationHeight = navigation.offsetHeight;
+}
 
-// Check if user prefers reduced motion
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-/**
- * Update header state based on scroll position
- */
 function updateHeader() {
-    const scrollY = window.scrollY;
-
-    // Don't animate if user prefers reduced motion
-    if (!prefersReducedMotion && header) {
-        // Auto-hide logic - only after scrolling past threshold
-        if (scrollY > SCROLL_THRESHOLD) {
-            if (scrollY > lastScrollY) {
-                // Scrolling down — update anchor and hide
-                scrollDirectionAnchor = scrollY;
-                if (!isHeaderHidden) {
-                    isHeaderHidden = true;
-                    header.classList.add("header--hidden");
-                }
-            } else {
-                // Scrolling up — only show after scrolling up SCROLL_UP_THRESHOLD px
-                const scrolledUp = scrollDirectionAnchor - scrollY;
-                if (scrolledUp >= SCROLL_UP_THRESHOLD && isHeaderHidden) {
-                    isHeaderHidden = false;
-                    header.classList.remove("header--hidden");
-                }
-            }
+    frame = undefined;
+    if (!header || !navigation) return;
+    const scrollY = Math.max(0, window.scrollY);
+    const delta = scrollY - lastScrollY;
+    // Scroll locks may restore position on close; don't interpret them as intent.
+    if (!document.querySelector("dialog[open]")) {
+        if (scrollY <= headerTop) {
+            floating = false;
+            hidden = false;
+            direction = 0;
+            directionAnchor = scrollY;
         } else {
-            // At top - always show header
-            scrollDirectionAnchor = scrollY;
-            if (isHeaderHidden) {
-                isHeaderHidden = false;
-                header.classList.remove("header--hidden");
+            if (!floating && scrollY >= headerTop + navigationHeight) {
+                floating = true;
+                hidden = true;
+                directionAnchor = scrollY;
+                direction = 0;
+            }
+            if (floating) {
+                const nextDirection = Math.sign(delta);
+                if (nextDirection && nextDirection !== direction) {
+                    directionAnchor = lastScrollY;
+                    direction = nextDirection;
+                }
+                if (direction < 0 && directionAnchor - scrollY >= REVEAL_DISTANCE) hidden = false;
+                if (direction > 0 && scrollY - directionAnchor >= HIDE_DISTANCE) hidden = true;
+                if (navigation.contains(document.activeElement)) hidden = false;
             }
         }
-
-        // Add scrolled state for blur backdrop
-        header.classList.toggle("is-scrolled", scrollY > BLUR_THRESHOLD);
+        header.toggleAttribute("data-nav-floating", floating);
+        header.toggleAttribute("data-nav-hidden", floating && hidden);
+        navigation.inert = floating && hidden;
     }
 
-    // Update reading progress (visual feedback, works even with reduced motion)
     if (progressBar) {
-        const windowHeight = window.innerHeight;
-        const documentHeight = document.documentElement.scrollHeight;
-        const scrollTop = window.scrollY;
-        const trackLength = documentHeight - windowHeight;
-
-        // Hide progress bar if page is not long enough
-        const minScrollDistance = windowHeight * MIN_SCROLL_DISTANCE_VH;
-        const isPageLongEnough = trackLength >= minScrollDistance;
-
-        progressBar.style.opacity = isPageLongEnough ? "1" : "0";
-
-        if (isPageLongEnough) {
-            const percentScrolled = (scrollTop / trackLength) * 100;
-            progressBar.style.transform = `scaleX(${Math.min(percentScrolled / 100, 1)})`;
-            progressBar.setAttribute("aria-valuenow", Math.round(percentScrolled).toString());
+        const trackLength = document.documentElement.scrollHeight - window.innerHeight;
+        const longEnough = trackLength >= window.innerHeight * MIN_SCROLL_DISTANCE_VH;
+        progressBar.style.opacity = longEnough ? "1" : "0";
+        if (longEnough) {
+            const progress = Math.max(0, Math.min(scrollY / trackLength, 1));
+            progressBar.style.transform = `scaleX(${progress})`;
+            progressBar.setAttribute("aria-valuenow", Math.round(progress * 100).toString());
         }
     }
-
     lastScrollY = scrollY;
-    ticking = false;
 }
 
-/**
- * Request animation frame for smooth updates
- */
-function onScroll() {
-	if (!ticking) {
-		requestAnimationFrame(updateHeader);
-		ticking = true;
-	}
+function queueUpdate() {
+    if (frame === undefined && header) frame = requestAnimationFrame(updateHeader);
 }
 
-// Guard to ensure scroll listener is only attached once
-let scrollListenerAttached = false;
-
-// Initialize on page load
-if (header) {
-	updateHeaderOffset();
-	updateHeader();
-	if (!scrollListenerAttached) {
-		scrollListenerAttached = true;
-		window.addEventListener("scroll", onScroll, { passive: true });
-	}
+function initHeader() {
+    header = document.querySelector<HTMLElement>("[data-header]");
+    navigation = header?.querySelector<HTMLElement>(".site-header__inner") ?? null;
+    progressBar = document.querySelector<HTMLElement>("[data-reading-progress]");
+    floating = false;
+    hidden = false;
+    direction = 0;
+    lastScrollY = Math.max(0, window.scrollY);
+    directionAnchor = lastScrollY;
+    measureNavigation();
+    // Only the navigation bar occupies the viewport during reading.
+    document.documentElement.style.setProperty("--header-offset", `${navigationHeight}px`);
+    updateHeader();
 }
 
-// Update on page navigation (for SPAs or view transitions)
-document.addEventListener("astro:page-load", () => {
-	header = document.querySelector("[data-header]") as HTMLElement;
-	progressBar = document.querySelector("[data-reading-progress]") as HTMLElement;
-	if (header) {
-		lastScrollY = 0;
-		scrollDirectionAnchor = 0;
-		isHeaderHidden = false;
-		header.classList.remove("header--hidden");
-		updateHeaderOffset();
-		updateHeader();
-		// Ensure scroll listener is attached (only once)
-		if (!scrollListenerAttached) {
-			scrollListenerAttached = true;
-			window.addEventListener("scroll", onScroll, { passive: true });
-		}
-	}
+// Persistent module listeners bind once; references and queued work are reset per page.
+window.addEventListener("scroll", queueUpdate, { passive: true });
+window.addEventListener(
+    "resize",
+    () => {
+        measureNavigation();
+        queueUpdate();
+    },
+    { passive: true },
+);
+document.addEventListener("astro:page-load", initHeader);
+document.addEventListener("astro:before-swap", () => {
+    if (frame !== undefined) cancelAnimationFrame(frame);
+    frame = undefined;
+    header = null;
+    navigation = null;
+    progressBar = null;
 });

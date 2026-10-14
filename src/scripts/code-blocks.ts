@@ -23,17 +23,20 @@ function createCopyButton(codeEl: HTMLElement | null): HTMLButtonElement {
         <span>${COPY_TEXT}</span>
     `;
 
+    const label = copyBtn.querySelector("span");
+    if (!label) return copyBtn;
+
     copyBtn.addEventListener("click", async () => {
         const code = codeEl?.textContent || "";
 
         try {
             await navigator.clipboard.writeText(code);
             copyBtn.classList.add("copied");
-            copyBtn.querySelector("span")!.textContent = COPIED_TEXT;
+            label.textContent = COPIED_TEXT;
 
             setTimeout(() => {
                 copyBtn.classList.remove("copied");
-                copyBtn.querySelector("span")!.textContent = COPY_TEXT;
+                label.textContent = COPY_TEXT;
             }, COPIED_DURATION);
         } catch {
             // Fallback for older browsers
@@ -47,11 +50,11 @@ function createCopyButton(codeEl: HTMLElement | null): HTMLButtonElement {
             document.body.removeChild(textarea);
 
             copyBtn.classList.add("copied");
-            copyBtn.querySelector("span")!.textContent = COPIED_TEXT;
+            label.textContent = COPIED_TEXT;
 
             setTimeout(() => {
                 copyBtn.classList.remove("copied");
-                copyBtn.querySelector("span")!.textContent = COPY_TEXT;
+                label.textContent = COPY_TEXT;
             }, COPIED_DURATION);
         }
     });

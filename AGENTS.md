@@ -33,12 +33,15 @@ pnpm build      # Production build
 pnpm preview    # Preview build
 pnpm format     # Biome format
 pnpm lint       # Biome lint
+pnpm check      # Astro/type diagnostics
+pnpm test:unit  # Deterministic module regressions
+pnpm test:browser # Owned local server/browser regressions; see docs/testing.md
 ```
 
 ## Key Conventions
 
 - **Dark mode** via `data-theme="dark"` on `<html>` — use `:global([data-theme="dark"])` in Astro scoped styles, `@include dark-theme` in SCSS, `dark:` prefix in UnoCSS
-- **Monochrome gray accent** palette — `#555` light, `#a0a0a0` dark
+- **Home03 palette** — blue structure, red language markers, yellow written Channel identity; tokens provide light/dark values
 - **BEM naming** — `.component__element--modifier`
 - **State via data attrs** — `[data-theme]`, `[data-header]`, `[data-tone]`
 - **Dark mode buttons** — prefer `color-mix()` tinted backgrounds over solid gray fills
@@ -57,7 +60,7 @@ The site uses Astro's `<ClientRouter />` for SPA-style navigation. This is criti
 4. **Inline `<script is:inline>` tags** need `data-astro-rerun` attribute to re-execute on navigation.
 5. **Use `AbortController` for document-level listener cleanup** to prevent listener leaks across navigations. See `NavDrawer.astro` for the canonical pattern.
 6. **Use module-level guards** (`let scrollListenerAttached = false`) for persistent listeners (scroll, resize) that should only bind once.
-7. **Theme state uses nanostores** — `src/stores/theme.ts` provides reactive state that persists across navigation. No need for manual theme subscriptions cleanup.
+7. **Theme state uses nanostores** — `src/stores/theme.ts` provides reactive state that persists across navigation. Dispose DOM theme-toggle bindings before swapping the Header; store state persists.
 8. **Don't put `transition:animate="none"` on footer** — it creates a view-transition stacking context that breaks fixed-position FABs.
 9. **Header scroll offset** (`--header-offset`) — only set on page-load, never during scroll (causes layout thrashing).
 
@@ -68,4 +71,4 @@ The site uses Astro's `<ClientRouter />` for SPA-style navigation. This is criti
 - State persists across SPA navigation (module executes once)
 - Applies theme on initial load, before swap, and after swap to prevent FOUC
 - Import in `BaseHead.astro` to ensure store is always loaded
-- No need for manual cleanup — nanostores subscriptions handle it automatically
+- Store state persists; DOM bindings and `onThemeChange()` subscribers must retain and call their disposers.

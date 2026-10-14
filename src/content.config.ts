@@ -1,4 +1,4 @@
-import { defineCollection, z, type ImageFunction } from "astro:content";
+import { defineCollection, type ImageFunction, z } from "astro:content";
 import { glob } from "astro/loaders";
 
 const createSharedSchema = (image: ImageFunction) =>

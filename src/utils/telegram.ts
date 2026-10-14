@@ -63,7 +63,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
     const url = `https://t.me/s/${channelUsername}${queryString ? `?${queryString}` : ""}`;
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
         if (!response.ok) {
             throw new Error(`Failed to fetch channel: ${response.statusText}`);
         }

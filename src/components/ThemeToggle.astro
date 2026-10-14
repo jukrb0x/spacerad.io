@@ -83,11 +83,19 @@ const { label = "Toggle theme", class: className = "", variant = "header" } = (A
 <script>
 	import { bindThemeToggles } from "../lib/theme-effects";
 
-	function initToggles() {
-		bindThemeToggles(document);
+	let disposeToggles: (() => void) | undefined;
+
+	function cleanupToggles() {
+		disposeToggles?.();
+		disposeToggles = undefined;
 	}
 
-	initToggles();
+	function initToggles() {
+		cleanupToggles();
+		disposeToggles = bindThemeToggles(document);
+	}
+
+	document.addEventListener("astro:before-swap", cleanupToggles);
 	document.addEventListener("astro:page-load", initToggles);
 </script>
 

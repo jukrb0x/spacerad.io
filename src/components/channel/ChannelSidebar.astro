@@ -11,6 +11,7 @@ const { title, description, avatar, username } = Astro.props;
 
 <aside class="channel-sidebar">
     <div class="channel-sidebar__card surface-card">
+        <p class="channel-sidebar__identity">Channel</p>
         <img src={avatar} alt={title} class="channel-sidebar__avatar" />
         <h2 class="channel-sidebar__title">{title}</h2>
         {description && (
@@ -80,7 +81,11 @@ const { title, description, avatar, username } = Astro.props;
 }
 
 .channel-sidebar__card {
-    padding: var(--space-4);
+    padding: 32px 20px 24px;
+    border: 0;
+    border-radius: 140px 140px 0 0;
+    background: var(--color-channel);
+    color: var(--color-on-channel);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -98,14 +103,14 @@ const { title, description, avatar, username } = Astro.props;
 .channel-sidebar__title {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: var(--color-on-channel);
     margin: 0 0 var(--space-2);
     line-height: var(--line-height-tight);
 }
 
 .channel-sidebar__description {
     font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
+    color: var(--color-on-channel);
     line-height: 1.5;
     margin-bottom: var(--space-4);
     /* text-align: left; */
@@ -137,7 +142,7 @@ const { title, description, avatar, username } = Astro.props;
     content: counter(list-counter) ".";
     position: absolute;
     left: 0;
-    color: var(--color-text-muted);
+    color: var(--color-on-channel);
     font-weight: 500;
     font-size: var(--font-size-xs);
 }
@@ -146,7 +151,7 @@ const { title, description, avatar, username } = Astro.props;
     content: "\2022";
     position: absolute;
     left: var(--space-1);
-    color: var(--color-text-muted);
+    color: var(--color-on-channel);
 }
 
 .channel-sidebar__actions {
@@ -162,52 +167,44 @@ const { title, description, avatar, username } = Astro.props;
     justify-content: center;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
+    border-radius: 999px;
+    min-height: 44px;
     font-size: var(--font-size-xs);
     font-weight: 600;
     text-decoration: none;
     transition: all var(--transition-base);
 }
 
+ .channel-sidebar__identity {
+    margin: 0 0 16px;
+    color: var(--color-on-channel);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
 .channel-sidebar__btn--primary {
-    background: var(--color-accent);
-    color: white;
+    background: var(--color-structure);
+    color: var(--color-on-structure);
+    border: 1px solid var(--color-structure);
 }
-
-.channel-sidebar__btn--primary:hover {
-    background: var(--color-accent-dark);
-}
-
-:global([data-theme="dark"]) .channel-sidebar__btn--primary {
-    background: color-mix(in srgb, var(--color-accent) 18%, var(--color-bg-surface));
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-subtle);
-}
-
-:global([data-theme="dark"]) .channel-sidebar__btn--primary:hover {
-    background: color-mix(in srgb, var(--color-accent) 30%, var(--color-bg-surface));
-    border-color: var(--color-accent);
-}
-
 .channel-sidebar__btn--ghost {
     background: transparent;
-    color: var(--color-accent);
-    border: 1px solid var(--color-accent);
+    color: var(--color-on-channel);
+    border: 1px solid currentColor;
 }
-
-.channel-sidebar__btn--ghost:hover {
-    background: var(--color-accent);
-    color: white;
-}
-
-:global([data-theme="dark"]) .channel-sidebar__btn--ghost {
-    color: var(--color-text-secondary);
-    border-color: var(--color-border-subtle);
-}
-
-:global([data-theme="dark"]) .channel-sidebar__btn--ghost:hover {
-    background: var(--color-accent-tint-12);
-    color: var(--color-text-primary);
-    border-color: var(--color-accent);
+.channel-sidebar__btn:hover { text-decoration: underline; }
+.channel-sidebar__description :global(a) { color: inherit; text-decoration: underline; }
+@media (max-width: 960px) {
+    .channel-sidebar__card {
+        border-radius: 64px 64px 0 0;
+        padding: 24px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        text-align: left;
+    }
+    .channel-sidebar__identity { width: 100%; margin-bottom: 0; }
+    .channel-sidebar__actions { flex-direction: row; }
+    .channel-sidebar__btn { flex: 1; }
 }
 </style>

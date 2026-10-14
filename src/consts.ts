@@ -4,7 +4,8 @@
 export const SITE_TITLE = "Spacerad.io";
 export const SITE_TITLE_OG = "Spacerad.io · On air with Jabriel";
 export const SITE_TITLE_ALT = ["太空来电", "宇宙频道", "星际广播", "I'm Jabriel", "智人大冲浪"] as const;
-export const SITE_DESCRIPTION = "Space Radio, another random blog. Sharing my thoughts on game development, web technology, and other interesting stuff.";
+export const SITE_DESCRIPTION =
+    "Space Radio, another random blog. Sharing my thoughts on game development, web technology, and other interesting stuff.";
 export const SITE_SOCIAL_IMAGE = "/og-image.png";
 export const DEFAULT_POST_SOCIAL_IMAGE = "/placeholder.png";
 
@@ -22,15 +23,12 @@ type NavLink = {
     drawer_only?: boolean;
 };
 
-// Radio stream URL — replace with your own stream
-export const RADIO_STREAM_URL = "https://live.truckers.fm";
-
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
-    { href: "/", label: "Home" },
+    { href: "/", label: "Home", drawer_only: true },
     { href: "/posts", label: "Blog" },
-    { href: "/tags", label: "Tags" },
     { href: "/channel", label: "Channel" },
+    { href: "/tags", label: "Topics", drawer_only: true },
     { href: "/friends", label: "Links" },
     { href: "/me", label: "About" },
 ];

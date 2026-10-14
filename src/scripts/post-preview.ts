@@ -1,331 +1,224 @@
-/**
- * Post Preview Card - Hover preview for blog post links
- *
- * Features:
- * - Smart positioning that follows cursor and stays within viewport
- * - Image preloading with state tracking (prevents duplicate requests)
- * - Smooth enter/exit animations with CSS transforms
- * - Respects reduced motion preferences
- * - Skips touch devices and small viewports
- */
-
-import { preloadImage, getImageState } from "../utils/imagePreloader";
+import { getImageState, preloadImage } from "../utils/imagePreloader";
 
 interface PostMeta {
-	title: string;
-	description: string;
-	image?: string;
+    title: string;
+    description: string;
+    image?: string;
+    lang?: "en" | "zh";
 }
-
 type PostMetaMap = Record<string, PostMeta>;
 
-function getAbsoluteUrl(src: string): string {
-    try {
-        return new URL(src, window.location.origin).href;
-    } catch {
-        return src;
-    }
-}
-
-function parsePostIdFromHref(href: string): string | null {
-    try {
-        const url = new URL(href, window.location.origin);
-        // Remove leading slashes and "posts/" prefix
-        return url.pathname.replace(/^\/+posts\//, "").replace(/^\/+/, "");
-    } catch {
-        return null;
-    }
+function postId(link: HTMLAnchorElement): string | null {
+    const url = new URL(link.href, window.location.origin);
+    return url.origin === window.location.origin && url.pathname.startsWith("/posts/")
+        ? link.dataset.postId || url.pathname.slice(7).replace(/\/$/, "")
+        : null;
 }
 
 class PreviewCard {
-    private card: HTMLElement | null = null;
-    private imageEl: HTMLImageElement | null = null;
-    private placeholderEl: HTMLElement | null = null;
-    private titleEl: HTMLElement | null = null;
-    private descEl: HTMLElement | null = null;
+    private card: HTMLElement | undefined;
+    private target: HTMLAnchorElement | undefined;
+    private timer: ReturnType<typeof setTimeout> | undefined;
+    private frame: number | undefined;
+    private x = 0;
+    private y = 0;
+    private revision = 0;
+    private pointerActive = false;
+    private metaMap: PostMetaMap;
 
-    private hoverTimeout: number | null = null;
-    private currentTarget: HTMLElement | null = null;
-    private isVisible = false;
-    private mouseX = 0;
-    private mouseY = 0;
-    private rafId: number | null = null;
-
-    private readonly HOVER_DELAY = 400;
-    private readonly CARD_WIDTH = 280;
-    private readonly CARD_OFFSET = 16;
-
-    constructor(private metaMap: PostMetaMap) {}
-
-    private createCard(): HTMLElement {
-        const card = document.createElement("div");
-        card.className = "post-preview-card";
-        card.setAttribute("role", "tooltip");
-        card.innerHTML = `
-            <div class="post-preview-card__image-container">
-                <img class="post-preview-card__image" alt="" />
-                <div class="post-preview-card__placeholder">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21,15 16,10 5,21"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="post-preview-card__content">
-                <h4 class="post-preview-card__title"></h4>
-                <p class="post-preview-card__desc"></p>
-            </div>
-        `;
-
-        document.body.appendChild(card);
-
-        this.imageEl = card.querySelector(".post-preview-card__image");
-        this.placeholderEl = card.querySelector(".post-preview-card__placeholder");
-        this.titleEl = card.querySelector(".post-preview-card__title");
-        this.descEl = card.querySelector(".post-preview-card__desc");
-
-        return card;
+    constructor(metaMap: PostMetaMap) {
+        this.metaMap = metaMap;
     }
 
     private ensureCard(): HTMLElement {
-        if (!this.card) {
-            this.card = this.createCard();
-        }
-        return this.card;
+        if (this.card) return this.card;
+        const card = document.createElement("div");
+        card.className = "post-preview-card";
+        card.id = "post-preview-tooltip";
+        card.setAttribute("role", "tooltip");
+        card.setAttribute("aria-hidden", "true");
+        card.innerHTML = `<div class="post-preview-card__content"><h4 class="post-preview-card__title"></h4><div class="post-preview-card__image-container" hidden><img class="post-preview-card__image" alt="" width="560" height="280" decoding="async" /></div><p class="post-preview-card__desc"></p></div>`;
+        document.body.appendChild(card);
+        this.card = card;
+        return card;
     }
 
-    private updateContent(meta: PostMeta): void {
-        if (!this.titleEl || !this.descEl || !this.imageEl || !this.placeholderEl) return;
-
-        this.titleEl.textContent = meta.title || "";
-        this.descEl.textContent = meta.description || "";
-
-        if (meta.image) {
-            const absoluteSrc = getAbsoluteUrl(meta.image);
-            const state = getImageState(absoluteSrc);
-
-            if (state === "loaded") {
-                // Image already cached - show immediately
-                this.imageEl.src = meta.image;
-                this.imageEl.alt = `Preview: ${meta.title}`;
-                this.imageEl.classList.add("loaded");
-                this.placeholderEl.classList.remove("visible");
-            } else if (state === "error") {
-                // Failed to load - show placeholder
-                this.imageEl.classList.remove("loaded");
-                this.placeholderEl.classList.add("visible");
-            } else {
-                // Loading or not started - show placeholder, then image when ready
-                this.imageEl.classList.remove("loaded");
-                this.placeholderEl.classList.add("visible");
-
-                preloadImage(absoluteSrc).then(() => {
-                    // Check if still showing same post
-                    if (getImageState(absoluteSrc) === "loaded" && this.imageEl && this.placeholderEl && meta.image) {
-                        this.imageEl.src = meta.image;
-                        this.imageEl.alt = `Preview: ${meta.title}`;
-                        this.imageEl.classList.add("loaded");
-                        this.placeholderEl.classList.remove("visible");
-                    }
-                });
-            }
-        } else {
-            // No image
-            this.imageEl.classList.remove("loaded");
-            this.placeholderEl.classList.add("visible");
-        }
-    }
-
-    private updatePosition(): void {
-        if (!this.card || !this.isVisible) return;
-
-        const cardHeight = this.card.offsetHeight || 240;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        // Position to the right of cursor by default
-        let x = this.mouseX + this.CARD_OFFSET;
-        let y = this.mouseY - cardHeight / 2;
-
-        // Flip to left if would overflow right edge
-        if (x + this.CARD_WIDTH > viewportWidth - 12) {
-            x = this.mouseX - this.CARD_WIDTH - this.CARD_OFFSET;
-        }
-
-        // Clamp to left edge
-        if (x < 12) {
-            x = 12;
-        }
-
-        // Clamp vertical position
-        if (y < 12) {
-            y = 12;
-        }
-        if (y + cardHeight > viewportHeight - 12) {
-            y = viewportHeight - cardHeight - 12;
-        }
-
+    private position = (): void => {
+        this.frame = undefined;
+        if (!this.card?.classList.contains("visible")) return;
+        const { width, height } = this.card.getBoundingClientRect();
+        let x = this.x + 16;
+        if (x + width > window.innerWidth - 12) x = this.x - width - 16;
+        x = Math.max(12, Math.min(x, window.innerWidth - width - 12));
+        const y = Math.max(12, Math.min(this.y - height / 2, window.innerHeight - height - 12));
         this.card.style.transform = `translate(${x}px, ${y}px)`;
-    }
-
-    private startPositionLoop(): void {
-        if (this.rafId !== null) return;
-
-        const loop = () => {
-            this.updatePosition();
-            if (this.isVisible) {
-                this.rafId = requestAnimationFrame(loop);
-            }
-        };
-        this.rafId = requestAnimationFrame(loop);
-    }
-
-    private stopPositionLoop(): void {
-        if (this.rafId !== null) {
-            cancelAnimationFrame(this.rafId);
-            this.rafId = null;
-        }
-    }
+    };
 
     private show(meta: PostMeta): void {
         const card = this.ensureCard();
-        this.updateContent(meta);
-        this.isVisible = true;
-
-        // Force reflow before adding visible class
-        card.offsetHeight;
-        card.classList.add("visible");
-
-        this.startPositionLoop();
-    }
-
-    private hide(): void {
-        if (!this.card) return;
-
-        this.isVisible = false;
-        this.card.classList.remove("visible");
-        this.stopPositionLoop();
-    }
-
-    private clearHoverTimeout(): void {
-        if (this.hoverTimeout !== null) {
-            window.clearTimeout(this.hoverTimeout);
-            this.hoverTimeout = null;
-        }
-    }
-
-    handleMouseEnter = (e: MouseEvent): void => {
-        const target = e.currentTarget as HTMLAnchorElement;
-        const id = target.dataset.postId || parsePostIdFromHref(target.href);
-        if (!id || !this.metaMap[id]) return;
-
-        this.currentTarget = target;
-        this.mouseX = e.clientX;
-        this.mouseY = e.clientY;
-
-        this.clearHoverTimeout();
-
-        // Start preloading image immediately
-        const meta = this.metaMap[id];
+        const revision = ++this.revision;
+        const title = card.querySelector<HTMLElement>(".post-preview-card__title");
+        const description = card.querySelector<HTMLElement>(".post-preview-card__desc");
+        const container = card.querySelector<HTMLElement>(".post-preview-card__image-container");
+        const image = card.querySelector<HTMLImageElement>("img");
+        if (!title || !description || !container || !image) return;
+        card.lang = meta.lang === "zh" ? "zh-CN" : "en";
+        title.textContent = meta.title;
+        description.textContent = meta.description;
+        container.hidden = !meta.image;
+        image.classList.remove("loaded");
+        image.removeAttribute("src");
         if (meta.image) {
-            preloadImage(getAbsoluteUrl(meta.image));
+            const src = meta.image;
+            const url = new URL(src, window.location.origin).href;
+            preloadImage(url).then(() => {
+                if (this.revision !== revision || !this.target) return;
+                if (getImageState(url) !== "loaded") {
+                    container.hidden = true;
+                    this.position();
+                    return;
+                }
+                image.src = src;
+                image.classList.add("loaded");
+            });
         }
+        card.classList.add("visible");
+        card.setAttribute("aria-hidden", "false");
+        this.target?.setAttribute("aria-describedby", [this.target.getAttribute("aria-describedby"), card.id].filter(Boolean).join(" "));
+        this.position();
+    }
 
-        this.hoverTimeout = window.setTimeout(() => {
-            if (this.currentTarget === target) {
-                this.show(meta);
-            }
-        }, this.HOVER_DELAY);
+    hide = (): void => {
+        clearTimeout(this.timer);
+        if (this.frame !== undefined) cancelAnimationFrame(this.frame);
+        this.frame = undefined;
+        this.revision++;
+        if (this.target) {
+            const ids = (this.target.getAttribute("aria-describedby") || "").split(/\s+/).filter((id) => id && id !== "post-preview-tooltip");
+            if (ids.length) this.target.setAttribute("aria-describedby", ids.join(" "));
+            else this.target.removeAttribute("aria-describedby");
+        }
+        this.target = undefined;
+        this.pointerActive = false;
+        this.card?.classList.remove("visible");
+        this.card?.setAttribute("aria-hidden", "true");
     };
 
-    handleMouseLeave = (): void => {
-        this.clearHoverTimeout();
-        this.currentTarget = null;
+    private queue(target: HTMLAnchorElement): void {
         this.hide();
-    };
-
-    handleMouseMove = (e: MouseEvent): void => {
-        this.mouseX = e.clientX;
-        this.mouseY = e.clientY;
-    };
-
-    handleFocus = (e: FocusEvent): void => {
-        const target = e.currentTarget as HTMLAnchorElement;
-        const id = target.dataset.postId || parsePostIdFromHref(target.href);
+        const id = postId(target);
         if (!id || !this.metaMap[id]) return;
+        this.target = target;
+        this.timer = setTimeout(() => {
+            if (this.target === target) this.show(this.metaMap[id]);
+        }, 300);
+    }
 
-        this.currentTarget = target;
+    private within(rect: DOMRect, x: number, y: number): boolean {
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    }
 
-        // Position near the focused element
-        const rect = target.getBoundingClientRect();
-        this.mouseX = rect.right;
-        this.mouseY = rect.top + rect.height / 2;
+    private withinPreview(x: number, y: number): boolean {
+        if (!this.target || !this.card?.classList.contains("visible")) return false;
+        const target = this.target.getBoundingClientRect();
+        const card = this.card.getBoundingClientRect();
+        if (this.within(target, x, y) || this.within(card, x, y)) return true;
+        // Keep the horizontal gap traversable without intercepting anything underneath.
+        return (
+            x >= Math.min(target.right, card.right) &&
+            x <= Math.max(target.left, card.left) &&
+            y >= Math.min(target.top, card.top) &&
+            y <= Math.max(target.bottom, card.bottom)
+        );
+    }
 
-        this.clearHoverTimeout();
-        this.hoverTimeout = window.setTimeout(() => {
-            if (this.currentTarget === target) {
-                this.show(this.metaMap[id]);
-            }
-        }, this.HOVER_DELAY);
+    enter = (event: MouseEvent): void => {
+        if (this.withinPreview(event.clientX, event.clientY)) return;
+        this.x = event.clientX;
+        this.y = event.clientY;
+        this.queue(event.currentTarget as HTMLAnchorElement);
+        this.pointerActive = !!this.target;
     };
-
-    handleBlur = (): void => {
-        this.handleMouseLeave();
+    move = (event: MouseEvent): void => {
+        if (!this.target || !this.pointerActive) return;
+        if (!this.within(this.target.getBoundingClientRect(), event.clientX, event.clientY)) {
+            if (!this.withinPreview(event.clientX, event.clientY)) this.hide();
+            // Freeze outside the title so the pointer can inspect the card.
+            if (this.frame !== undefined) cancelAnimationFrame(this.frame);
+            this.frame = undefined;
+            return;
+        }
+        this.x = event.clientX;
+        this.y = event.clientY;
+        if (this.card?.classList.contains("visible") && this.frame === undefined) {
+            this.frame = requestAnimationFrame(this.position);
+        }
+    };
+    leaveWindow = (): void => {
+        if (this.pointerActive) this.hide();
+    };
+    focus = (event: FocusEvent): void => {
+        const target = event.currentTarget as HTMLAnchorElement;
+        // Pointer clicks should never reopen a dismissed preview.
+        if (!target.matches(":focus-visible")) return;
+        const rect = target.getBoundingClientRect();
+        this.x = rect.right;
+        this.y = rect.top + rect.height / 2;
+        this.queue(target);
+    };
+    keydown = (event: KeyboardEvent): void => {
+        if (event.key === "Escape") this.hide();
+    };
+    destroy = (): void => {
+        this.hide();
+        this.card?.remove();
     };
 }
 
+let dispose: (() => void) | undefined;
+export function destroyPostPreview(): void {
+    dispose?.();
+    dispose = undefined;
+}
+
 export function initPostPreview(root: ParentNode = document): void {
-    // Skip touch devices and small viewports
-    const isTouch = window.matchMedia?.("(pointer: coarse)").matches ?? false;
-    const isSmall = window.matchMedia?.("(max-width: 1024px)").matches ?? false;
-    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-
-    if (isTouch || isSmall) return;
-
-    // Get metadata from script tag
-    const metaScript = document.getElementById("all-posts-meta");
-    if (!metaScript?.textContent) return;
-
-    let metaMap: PostMetaMap;
+    destroyPostPreview();
+    // Only mouse activation requires a fine hover pointer; keyboards work on touch devices.
+    const mouseEnabled = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const json = document.getElementById("all-posts-meta")?.textContent;
+    if (!json) return;
+    let metadata: PostMetaMap;
     try {
-        metaMap = JSON.parse(metaScript.textContent) as PostMetaMap;
+        metadata = JSON.parse(json);
     } catch {
         return;
     }
-
-    // Find eligible links
-    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>("a")).filter((link) => {
-        if (!link.href) return false;
-
-        // Exclude marked areas
-        if (link.closest("[data-no-preview]")) return false;
-        if (link.closest(".toc")) return false;
-        if (link.dataset.preview === "off") return false;
-
-        // Exclude anchor links
-        const rawHref = link.getAttribute("href") || "";
-        if (rawHref.startsWith("#")) return false;
-
-        // Check if it's a post link with metadata
-        const id = link.dataset.postId || parsePostIdFromHref(link.href);
-        return !!(id && metaMap[id]);
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
+        if (link.closest("[data-no-preview], .toc") || link.dataset.preview === "off" || link.getAttribute("aria-hidden") === "true") return false;
+        const id = postId(link);
+        return !!id && !!metadata[id];
     });
-
-    if (links.length === 0) return;
-
-    // Add reduced motion class to body if needed
-    if (prefersReducedMotion) {
-        document.body.classList.add("reduced-motion");
-    }
-
-    const previewCard = new PreviewCard(metaMap);
-
+    const preview = new PreviewCard(metadata);
+    const controller = new AbortController();
+    const options = { signal: controller.signal };
     for (const link of links) {
-        link.addEventListener("mouseenter", previewCard.handleMouseEnter);
-        link.addEventListener("mouseleave", previewCard.handleMouseLeave);
-        link.addEventListener("mousemove", previewCard.handleMouseMove);
-        link.addEventListener("focus", previewCard.handleFocus);
-        link.addEventListener("blur", previewCard.handleBlur);
+        if (mouseEnabled) {
+            link.addEventListener("mouseenter", preview.enter, options);
+            link.addEventListener("mouseleave", preview.move, options);
+        }
+        link.addEventListener("focus", preview.focus, options);
+        link.addEventListener("blur", preview.hide, options);
+        link.addEventListener("click", preview.hide, options);
     }
+    if (mouseEnabled) {
+        document.addEventListener("mousemove", preview.move, options);
+        document.addEventListener("mouseleave", preview.leaveWindow, options);
+    }
+    window.addEventListener("scroll", preview.hide, { ...options, passive: true, capture: true });
+    window.addEventListener("resize", preview.hide, options);
+    document.addEventListener("keydown", preview.keydown, options);
+    dispose = () => {
+        controller.abort();
+        preview.destroy();
+    };
 }

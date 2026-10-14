@@ -1,8 +1,3 @@
-// =============================================
-// Post Preview Card
-// Hover preview card for blog post links
-// =============================================
-
 @use '../tokens' as *;
 
 .post-preview-card {
@@ -10,105 +5,24 @@
   top: 0;
   left: 0;
   z-index: z('tooltip');
-  width: 280px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
+  width: min(320px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
   background: var(--color-bg-surface);
-  box-shadow: var(--shadow-strong);
+  box-shadow: 7px 7px var(--color-structure);
   overflow: hidden;
   pointer-events: none;
-
-  // Initial state - hidden
   opacity: 0;
   visibility: hidden;
-  transform: translate(0, 0) scale(0.96);
-  transition:
-    opacity 0.2s ease-out,
-    visibility 0.2s ease-out,
-    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity .15s ease, visibility .15s ease;
 
-  // Visible state
-  &.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(var(--x, 0), var(--y, 0)) scale(1);
-  }
-
-  // Reduced motion
-  .reduced-motion & {
-    transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
-    transform: none !important;
-
-    &.visible {
-      transform: translate(var(--x, 0), var(--y, 0)) !important;
-    }
-  }
-
-  // Image container
-  &__image-container {
-    position: relative;
-    width: 100%;
-    height: 140px;
-    background: var(--color-bg-muted);
-    overflow: hidden;
-  }
-
-  // Image
-  &__image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity 0.25s ease-out;
-
-    &.loaded {
-      opacity: 1;
-    }
-  }
-
-  // Placeholder
-  &__placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-muted);
-    opacity: 0;
-    transition: opacity 0.2s ease-out;
-
-    &.visible {
-      opacity: 1;
-    }
-
-    svg {
-      opacity: 0.5;
-    }
-  }
-
-  // Content
-  &__content {
-    padding: var(--space-3) var(--space-4);
-  }
-
-  // Title
-  &__title {
-    margin: 0 0 var(--space-1);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    line-height: var(--line-height-tight);
-    color: var(--color-text-primary);
-    @include line-clamp(2);
-  }
-
-  // Description
-  &__desc {
-    margin: 0;
-    font-size: var(--font-size-xs);
-    line-height: var(--line-height-relaxed);
-    color: var(--color-text-secondary);
-    @include line-clamp(3);
-  }
+  &.visible { opacity: 1; visibility: visible; }
+  &__content { padding: 16px; }
+  &__title { margin: 0 0 12px; font: 600 17px/1.4 var(--font-family-heading); color: var(--color-text-primary); @include line-clamp(2); }
+  &__image-container { aspect-ratio: 2; background: var(--color-bg-muted); overflow: hidden; }
+  &__image { display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+  &__image.loaded { opacity: 1; }
+  &__desc { margin: 12px 0 0; font-size: 14px; line-height: 1.65; color: var(--color-text-secondary); @include line-clamp(3); }
+  @media (prefers-reduced-motion: reduce) { transition: none; }
 }

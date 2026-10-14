@@ -2,9 +2,9 @@
 // Import the global styles here so that they are included on
 // all pages through the use of the <BaseHead /> component.
 import "../styles/global.scss";
-import "katex/dist/katex.min.css";
+import "../styles/editorial.css";
 import { ClientRouter } from "astro:transitions";
-import { SITE_TITLE, SITE_SOCIAL_IMAGE } from "../consts";
+import { SITE_SOCIAL_IMAGE, SITE_TITLE } from "../consts";
 
 interface Props {
     title: string;
@@ -25,17 +25,6 @@ const { title, description, image = SITE_SOCIAL_IMAGE } = Astro.props;
 <!-- Theme initialization script (prevents FOUC) - only runs on initial load -->
 <script is:inline>
     (() => {
-        // Only run on initial page load, not during navigation
-        // Check sessionStorage flag to prevent re-running
-        const initFlag = "theme-fouc-init";
-        if (window.sessionStorage?.getItem(initFlag)) return;
-
-        try {
-            window.sessionStorage?.setItem(initFlag, "1");
-        } catch {
-            /* noop */
-        }
-
         const storageKey = "theme-preference";
         const root = document.documentElement;
         const isPreference = (value) =>
@@ -89,8 +78,6 @@ const { title, description, image = SITE_SOCIAL_IMAGE } = Astro.props;
 />
 <meta name="generator" content={Astro.generator} />
 
-<!-- Font preloads -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
