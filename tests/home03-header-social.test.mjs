@@ -57,7 +57,7 @@ async function reveal(page) {
     return y - 64;
 }
 
-// Legacy gray hover utilities must not override the brand-colored parent or mobile SVG.
+// Hover utilities must not override article control ink on the parent or mobile SVG.
 for (const width of [1440, 390])
     for (const theme of ["light", "dark"]) {
         test(`social hover and keyboard focus retain palette (${width}px ${theme})`, async () => {
@@ -67,7 +67,17 @@ for (const width of [1440, 390])
                 if (width < 1400) await page.locator("[data-share-mobile-toggle]").click();
                 const selector = width < 1400 ? "[data-share-menu-item]" : "[data-share-sidebar] > a, [data-share-sidebar] > button";
                 const buttons = page.locator(selector);
-                const expected = theme === "light" ? "rgb(8, 25, 174)" : "rgb(166, 183, 255)";
+                const token = await page.locator("body").evaluate((el) => getComputedStyle(el).getPropertyValue("--article-control-ink").trim());
+                assert.notEqual(token, "", "article control ink must be defined");
+                const expected = await page.locator("body").evaluate((el) => {
+                    const probe = document.createElement("span");
+                    probe.style.color = "var(--article-control-ink)";
+                    el.append(probe);
+                    const ink = getComputedStyle(probe).color;
+                    probe.remove();
+                    return ink;
+                });
+                assert.ok((await buttons.count()) >= 4, "share and like controls must be present");
                 for (let i = 0; i < (await buttons.count()); i++) {
                     const button = buttons.nth(i);
                     await button.hover();
@@ -81,6 +91,7 @@ for (const width of [1440, 390])
                     await page.mouse.move(1, 1);
                     await page.keyboard.press("Tab");
                     await button.focus();
+                    await waitForPageAnimations(page);
                     const focus = await button.evaluate((el) => ({
                         visible: el.matches(":focus-visible"),
                         width: parseFloat(getComputedStyle(el).outlineWidth),
@@ -102,6 +113,7 @@ for (const width of [1440, 390])
             try {
                 await go(page);
                 const before = await geometry(page);
+                const flowOrigin = (await page.locator("[data-header]").boundingBox()).y;
                 const y = await scroll(page, 700);
                 const hidden = await navBox(page);
                 assert.ok(hidden.y + hidden.height <= 1, "navigation should hide after scrolling down");
@@ -127,10 +139,14 @@ for (const width of [1440, 390])
                 }
                 // Floating-to-flow handoff near the top must tolerate a few pixels of reversal.
                 await page.mouse.click(1, 400);
+                let returnedToFlow = false;
                 for (const top of [45, 47, 43, 30, 32, 25, 27, 0, 2, 0]) {
                     await scroll(page, top);
                     const box = await navBox(page);
-                    assert.ok(box.y >= -1 && box.y <= 30, `near-top header flicker at ${top}: ${JSON.stringify(box)}`);
+                    if (top <= flowOrigin) returnedToFlow = true;
+                    const expectedTop = returnedToFlow ? flowOrigin - top : 0;
+                    assert.ok(Math.abs(box.y - expectedTop) <= 1, `near-top header handoff at ${top}: ${JSON.stringify(box)}`);
+                    assert.ok(box.y + box.height >= box.height / 4, "near-top navigation must remain visible");
                 }
                 assert.deepEqual(await geometry(page), before);
                 assert.equal(await page.locator("body").evaluate((el) => el.style.overflow), "");

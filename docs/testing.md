@@ -15,7 +15,18 @@ pnpm test:browser
 
 `pnpm test:browser` discovers `tests/home03*.test.mjs` and runs them sequentially with Node's test runner. By default it starts a local Astro dev server on `http://127.0.0.1:4321`, waits for `/posts` to return success, and stops its server process group after success, failure or interruption. Readiness has a 45-second deadline; each browser test has a 60-second deadline. An occupied default port is an error, so the runner cannot silently reuse another server. Run builds before browser checks to avoid changes to a watched server during assertions.
 
-The default browser is Playwright's bundled headless Chromium. The checked-in GitHub Actions workflow installs locked dependencies and explicitly provisions that browser with `pnpm exec playwright install --with-deps chromium`, then runs all six checks above. The workflow does not deploy the site. Local checks use already installed tools; the test command itself never downloads a browser.
+The default browser is Playwright's bundled headless Chromium. GitHub Actions runs type, lint, unit, build and release checks in `checks`, independently of the `browser` job. The browser job uses `mcr.microsoft.com/playwright:v1.58.1-noble`, verifies its version and Chromium launch, builds, then runs the entire browser suite. Keep the image tag and preflight version aligned with `pnpm-lock.yaml`. Browser failures fail the workflow. The workflow does not deploy the site; the test command itself never downloads a browser.
+
+For a fresh Mac browser installation, use Node 24 for provisioning, then the project Node 26.11.0 for checks. Playwright 1.58.1's ZIP extractor stalls on the Chromium archive under Node 26.11.0; the same archive extracts under Node 24. The preinstalled CI image avoids this installation path. With `NODE24` pointing to a Node 24 executable:
+
+```sh
+pnpm install --frozen-lockfile
+"$NODE24" node_modules/playwright/cli.js install chromium
+pnpm build
+pnpm test:browser
+```
+
+On a normal Ubuntu runner, the equivalent provisioning command is `"$NODE24" node_modules/playwright/cli.js install --with-deps chromium`. See the official [CI](https://playwright.dev/docs/ci) and [Docker](https://playwright.dev/docs/docker) guidance for hosted installation and matching image versions.
 
 To use the existing local Chrome without installing Chromium:
 

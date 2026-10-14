@@ -22,6 +22,8 @@ test("mobile drawer stays right-anchored throughout first/repeated opens and rou
                         document.documentElement.dataset.theme = value;
                     }, theme);
                     for (let opening = 0; opening < 2; opening++) {
+                        const origin = opening === 0 ? "[data-nav-toggle]" : "[data-search-trigger]";
+                        await page.locator(origin).focus();
                         const samples = await page.evaluate(async () => {
                             const dialog = document.querySelector("[data-nav-overlay]");
                             const panel = document.querySelector("[data-nav-drawer]");
@@ -60,7 +62,11 @@ test("mobile drawer stays right-anchored throughout first/repeated opens and rou
                         );
                         await page.keyboard.press("Escape");
                         await page.waitForFunction(() => !document.querySelector("[data-nav-overlay]").open);
-                        assert.equal(await page.locator("[data-nav-toggle]").evaluate((el) => document.activeElement === el), true);
+                        assert.equal(
+                            await page.locator(origin).evaluate((el) => document.activeElement === el),
+                            true,
+                            "closing restores the actual focus origin",
+                        );
                     }
                 }
             }

@@ -19,10 +19,36 @@ jobs:
           node-version-file: .node-version
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check
       - run: pnpm lint
       - run: pnpm test:unit
       - run: pnpm build
       - run: pnpm test:release
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      # Match the locked Playwright version; browsers and OS dependencies are preinstalled.
+      image: mcr.microsoft.com/playwright:v1.58.1-noble
+      options: --init --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Verify bundled Chromium and Playwright version
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { chromium } from 'playwright';
+          import pkg from 'playwright/package.json' with { type: 'json' };
+          assert.equal(pkg.version, '1.58.1', 'Update the container tag with the Playwright lockfile');
+          const browser = await chromium.launch({ headless: true });
+          console.log(`Chromium ${browser.version()}`);
+          await browser.close();
+          JS
+      - run: pnpm build
       - run: pnpm test:browser
