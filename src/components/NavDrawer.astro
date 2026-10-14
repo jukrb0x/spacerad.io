@@ -79,6 +79,10 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         line-height: 1.6;
         letter-spacing: 0.04em;
     }
+
+    .nav-drawer[data-nav-input="pointer"] [data-nav-link]:focus-visible {
+        outline: none;
+    }
 </style>
 
 <script>
@@ -117,7 +121,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             el.classList.add(...add);
         };
 
-        const setNavOpen = (open: boolean) => {
+        const setNavOpen = (open: boolean, focusOrigin = document.activeElement) => {
             if (!overlay || !drawer) return;
 
             cancelAnimationFrame(openingFrame);
@@ -134,7 +138,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                     phrase.textContent = lastPhrase;
                 }
                 if (!overlay.open) {
-                    lastFocusedElement = document.activeElement;
+                    lastFocusedElement = focusOrigin;
                     overlay.showModal();
                 }
                 if (!locked) { locked = true; lockScrollForDialog(); }
@@ -158,16 +162,19 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 closingTimer = setTimeout(() => {
                     if (!overlay.classList.contains("is-open")) {
                         overlay.close();
+                        if (lastFocusedElement && "focus" in lastFocusedElement) {
+                            (lastFocusedElement as HTMLElement).focus({ preventScroll: true });
+                        }
                     }
                 }, 200);
-                if (lastFocusedElement && "focus" in lastFocusedElement) {
-                    (lastFocusedElement as HTMLElement).focus({ preventScroll: true });
-                }
             }
         };
 
         // Element-level listeners (auto-cleaned when DOM swaps)
-        toggleButton?.addEventListener("click", () => setNavOpen(toggleButton.getAttribute("aria-expanded") !== "true"));
+        toggleButton?.addEventListener("click", (event) => {
+            overlay.setAttribute("data-nav-input", event.detail > 0 ? "pointer" : "keyboard");
+            setNavOpen(toggleButton.getAttribute("aria-expanded") !== "true", event.detail > 0 ? toggleButton : document.activeElement);
+        });
         closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
         navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
 
@@ -179,6 +186,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
         // Document-level listeners (cleaned via AbortController)
         document.addEventListener("keydown", (e) => {
+            if (overlay.open) overlay.setAttribute("data-nav-input", "keyboard");
             if (e.key === "Escape" && overlay.open) {
                 setNavOpen(false);
             }
