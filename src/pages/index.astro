@@ -2,61 +2,23 @@
 import BaseHead from "@components/BaseHead.astro";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
-import ProfileCard from "@components/home/ProfileCard.astro";
+import LatestChannelSlot from "@components/home/LatestChannelSlot.astro";
 import LatestPosts from "@components/home/LatestPosts.astro";
-import LatestChannel from "@components/home/LatestChannel.astro";
 import { SITE_DESCRIPTION, SITE_TITLE_OG } from "../consts";
-import { fetchTelegramChannel, type TelegramPost } from "../utils/telegram";
-
-// Enable SSR for fresh Telegram data
-export const prerender = false;
-
-// Fetch Telegram channel data with graceful fallback
-let telegramPosts: TelegramPost[] | null = [];
-try {
-    const channel = await fetchTelegramChannel("SpaceRad_io");
-    telegramPosts = channel.posts;
-} catch (error) {
-    console.error("Failed to fetch Telegram channel:", error);
-}
-
-// Set cache header
-Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=30");
+export const prerender = true;
 ---
-
 <!doctype html>
 <html lang="en">
-  <head>
-    <BaseHead title={SITE_TITLE_OG} description={SITE_DESCRIPTION} />
-  </head>
-  <body>
-    <Header />
-    <main class="page-shell" transition:animate="fade">
-      <div class="home-container">
-        <!-- Profile Section -->
-        <section>
-          <ProfileCard />
-        </section>
-
-        <!-- Radio Station (Telegram Channel) -->
-        <section>
-          <LatestChannel posts={telegramPosts} />
-        </section>
-
-        <!-- Latest Posts -->
-        <section>
-          <LatestPosts />
-        </section>
-      </div>
-    </main>
-    <Footer />
-  </body>
+    <head><BaseHead title={SITE_TITLE_OG} description={SITE_DESCRIPTION} /><meta data-pagefind-meta="title[content]" content="Space Radio" /></head>
+    <body class="home-page">
+        <Header />
+        <main id="main-content" tabindex="-1" class="editorial-shell" transition:animate="fade">
+            <LatestPosts />
+            <section class="home-channel" aria-labelledby="channel-title">
+                <a class="home-channel__identity" href="/channel"><h2 id="channel-title">Channel</h2><span>进入电台 <span aria-hidden="true">→</span></span></a>
+                <LatestChannelSlot />
+            </section>
+        </main>
+        <Footer />
+    </body>
 </html>
-
-<style>
-  .home-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-12);
-  }
-</style>

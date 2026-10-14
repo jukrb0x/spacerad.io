@@ -1,0 +1,25 @@
+<div class="home-channel__content" data-latest-channel>
+    <div class="channel-fallback">Loading the latest channel notes… <a href="/channel">Read the Channel ↗</a></div>
+</div>
+<script>
+    let request: AbortController | undefined;
+    async function initChannelSlot() {
+        request?.abort();
+        const element = document.querySelector<HTMLElement>("[data-latest-channel]");
+        if (!element) return;
+        const controller = new AbortController();
+        request = controller;
+        try {
+            const response = await fetch("/api/latest-channel", { signal: controller.signal });
+            if (!response.ok) throw new Error("Channel unavailable");
+            const html = await response.text();
+            if (!controller.signal.aborted && element.isConnected) element.innerHTML = html;
+        } catch {
+            if (controller.signal.aborted || !element.isConnected) return;
+            const fallback = element.querySelector(".channel-fallback");
+            if (fallback?.firstChild) fallback.firstChild.textContent = "The channel is temporarily unavailable. ";
+        }
+    }
+    document.addEventListener("astro:page-load", initChannelSlot);
+    document.addEventListener("astro:before-swap", () => request?.abort());
+</script>

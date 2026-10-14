@@ -4,7 +4,7 @@
 
 import { activeTheme, isThemeInitialized, themePreference } from "../stores/theme";
 import type { ThemeName, ThemePreference, ThemeState } from "./theme-core";
-import { calculateTheme, cyclePreference, describeState, getSystemTheme, isValidPreference } from "./theme-core";
+import { calculateTheme, cyclePreference, describeState, isValidPreference } from "./theme-core";
 
 export type { ThemeName, ThemePreference, ThemeState };
 
@@ -143,14 +143,8 @@ export const onThemeChange = (listener: Listener) => {
     listeners.add(listener);
     listener(getThemeState());
 
-    // Subscribe to nanostore changes
-    const unsubscribeTheme = themePreference.subscribe(() => {
-        listener(getThemeState());
-    });
-
     return () => {
         listeners.delete(listener);
-        unsubscribeTheme();
     };
 };
 
@@ -158,15 +152,11 @@ export const onThemeChange = (listener: Listener) => {
  * Bind theme toggle buttons to the theme system
  */
 export const bindThemeToggles = (root: ParentNode = document) => {
-    const toggles = Array.from(root.querySelectorAll<HTMLElement>("[data-theme-toggle]"));
+    const toggles = Array.from(root.querySelectorAll<HTMLElement>("[data-theme-toggle]")).filter((toggle) => !toggle.dataset.themeBound);
     if (!toggles.length) return;
-
-    // Filter to only unbound toggles to prevent duplicate listeners
-    const unboundToggles = toggles.filter((t) => !t.dataset.themeBound);
 
     const update = (state: ThemeState) => {
         const { nextPreference, message } = describeState(state);
-        // Always update ALL toggles (including previously bound ones)
         toggles.forEach((toggle) => {
             toggle.dataset.themePreference = state.preference;
             toggle.dataset.themeState = state.theme;
@@ -186,20 +176,17 @@ export const bindThemeToggles = (root: ParentNode = document) => {
         cycleTheme();
     };
 
-    unboundToggles.forEach((toggle) => {
+    toggles.forEach((toggle) => {
         toggle.dataset.themeBound = "true";
         toggle.addEventListener("click", handleClick);
     });
-
-    // Initial update
-    update(getThemeState());
 
     // Subscribe to changes
     const unsubscribe = onThemeChange(update);
 
     return () => {
         unsubscribe();
-        unboundToggles.forEach((toggle) => {
+        toggles.forEach((toggle) => {
             delete toggle.dataset.themeBound;
             toggle.removeEventListener("click", handleClick);
         });

@@ -1,314 +1,76 @@
 ---
-import { Icon } from "astro-icon/components";
-import { Image } from "astro:assets";
-import { SOCIAL_LINKS } from "../../consts";
-
-const avatarUrl = "https://avatars.githubusercontent.com/u/15688641?v=4";
-const name = "Jabriel";
-const description = "Unreal Engine developer, toolsmith, and web tech enthusiast. Building story-driven performant AAA Games.";
-const description_hover = "UE 引擎工程师 / 卖铲子的 / Web 开发 / GO 学长 / 瓦学弟。目前正在专注于打造 AAA 第九艺术。";
-
-const rotatingThings = ["Unreal Engine", "tools", "teams", "games", "stories", "performance"].map((s) => `${s}.`);
-
-const socialLinks = [
-    { href: SOCIAL_LINKS.github, icon: "ri:github-fill", label: "GitHub", color: "#333", darkColor: "#e6edf3" },
-    { href: SOCIAL_LINKS.telegram, icon: "ri:telegram-fill", label: "Telegram", color: "#26a5e4" },
-    { href: SOCIAL_LINKS.email, icon: "ri:mail-fill", label: "Email", color: "#d44638" },
-    { href: SOCIAL_LINKS.rss, icon: "ri:rss-fill", label: "RSS", color: "#ee802f" },
-];
+const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performance"].map((word) => `${word}.`);
 ---
-
-<div class="profile-card">
-  <div class="avatar-container">
-    <Image class="avatar-image" src={avatarUrl} alt={name} inferSize />
-
-    <svg class="avatar-ring" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <path
-          id="circlePath"
-          d="M 100, 100 m -90, 0 a 90,90 0 1,1 180,0 a 90,90 0 1,1 -180,0"
-        />
-      </defs>
-
-      <text class="ring-text" fill="currentColor">
-        <textPath href="#circlePath" startOffset="0%">
-          SPACERADIO 4666FM · SPACERADIO 466.6FM · SPACERADIO 4666FM ·&nbsp;
-        </textPath>
-      </text>
-    </svg>
-  </div>
-
-  <div class="profile-info">
-    <h1 class="profile-name">{name}</h1>
-
-    <div class="social-links">
-      {socialLinks.map((link) => (
-        <a
-          href={link.href}
-          target={link.href.startsWith("http") ? "_blank" : undefined}
-          rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-          class="social-link"
-          title={link.label}
-          style={`--link-color: ${link.color};${link.darkColor ? ` --link-color-dark: ${link.darkColor};` : ""}`}
-        >
-          <Icon name={link.icon} class="social-icon" aria-hidden="true" />
-        </a>
-      ))}
-    </div>
-  </div>
-
-  <div class="profile-bio">
-    <h2 class="profile-tagline">
-      👋 I build <span
-        class="typewriter"
-        data-words={JSON.stringify(rotatingThings)}
-      ><span class="typewriter-text">{rotatingThings[0]}</span><span class="typewriter-cursor">|</span></span>
-    </h2>
-
-    <p class="group profile-description relative inline-block">
-      <span class="absolute transition-opacity duration-300 group-hover:opacity-0 select-none">{description}</span>
-      <span class="block transition-opacity duration-300 opacity-0 group-hover:opacity-100 select-none">{description_hover}</span>
-    </p>
-  </div>
+<div class="home-profile">
+    <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance.">I build <span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
+    <a href="/me" class="home-profile__name">Jabriel</a>
 </div>
-
-<style lang="scss">
-  @use "../../styles/tokens" as *;
-
-  .profile-card {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-4);
-    padding: var(--space-6);
-
-    @include breakpoint('md') {
-      gap: var(--space-4) var(--space-8);
-    }
-  }
-
-  .avatar-container {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    grid-row: 1;
-    grid-column: 1;
-
-    @include breakpoint('md') {
-      width: 200px;
-      height: 200px;
-      grid-row: 1 / 3;
-    }
-  }
-
-  .avatar-image {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    object-fit: cover;
-
-    @include breakpoint('md') {
-      width: 160px;
-      height: 160px;
-    }
-  }
-
-  .avatar-ring {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    animation: rotate 30s linear infinite;
-    pointer-events: none;
-
-    @include reduced-motion {
-      animation: none;
-    }
-  }
-
-  .ring-text {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    fill: var(--color-text-primary);
-    opacity: 0.6;
-  }
-
-  .profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    text-align: left;
-    grid-row: 1;
-    grid-column: 2;
-    align-self: center;
-    min-width: 0;
-  }
-
-  .profile-bio {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    grid-row: 2;
-    grid-column: 1 / -1;
-
-    @include breakpoint('md') {
-      grid-column: 2;
-    }
-  }
-
-  .profile-name {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    margin: 0;
-    line-height: var(--line-height-tight);
-
-    @include breakpoint('md') {
-      font-size: var(--font-size-3xl);
-    }
-  }
-
-  .social-links {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    justify-content: flex-start;
-  }
-
-  .social-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--link-color, var(--color-text-secondary));
-    transition: opacity var(--transition-base), transform var(--transition-base);
-
-    @include dark-theme {
-      color: var(--link-color-dark, var(--link-color, var(--color-text-secondary)));
-    }
-
-    &:hover {
-      opacity: 0.7;
-      transform: translateY(-1px);
-    }
-  }
-
-  .social-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
-  .profile-description {
-    text-align: left;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-secondary);
-    line-height: var(--line-height-relaxed);
-    margin: 0;
-    max-width: 50ch;
-  }
-
-  .profile-tagline {
-    text-align: left;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    line-height: var(--line-height-relaxed);
-    margin: 0;
-
-    @include breakpoint('md') {
-      font-size: var(--font-size-xl);
-    }
-  }
-
-  .typewriter {
-    // inherits font from parent — no overrides
-  }
-
-  .typewriter-text {
-    // inherits everything from parent h2
-  }
-
-  .typewriter-cursor {
-    display: inline-block;
-    color: var(--color-accent);
-    font-weight: var(--font-weight-normal);
-    animation: blink 0.8s step-end infinite;
-    margin-left: -0.05em;
-    user-select: none;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-</style>
-
 <script>
-  function initTypewriter() {
-    const container = document.querySelector<HTMLElement>(".typewriter");
-    if (!container) return;
+    let disposeCarousel: (() => void) | undefined;
 
-    const words: string[] = JSON.parse(container.dataset.words || "[]");
-    if (words.length === 0) return;
+    function initCarousel() {
+        disposeCarousel?.();
+        disposeCarousel = undefined;
+        const element = document.querySelector<HTMLElement>("[data-build-words]");
+        if (!element || !element.animate) return;
+        const words = Array.from(element.querySelectorAll<HTMLElement>(".home-profile__word"));
+        if (words.length < 2) return;
+        const controller = new AbortController();
+        const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let index = Math.max(0, words.findIndex((word) => word.hasAttribute("data-current")));
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        let animations: Animation[] = [];
+        const eligible = () => !controller.signal.aborted && !document.hidden && !motion.matches;
 
-    const textEl = container.querySelector<HTMLElement>(".typewriter-text")!;
-    let wordIndex = 0;
-    let charIndex = words[0].length;
-    let isDeleting = true; // first word is already rendered, start by deleting
-    let timeout: ReturnType<typeof setTimeout> | null = null;
-
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return;
-
-    // Clean up previous instance
-    if ((container as any).__typewriterTimeout) {
-      clearTimeout((container as any).__typewriterTimeout);
-    }
-
-    function tick() {
-      const currentWord = words[wordIndex];
-
-      if (isDeleting) {
-        charIndex--;
-        textEl.textContent = currentWord.slice(0, charIndex);
-
-        if (charIndex === 0) {
-          isDeleting = false;
-          wordIndex = (wordIndex + 1) % words.length;
-          timeout = setTimeout(tick, 200);
-        } else {
-          timeout = setTimeout(tick, 40 + Math.random() * 30);
+        function pause() {
+            clearTimeout(timer);
+            animations.forEach((animation) => animation.cancel());
+            animations = [];
+            words.forEach((word) => word.removeAttribute("data-incoming"));
         }
-      } else {
-        charIndex++;
-        textEl.textContent = currentWord.slice(0, charIndex);
 
-        if (charIndex === currentWord.length) {
-          isDeleting = true;
-          timeout = setTimeout(tick, 2000);
-        } else {
-          timeout = setTimeout(tick, 60 + Math.random() * 50);
+        function schedule() {
+            if (eligible()) timer = setTimeout(exchange, 4000);
         }
-      }
 
-      (container as any).__typewriterTimeout = timeout;
+        async function exchange() {
+            if (!eligible()) return;
+            const next = (index + 1) % words.length;
+            words[next].setAttribute("data-incoming", "");
+            const outgoing = words[index].animate(
+                [{ transform: "translateY(0)" }, { transform: "translateY(-110%)" }],
+                { duration: 240, easing: "cubic-bezier(.3, 0, .2, 1)", fill: "both" },
+            );
+            const incoming = words[next].animate(
+                [{ transform: "translateY(110%)" }, { transform: "translateY(0)" }],
+                { delay: 40, duration: 260, easing: "cubic-bezier(.22, 1, .36, 1)", fill: "both" },
+            );
+            animations = [outgoing, incoming];
+            try {
+                await Promise.all(animations.map((animation) => animation.finished));
+            } catch {
+                // Cancellation leaves the last settled phrase in place.
+                return;
+            }
+            if (!eligible()) return;
+            words[index].removeAttribute("data-current");
+            words[next].removeAttribute("data-incoming");
+            words[next].setAttribute("data-current", "");
+            index = next;
+            animations.forEach((animation) => animation.cancel());
+            animations = [];
+            schedule();
+        }
+
+        const restart = () => { pause(); schedule(); };
+        document.addEventListener("visibilitychange", restart, { signal: controller.signal });
+        motion.addEventListener("change", restart, { signal: controller.signal });
+        disposeCarousel = () => { pause(); controller.abort(); };
+        schedule();
     }
-
-    // Pause on first word, then start deleting
-    timeout = setTimeout(tick, 2500);
-    (container as any).__typewriterTimeout = timeout;
-  }
-
-  initTypewriter();
-  document.addEventListener("astro:page-load", initTypewriter);
+    document.addEventListener("astro:page-load", initCarousel);
+    document.addEventListener("astro:before-swap", () => {
+        disposeCarousel?.();
+        disposeCarousel = undefined;
+    });
 </script>

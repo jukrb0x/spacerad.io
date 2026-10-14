@@ -9,6 +9,8 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
 <dialog
     data-nav-overlay
+    aria-label="Navigation menu"
+    data-pagefind-ignore
     class="nav-drawer md:hidden"
     transition:animate="none"
 >
@@ -19,6 +21,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         aria-label="Close navigation menu"></button>
     <div
         data-nav-drawer
+    aria-label="Navigation menu"
         data-scroll-container
         class="nav-drawer__panel"
     >
@@ -49,6 +52,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                                 : "text-secondary hover:text-accent hover:bg-accent-tint-8",
                         ]}
                         data-nav-link
+                        aria-current={isActive(link.href) ? "page" : undefined}
                     >
                         {link.label}
                     </a>
@@ -74,6 +78,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const barMiddle = toggleButton?.querySelector<HTMLElement>("[data-bar-middle]");
         const barBottom = toggleButton?.querySelector<HTMLElement>("[data-bar-bottom]");
         let lastFocusedElement: Element | null = null;
+        let locked = false;
 
         if (!overlay || !drawer) return;
 
@@ -97,7 +102,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             if (open) {
                 lastFocusedElement = document.activeElement;
                 overlay.showModal();
-                lockScrollForDialog();
+                if (!locked) { locked = true; lockScrollForDialog(); }
                 // Animate in next frame after dialog is visible
                 requestAnimationFrame(() => {
                     overlay.classList.add("is-open");
@@ -111,7 +116,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
                 toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
                 toggleClasses(barMiddle, [], ["opacity-0"]);
-                unlockScrollForDialog();
+                if (locked) { locked = false; unlockScrollForDialog(); }
                 // Close dialog after CSS transition completes
                 setTimeout(() => {
                     if (!overlay.classList.contains("is-open")) {
@@ -149,7 +154,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
                 toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
                 toggleClasses(barMiddle, [], ["opacity-0"]);
-                unlockScrollForDialog();
+                if (locked) { locked = false; unlockScrollForDialog(); }
                 overlay.close();
             }
         }, { signal });

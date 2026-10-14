@@ -1,0 +1,8 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  sharp: true
+  workerd: true
+
+# CI supplies the pinned pnpm; local commands must not auto-provision a manager.
+pmOnFail: ignore

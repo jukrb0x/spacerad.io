@@ -11,14 +11,14 @@
  * @param duration - Animation duration in milliseconds (default: 200)
  */
 export function closeDialogWithAnimation(dialog: HTMLDialogElement, duration: number = 200): void {
-	dialog.classList.remove("is-open");
+    dialog.classList.remove("is-open");
 
-	setTimeout(() => {
-		// Only close if still not open (user might have reopened it)
-		if (!dialog.classList.contains("is-open")) {
-			dialog.close();
-		}
-	}, duration);
+    setTimeout(() => {
+        // Only close if still not open (user might have reopened it)
+        if (!dialog.classList.contains("is-open")) {
+            dialog.close();
+        }
+    }, duration);
 }
 
 /**
@@ -28,11 +28,11 @@ export function closeDialogWithAnimation(dialog: HTMLDialogElement, duration: nu
  * @param dialog - The dialog element to open
  */
 export function openDialogWithAnimation(dialog: HTMLDialogElement): void {
-	dialog.showModal();
-	// Add class in next frame to trigger CSS transition
-	requestAnimationFrame(() => {
-		dialog.classList.add("is-open");
-	});
+    dialog.showModal();
+    // Add class in next frame to trigger CSS transition
+    requestAnimationFrame(() => {
+        dialog.classList.add("is-open");
+    });
 }
 
 /**
@@ -42,9 +42,9 @@ export function openDialogWithAnimation(dialog: HTMLDialogElement): void {
  * @param duration - Animation duration in milliseconds (default: 200)
  */
 export function toggleDialog(dialog: HTMLDialogElement, duration: number = 200): void {
-	if (dialog.open) {
-		closeDialogWithAnimation(dialog, duration);
-	} else {
-		openDialogWithAnimation(dialog);
-	}
+    if (dialog.open) {
+        closeDialogWithAnimation(dialog, duration);
+    } else {
+        openDialogWithAnimation(dialog);
+    }
 }

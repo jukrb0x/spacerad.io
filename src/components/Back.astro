@@ -1,9 +1,10 @@
 ---
 interface Props {
     href?: string;
+    label?: string;
 }
 
-const { href } = Astro.props;
+const { href, label } = Astro.props;
 
 // Calculate parent path from current URL if href not provided
 const getParentPath = () => {
@@ -14,11 +15,11 @@ const getParentPath = () => {
 };
 
 const backHref = href ?? getParentPath();
+const backLabel = label ?? ({ "/": "Home", "/posts": "All writing", "/tags": "All topics", "/channel": "All notes" }[backHref] || "Back");
 ---
 
-<div class="mb-6">
-    <span class="font-mono opacity-50">&gt; </span>
-    <a href={backHref} class="font-mono opacity-50 hover:opacity-75 transition-opacity" title="Go Back">
-        cd ..
+<div class="editorial-back">
+    <a href={backHref}>
+        <span aria-hidden="true">←</span> {backLabel}
     </a>
 </div>

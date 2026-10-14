@@ -3,22 +3,21 @@
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import vue from "@astrojs/vue";
 import { defineConfig } from "astro/config";
-import UnoCSS from "unocss/astro";
 import icon from "astro-icon";
 import pagefind from "astro-pagefind";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeFigure from "rehype-figure";
-import rehypeSlug from "rehype-slug";
 import rehypeExternalLinks from "rehype-external-links";
+import rehypeFigure from "rehype-figure";
+import rehypeKatex from "rehype-katex";
 import { rehypePrettyCode } from "rehype-pretty-code";
+import rehypeSlug from "rehype-slug";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import { remarkModifiedTime } from "./scripts/remark-modified-time.mjs";
+import UnoCSS from "unocss/astro";
 import { rehypeMermaidPre } from "./scripts/rehype-mermaid-pre.mjs";
-
-import vue from "@astrojs/vue";
+import { remarkModifiedTime } from "./scripts/remark-modified-time.mjs";
 
 /** @type {import("rehype-pretty-code").Options} */
 const rehypePrettyCodeOptions = {
@@ -59,8 +58,18 @@ export default defineConfig({
     }),
     site: "https://spacerad.io",
     integrations: [
+        {
+            name: "local-design-lab",
+            hooks: {
+                "astro:config:setup": ({ command, injectRoute }) => {
+                    if (command !== "dev") return;
+                    injectRoute({ pattern: "/design-lab", entrypoint: "./src/pages/_design-lab/index.astro" });
+                    injectRoute({ pattern: "/design-lab/read/[slug]", entrypoint: "./src/pages/_design-lab/read/[slug].astro" });
+                },
+            },
+        },
         mdx(),
-        sitemap(),
+        sitemap({ filter: (url) => !new URL(url).pathname.startsWith("/api/") }),
         UnoCSS({ injectReset: true }),
         icon({
             include: {

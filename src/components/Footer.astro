@@ -1,79 +1,14 @@
 ---
-import { Icon } from "astro-icon/components";
 import { SOCIAL_LINKS } from "../consts";
 import PostPreviewCard from "./PostPreviewCard.astro";
-import RadioPlayer from "./RadioPlayer.astro";
 
 const today = new Date();
-const iconButtonClass = "icon-btn icon-btn--md icon-btn--round focus-accent";
-const iconClass = "h-7 w-7";
 ---
-
-<footer class="bg-page py-12 text-center text-sm text-secondary">
-    <div class="mx-auto max-w-5xl px-6 sm:px-6 space-y-6">
-        <div class="flex flex-wrap items-center justify-start sm:justify-center gap-3">
-            <a
-                href={SOCIAL_LINKS.telegram}
-                target="_blank"
-                rel="noreferrer"
-                title={SOCIAL_LINKS.telegram}
-                class={iconButtonClass}
-            >
-                <span class="sr-only">Join on Telegram</span>
-                <Icon
-                    name="ri:telegram-fill"
-                    class={iconClass}
-                    aria-hidden="true"
-                />
-            </a>
-            <a
-                href={SOCIAL_LINKS.github}
-                target="_blank"
-                rel="noreferrer"
-                title={SOCIAL_LINKS.github}
-                class={iconButtonClass}
-            >
-                <span class="sr-only">Go to GitHub</span>
-                <Icon name="ri:github-fill" class={iconClass} aria-hidden="true" />
-            </a>
-            <a
-                href={SOCIAL_LINKS.email}
-                title={SOCIAL_LINKS.email.replace("mailto:", "")}
-                class={iconButtonClass}
-            >
-                <span class="sr-only">Send email</span>
-                <Icon name="ri:mail-fill" class={iconClass} aria-hidden="true" />
-            </a>
-            <a href={SOCIAL_LINKS.rss} title="RSS Feed" class={iconButtonClass}>
-                <span class="sr-only">Subscribe to RSS Feed</span>
-                <Icon name="ri:rss-fill" class={iconClass} aria-hidden="true" />
-            </a>
-        </div>
-        <div class="flex flex-wrap items-center justify-between gap-4 text-muted text-left">
-            <div class="flex flex-col gap-1">
-                <span class="inline-flex items-center gap-1">
-                    <Icon name="ri:creative-commons-line" class="h-5 w-5" aria-hidden="true" />
-                    <a
-                        target="_blank"
-                        rel="noreferrer"
-                        href="https://creativecommons.org/licenses/by-nc-sa/4.0/"
-                        class="hover:text-primary transition-colors"
-                    >
-                        CC BY-NC-SA 4.0
-                    </a>
-                </span>
-                <span class="group relative inline-block leading-tight" style="height: 1.25em;">
-                    <span class="absolute left-0 top-0 block w-full transition-opacity duration-300 group-hover:opacity-0">
-                        版权所有，禁止转载，转发需注明出处
-                    </span>
-                    <span class="block w-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                        Copyright reserved. Unauthorized reproduction prohibited.
-                    </span>
-                </span>
-            </div>
-            <span>2017 - {today.getFullYear()} &copy; Jabriel w/ Spacerad.io</span>
-        </div>
+<footer class="site-footer" data-pagefind-ignore>
+    <div class="site-footer__inner">
+        <span>2017–{today.getFullYear()} © Jabriel</span>
+        <nav aria-label="Subscriptions and social links"><a href={SOCIAL_LINKS.github} target="_blank" rel="noreferrer">GitHub</a><a href={SOCIAL_LINKS.telegram} target="_blank" rel="noreferrer">Telegram</a><a href={SOCIAL_LINKS.rss}>RSS</a><a href="/tags">Tags</a><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer" aria-label="Creative Commons BY-NC-SA 4.0 license">CC BY-NC-SA</a></nav>
+        <a href={SOCIAL_LINKS.email}>fm@spacerad.io</a>
     </div>
 </footer>
 <PostPreviewCard />
-<RadioPlayer />

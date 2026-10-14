@@ -21,8 +21,7 @@ export function initMermaid() {
         }
     }
 
-    const themeForState = (theme: string) =>
-        theme === "dark" ? "dark" : "default";
+    const themeForState = (theme: string) => (theme === "dark" ? "dark" : "default");
 
     const renderAll = async (mermaid: typeof mermaidModule) => {
         if (!mermaid) return;

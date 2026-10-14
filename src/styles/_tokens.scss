@@ -56,6 +56,9 @@ $spaces: (
   '6': 1.5rem,
   '8': 2rem,
   '12': 3rem,
+  '16': 4rem,
+  '24': 6rem,
+  '32': 8rem,
 );
 
 // Border Radius
@@ -287,21 +290,11 @@ $breakpoints: (
   }
 
   // Font families
+  // Cabin is served locally; CJK text uses installed sans fonts.
+  --font-family-heading: 'Cabin', 'Source Han Sans SC', 'Noto Sans CJK SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-family-sans:
-    'MiSans Latin',
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    'Roboto',
-    'Helvetica Neue',
-    Arial,
-    'Noto Sans',
-    sans-serif,
-    'Apple Color Emoji',
-    'Segoe UI Emoji',
-    'Segoe UI Symbol',
-    'Noto Color Emoji';
+    'Cabin', 'Source Han Sans SC', 'Noto Sans CJK SC', 'PingFang SC', 'Helvetica Neue', Helvetica, Arial, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   --font-family-mono:
     'Fira Code',
     'SFMono-Regular',
@@ -311,7 +304,22 @@ $breakpoints: (
     monospace;
 
   // Layout
-  --layout-max-width: #{$layout-max-width};
+  --layout-max-width: 78rem;
+  --page-gutter: clamp(1.25rem, 4vw, 4rem);
+  --section-space: 6rem;
+  --type-caption: 0.75rem;
+  --type-small: 0.875rem;
+  --type-body: 1.0625rem;
+  --type-large: 1.375rem;
+  --type-section: 2rem;
+  --type-display: 3rem;
+  --type-masthead: 3.5rem;
+  --color-language: #df201b;
+  --color-channel: #ffcc00;
+  --color-on-channel: #24262d;
+  --color-structure: #0819ae;
+  --color-on-structure: #ffffff;
+  --color-structure-muted: #d2d8ff;
   --measure: #{$measure};
   --measure-wide: #{$measure-wide};
 
@@ -332,23 +340,23 @@ $breakpoints: (
 
 :root {
   // Background palette
-  --color-bg-page: #fafbfc;
+  --color-bg-page: #fbfbfa;
   --color-bg-surface: #ffffff;
-  --color-bg-muted: #f6f8fa;
+  --color-bg-muted: #f1f1ef;
   --color-bg-elevated: #ffffff;
 
   // Text colors - WCAG AA compliant
-  --color-text-primary: #0d1117;
+  --color-text-primary: #24262d;
   --color-text-primary-rgb: 13 17 23;
-  --color-text-secondary: #57606a;
-  --color-text-muted: #8b949e;
+  --color-text-secondary: #686b78;
+  --color-text-muted: #686b78;
   --color-text-inverse: #ffffff;
 
   // Border tokens
-  --color-border: #d0d7de;
+  --color-border: #e3e3e5;
   --color-border-soft: rgba(var(--color-text-primary-rgb), 0.08);
   --color-border-subtle: rgba(var(--color-text-primary-rgb), 0.12);
-  --color-border-strong: #afb8c1;
+  --color-border-strong: #a5a7af;
 
   // Accent colors
   --color-accent: #555555;
@@ -362,8 +370,8 @@ $breakpoints: (
   --color-accent-tint-18: color-mix(in srgb, var(--color-accent) 18%, transparent);
 
   // Link colors
-  --color-link: #555555;
-  --color-link-hover: #222222;
+  --color-link: #0819ae;
+  --color-link-hover: #051178;
 
   // State colors
   --color-state-success-bg: #dafbe1;
@@ -390,7 +398,7 @@ $breakpoints: (
   --shadow-button-hover: 0 6px 20px rgba(85, 85, 85, 0.15);
 
   // Code
-  --color-code-bg: #f6f8fa;
+  --color-code-bg: #dddcd2;
 
   // Scrollbar
   --c-scrollbar: #eee;
@@ -420,7 +428,7 @@ $breakpoints: (
   --color-space-cyan: #00d9ff;
   --color-space-purple: #a855f7;
   --color-space-blue: #3b82f6;
-  --color-space-silver: #6e7781;
+  --color-space-silver: #a0a895;
 
   // Glow effects
   --glow-accent-soft: 0 0 20px rgba(85, 85, 85, 0.15);
@@ -444,23 +452,23 @@ $breakpoints: (
   color-scheme: dark;
 
   // Background palette
-  --color-bg-page: #0d1117;
-  --color-bg-surface: #161b22;
-  --color-bg-muted: #21262d;
-  --color-bg-elevated: #1c2128;
+  --color-bg-page: #131315;
+  --color-bg-surface: #22242b;
+  --color-bg-muted: #292b32;
+  --color-bg-elevated: #2a2d35;
 
   // Text colors
-  --color-text-primary: #e6edf3;
+  --color-text-primary: #f0f0f1;
   --color-text-primary-rgb: 230 237 243;
-  --color-text-secondary: #8b949e;
-  --color-text-muted: #6e7781;
-  --color-text-inverse: #0d1117;
+  --color-text-secondary: #aaacb9;
+  --color-text-muted: #aaacb9;
+  --color-text-inverse: #131315;
 
   // Border tokens
-  --color-border: #30363d;
+  --color-border: #353740;
   --color-border-soft: rgba(var(--color-text-primary-rgb), 0.08);
   --color-border-subtle: rgba(var(--color-text-primary-rgb), 0.16);
-  --color-border-strong: #484f58;
+  --color-border-strong: #777b8e;
 
   // Accent colors
   --color-accent: #a0a0a0;
@@ -474,8 +482,8 @@ $breakpoints: (
   --color-accent-tint-18: color-mix(in srgb, var(--color-accent) 18%, transparent);
 
   // Link colors
-  --color-link: #a0a0a0;
-  --color-link-hover: #d0d0d0;
+  --color-link: #a6b7ff;
+  --color-link-hover: #d0d9ff;
 
   // State colors
   --color-state-success-bg: rgba(46, 160, 67, 0.16);
@@ -502,7 +510,7 @@ $breakpoints: (
   --shadow-button-hover: 0 6px 20px rgba(160, 160, 160, 0.2);
 
   // Code
-  --color-code-bg: #161b22;
+  --color-code-bg: #262b24;
 
   // Scrollbar
   --c-scrollbar: #222;
@@ -532,7 +540,7 @@ $breakpoints: (
   --color-space-cyan: #22e5ff;
   --color-space-purple: #c084fc;
   --color-space-blue: #60a5fa;
-  --color-space-silver: #8b949e;
+  --color-space-silver: #b7bcac;
 
   // Glow effects - brighter for dark mode
   --glow-accent-soft: 0 0 20px rgba(160, 160, 160, 0.2);
@@ -546,4 +554,13 @@ $breakpoints: (
   --gradient-radio-glow: radial-gradient(ellipse at center, rgba(232, 201, 160, 0.1) 0%, transparent 70%);
   --gradient-bg-cosmic: radial-gradient(ellipse at top, rgba(129, 140, 248, 0.08) 0%, transparent 50%);
   --gradient-bg-radio: radial-gradient(ellipse at bottom, rgba(232, 201, 160, 0.06) 0%, transparent 50%);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-gutter: 24px;
+    --type-display: 2rem;
+    --type-section: 1.625rem;
+    --type-large: 1.25rem;
+  }
 }

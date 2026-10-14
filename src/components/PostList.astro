@@ -1,14 +1,13 @@
 ---
-import { getPublishedPosts, groupPostsByYear } from "../utils/posts";
+import { getPublishedPosts } from "../utils/posts";
 import PostItem from "./PostItem.astro";
 
 const posts = await getPublishedPosts();
-const groupedPosts = groupPostsByYear(posts);
 ---
 
 <section class="section-stack">
 	<div class="flex items-center justify-end mb-4">
-		<div class="lang-switcher inline-flex select-none items-center gap-1 text-sm text-muted">
+		<div class="lang-switcher inline-flex select-none items-center gap-1 text-sm text-muted" role="group" aria-label="Posts language">
 			<button
 				id="lang-all"
 				type="button"
@@ -20,7 +19,7 @@ const groupedPosts = groupPostsByYear(posts);
 				type="button"
 				class="lang-btn px-2 py-0.5 rounded transition-colors"
 				data-lang="en"
-			>EN</button>
+			>English</button>
 			<button
 				id="lang-zh"
 				type="button"
@@ -29,40 +28,10 @@ const groupedPosts = groupPostsByYear(posts);
 			>中文</button>
 		</div>
 	</div>
-	{
-		groupedPosts.map(([year, yearPosts]) => (
-			<div class="relative" data-year-group>
-				{/* Year in background - closer to first post */}
-				<div class="relative h-14 pointer-events-none select-none">
-					<span class="absolute -left-7 sm:-left-10 -top-1 text-8xl sm:text-9xl font-bold opacity-[0.06] text-primary">
-						{year}
-					</span>
-				</div>
-
-				<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
-					{yearPosts.map((post) => (
-						<PostItem post={post} />
-					))}
-				</ul>
-			</div>
-		))
-	}
+    <ul class="archive-list" data-year-group>{posts.map(post => <PostItem post={post} posts={posts} />)}</ul>
 </section>
 
-<style lang="scss">
-	/* Language switcher buttons */
-	.lang-btn {
-		opacity: 0.5;
-		&:hover {
-			opacity: 0.8;
-			background: color-mix(in srgb, var(--color-text-muted) 10%, transparent);
-		}
-		&.active {
-			opacity: 1;
-			background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-		}
-	}
-</style>
+
 
 <script is:inline data-astro-rerun>
 	(function() {
@@ -72,17 +41,20 @@ const groupedPosts = groupPostsByYear(posts);
 		if (!langButtons.length) return;
 
 		const LANG_KEY = 'posts-lang-filter';
-		let currentLang = window.localStorage.getItem(LANG_KEY) || 'all';
+		let currentLang = 'all';
+		try { currentLang = window.localStorage.getItem(LANG_KEY) || 'all'; } catch {}
+		if (!['all', 'en', 'zh'].includes(currentLang)) currentLang = 'all';
 
 		const setActiveButton = (lang) => {
 			langButtons.forEach((btn) => {
 				btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+				btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang') === lang));
 			});
 		};
 
 		const applyFilter = (lang) => {
 			currentLang = lang;
-			window.localStorage.setItem(LANG_KEY, lang);
+			try { window.localStorage.setItem(LANG_KEY, lang); } catch {}
 			setActiveButton(lang);
 
 			yearGroups.forEach((group) => {
@@ -94,15 +66,7 @@ const groupedPosts = groupPostsByYear(posts);
 					if (shouldShow) visibleCount += 1;
 				});
 
-				const noDataIndicator = group.querySelector('.no-posts');
-				if (noDataIndicator) {
-					noDataIndicator.style.display = visibleCount === 0 ? 'block' : 'none';
-				} else if (visibleCount === 0) {
-					const emptyState = document.createElement('p');
-					emptyState.className = 'no-posts text-sm text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)] italic';
-					emptyState.textContent = 'No posts in this language for this year.';
-					group.querySelector('ul')?.appendChild(emptyState);
-				}
+				group.hidden = visibleCount === 0;
 			});
 		};
 

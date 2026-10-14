@@ -28,30 +28,26 @@ const groupedPosts = groupPostsByYear(posts);
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 	<head>
 		<BaseHead
 			title={`Tag: ${tag} | ${SITE_TITLE}`}
 			description={`All posts tagged with "${tag}"`}
 		/>
 	</head>
-	<body>
+	<body class="archive-page">
 		<Header />
-		<main class="page-shell" transition:animate="fade">
+		<main id="main-content" tabindex="-1" class="page-shell" transition:animate="fade">
 			<Back href="/tags" />
-			<h1 class="text-2xl sm:text-3xl font-bold text-primary mb-4">#{tag}</h1>
+			<div class="archive-heading"><p class="editorial-kicker">Writing by topic</p><h1>{tag}</h1><p>{posts.length} {posts.length === 1 ? "essay" : "essays"} in the journal.</p></div>
 			<section class="section-stack">
 				{groupedPosts.map(([year, yearPosts]) => (
 					<div class="relative" data-year-group>
-						<div class="relative h-14 pointer-events-none select-none">
-							<span class="absolute -left-7 sm:-left-10 -top-1 text-8xl sm:text-9xl font-bold opacity-[0.06] text-primary">
-								{year}
-							</span>
-						</div>
+<h2 class="archive-year">{year}</h2>
 
 						<ul class="m-0 flex list-none flex-col gap-1 p-0 relative">
 							{yearPosts.map((post) => (
-								<PostItem post={post} />
+								<PostItem post={post} posts={posts} />
 							))}
 						</ul>
 					</div>

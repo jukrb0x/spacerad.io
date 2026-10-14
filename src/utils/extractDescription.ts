@@ -14,10 +14,10 @@ export function extractDescription(content: string, maxLength: number = 80): str
         .replace(/```[\s\S]*?```/g, "")
         // Remove inline code
         .replace(/`[^`]*`/g, "")
-        // Remove links
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
         // Remove images
         .replace(/!\[([^\]]*)\]\([^)]+\)/g, "")
+        // Remove links after images so image captions do not become stray text.
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
         // Remove heading markers
         .replace(/^#{1,6}\s+/gm, "")
         // Remove bold and italic markers
@@ -49,11 +49,7 @@ export function extractDescription(content: string, maxLength: number = 80): str
     let truncated = plainText.substring(0, maxLength);
 
     // Try to truncate at sentence endings
-    const lastSentenceEnd = Math.max(
-        truncated.lastIndexOf("."),
-        truncated.lastIndexOf("!"),
-        truncated.lastIndexOf("?"),
-    );
+    const lastSentenceEnd = Math.max(truncated.lastIndexOf("."), truncated.lastIndexOf("!"), truncated.lastIndexOf("?"));
 
     if (lastSentenceEnd > maxLength * 0.8) {
         truncated = truncated.substring(0, lastSentenceEnd + 1);
