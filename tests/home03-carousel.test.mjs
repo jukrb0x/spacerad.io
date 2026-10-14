@@ -67,11 +67,12 @@ for (const width of [1440, 390, 320]) {
                 "I build Unreal Engine, tools, teams, games, stories and performance.",
             );
             assert.equal(await frame.getAttribute("aria-hidden"), "true");
-            const viewport = await page.evaluate(() => ({
-                width: document.documentElement.clientWidth,
-                content: document.documentElement.scrollWidth,
-            }));
-            assert.equal(viewport.content, viewport.width, "carousel must not cause horizontal overflow, including with a reserved scrollbar");
+            // Reserved gutters can make scrollWidth smaller than clientWidth; test actual scrollability.
+            const horizontalScroll = await page.evaluate(() => {
+                window.scrollTo({ left: 1, top: window.scrollY, behavior: "instant" });
+                return window.scrollX;
+            });
+            assert.equal(horizontalScroll, 0, "carousel must not allow even one pixel of horizontal scrolling");
         } finally {
             await context.close();
         }
