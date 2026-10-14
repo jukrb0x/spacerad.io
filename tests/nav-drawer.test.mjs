@@ -49,6 +49,10 @@ function fixture() {
     const drawer = new Element();
     const close = new Element();
     const link = new Element();
+    const phrase = Object.assign(new Element(), {
+        textContent: "",
+        dataset: { navPhrases: JSON.stringify(["太空来电", "宇宙频道", "星际广播", "I'm Jabriel", "智人大冲浪"]) },
+    });
     const overlay = Object.assign(new Element(), {
         open: false,
         showModal() {
@@ -60,7 +64,8 @@ function fixture() {
     });
     const document = Object.assign(new EventTarget(), {
         activeElement: toggle,
-        querySelector: (selector) => ({ "[data-nav-toggle]": toggle, "[data-nav-overlay]": overlay, "[data-nav-drawer]": drawer })[selector],
+        querySelector: (selector) =>
+            ({ "[data-nav-toggle]": toggle, "[data-nav-overlay]": overlay, "[data-nav-drawer]": drawer, "[data-nav-phrase]": phrase })[selector],
         querySelectorAll: (selector) => (selector === "[data-nav-close]" ? [close] : [link]),
     });
     const media = new EventTarget();
@@ -100,6 +105,7 @@ function fixture() {
         toggle,
         close,
         link,
+        phrase,
         overlay,
         document,
         media,
@@ -129,6 +135,31 @@ test("first and repeated opens measure the initial state, focus without scrollin
         assert.equal(f.locks(), 0);
         assert.equal(f.document.activeElement, f.toggle);
     }
+});
+
+test("menu phrase changes only on a closed-to-open transition, including rapid reopening", () => {
+    const f = fixture();
+    const phrases = ["太空来电", "宇宙频道", "星际广播", "I'm Jabriel", "智人大冲浪"];
+    assert.equal(f.phrase.textContent, "", "no autoplay while closed");
+    let previous = "";
+    for (let i = 0; i < 20; i++) {
+        f.toggle.click();
+        assert.ok(phrases.includes(f.phrase.textContent), "opening selects an existing wordmark phrase");
+        assert.notEqual(f.phrase.textContent, previous, "successive openings never repeat");
+        previous = f.phrase.textContent;
+        f.frame();
+        f.finish();
+        assert.equal(f.phrase.textContent, previous, "frames and timers never change an open phrase");
+        assert.equal(f.timers.size, 0, "open menu owns no phrase timer");
+        f.close.click();
+        f.close.click();
+        assert.equal(f.phrase.textContent, previous, "closing does not select a phrase");
+        if (i % 2 === 0) f.finish();
+    }
+    f.document.dispatchEvent(new Event("astro:before-swap"));
+    f.frame();
+    f.finish();
+    assert.equal(f.phrase.textContent, previous, "route cleanup does not select a phrase");
 });
 
 test("close before opening frame and rapid close/reopen cancel stale callbacks", () => {

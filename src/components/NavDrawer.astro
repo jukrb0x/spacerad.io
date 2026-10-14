@@ -1,6 +1,6 @@
 ---
 // NavDrawer.astro - Mobile navigation drawer using <dialog> for proper iOS Safari viewport handling
-import { NAV_LINKS } from "../consts";
+import { NAV_LINKS, SITE_TITLE_ALT } from "../consts";
 
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
 const subpath = pathname.match(/[^/]+/g);
@@ -59,14 +59,34 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 ))
             }
         </nav>
+        <p class="nav-drawer__phrase" data-nav-phrase data-nav-phrases={JSON.stringify(SITE_TITLE_ALT)} aria-hidden="true"></p>
     </div>
 </dialog>
+
+<style>
+    .nav-drawer__panel {
+        padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+    }
+
+    .nav-drawer__panel > * {
+        flex-shrink: 0;
+    }
+
+    .nav-drawer__phrase {
+        margin: auto 0 0;
+        color: var(--color-text-muted);
+        font-size: var(--font-size-sm);
+        line-height: 1.6;
+        letter-spacing: 0.04em;
+    }
+</style>
 
 <script>
     import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
     // AbortController for document-level listeners so we can clean up on re-init
     let drawerAbort: AbortController | null = null;
+    let lastPhrase = "";
 
     function initNavDrawer() {
         const toggleButton = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
@@ -74,6 +94,8 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const drawer = document.querySelector<HTMLElement>("[data-nav-drawer]");
         const closeButtons = document.querySelectorAll<HTMLButtonElement>("[data-nav-close]");
         const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
+        const phrase = document.querySelector<HTMLElement>("[data-nav-phrase]");
+        const phrases = JSON.parse(phrase?.dataset.navPhrases || "[]") as string[];
         const barTop = toggleButton?.querySelector<HTMLElement>("[data-bar-top]");
         const barMiddle = toggleButton?.querySelector<HTMLElement>("[data-bar-middle]");
         const barBottom = toggleButton?.querySelector<HTMLElement>("[data-bar-bottom]");
@@ -101,10 +123,16 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             cancelAnimationFrame(openingFrame);
             clearTimeout(closingTimer);
 
+            const wasOpen = toggleButton?.getAttribute("aria-expanded") === "true";
             toggleButton?.setAttribute("aria-expanded", String(open));
             toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
 
             if (open) {
+                if (!wasOpen && phrase && phrases.length > 0) {
+                    const choices = phrases.filter((value) => value !== lastPhrase);
+                    lastPhrase = choices[Math.floor(Math.random() * choices.length)] ?? phrases[0];
+                    phrase.textContent = lastPhrase;
+                }
                 if (!overlay.open) {
                     lastFocusedElement = document.activeElement;
                     overlay.showModal();
