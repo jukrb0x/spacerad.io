@@ -5,15 +5,15 @@
 let initialized = false;
 
 function update(): void {
-  const vh = window.visualViewport?.height ?? window.innerHeight;
-  document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
+    const vh = window.visualViewport?.height ?? window.innerHeight;
+    document.documentElement.style.setProperty("--vh", `${vh * 0.01}px`);
 }
 
 export function initViewportHeight(): void {
-  if (initialized) return;
-  initialized = true;
+    if (initialized) return;
+    initialized = true;
 
-  update();
-  window.addEventListener('resize', update, { passive: true });
-  window.visualViewport?.addEventListener('resize', update, { passive: true });
+    update();
+    window.addEventListener("resize", update, { passive: true });
+    window.visualViewport?.addEventListener("resize", update, { passive: true });
 }

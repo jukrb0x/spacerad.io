@@ -2,6 +2,7 @@
 title: "Cusdis 到 Remark42 的评论迁移：PostgreSQL 到 BoltDB"
 description: "从 Cusdis (PostgreSQL) 迁移到 Remark42 (BoltDB) 的技术实现：数据库差异、数据转换和实现细节"
 published: 2026-01-30
+lang: zh
 tags: ["数据库", "go", "迁移", "postgresql", "boltdb"]
 draft: true
 ---

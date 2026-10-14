@@ -3,6 +3,7 @@
 ---
 
 <dialog
+    data-pagefind-ignore
     data-search-overlay
     class="search-dialog"
     aria-label="Site Search"
@@ -36,11 +37,11 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.3-4.3"></path>
             </svg>
-            <label for="search-input" class="sr-only">Search Posts</label>
+            <label for="search-input" class="sr-only">Search the journal</label>
             <input
                 id="search-input"
                 type="search"
-                placeholder="Search posts..."
+                placeholder="Search the journal…"
                 class="w-full bg-transparent text-lg text-primary placeholder:text-muted focus-accent rounded"
                 data-search-input
                 autocomplete="off"
@@ -108,7 +109,10 @@
 <script>
     import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
+    let disposeSearchOverlay: (() => void) | undefined;
+
     function initSearchOverlay() {
+        disposeSearchOverlay?.();
         const searchTrigger = document.querySelector<HTMLButtonElement>("[data-search-trigger]");
         const searchDialog = document.querySelector<HTMLDialogElement>("[data-search-overlay]");
         const searchContainer = document.querySelector<HTMLElement>("[data-search-container]");
@@ -119,7 +123,22 @@
         const searchList = document.querySelector<HTMLElement>("[data-search-list]");
 
         let lastFocusedElement: Element | null = null;
+        const controller = new AbortController();
+        const options = { signal: controller.signal };
+        let locked = false;
+        let revision = 0;
+        let closeTimer: ReturnType<typeof setTimeout> | undefined;
+        let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+        const frames = new Set<number>();
         let pagefind: any = null;
+        const current = (request: number) => !controller.signal.aborted && locked && request === revision;
+        const nextFrame = (callback: () => void) => {
+            const id = requestAnimationFrame(() => {
+                frames.delete(id);
+                if (!controller.signal.aborted && locked) callback();
+            });
+            frames.add(id);
+        };
         let selectedIndex = -1;
 
         async function loadPagefind() {
@@ -163,16 +182,18 @@
             return li;
         }
 
-        async function performSearch(query: string) {
+        async function performSearch(query: string, request: number) {
+            if (!current(request)) return;
             if (!query.trim()) {
                 showEmpty();
                 return;
             }
 
             const pf = await loadPagefind();
-            if (!pf) return;
+            if (!pf || !current(request)) return;
 
             const search = await pf.search(query);
+            if (!current(request)) return;
 
             if (search.results.length === 0) {
                 showNoResults();
@@ -183,7 +204,7 @@
                 search.results.slice(0, 10).map((r: any) => r.data())
             );
 
-            showResults(results);
+            if (current(request)) showResults(results);
         }
 
         function showEmpty() {
@@ -239,48 +260,66 @@
             selectedIndex = newIndex;
         }
 
-        function setSearchOpen(open: boolean) {
-            if (!searchDialog || !searchContainer) return;
-
+        function setSearchOpen(open: boolean, immediate = false, restoreFocus = true) {
+            if (!searchDialog || !searchContainer || controller.signal.aborted) return;
+            clearTimeout(closeTimer);
             if (open) {
+                if (locked) return;
                 lastFocusedElement = document.activeElement;
-                searchDialog.showModal();
+                if (!searchDialog.open) searchDialog.showModal();
+                locked = true;
                 lockScrollForDialog();
-                // Animate in next frame
-                requestAnimationFrame(() => {
+                nextFrame(() => {
                     searchDialog.classList.add("is-open");
-                });
-                requestAnimationFrame(() => {
                     searchInput?.focus();
                     searchInput?.select();
                 });
-            } else {
-                searchDialog.classList.remove("is-open");
-                unlockScrollForDialog();
-                // Close dialog after transition
-                setTimeout(() => {
-                    if (!searchDialog.classList.contains("is-open")) {
-                        searchDialog.close();
-                    }
-                }, 200);
-                if (lastFocusedElement && "focus" in lastFocusedElement) {
-                    (lastFocusedElement as HTMLElement).focus();
-                }
-                if (searchInput) searchInput.value = "";
-                showEmpty();
+                return;
             }
+            revision++;
+            clearTimeout(debounceTimer);
+            for (const frame of frames) cancelAnimationFrame(frame);
+            frames.clear();
+            searchDialog.classList.remove("is-open");
+            if (locked) {
+                locked = false;
+                unlockScrollForDialog();
+            }
+            if (immediate) searchDialog.close();
+            else closeTimer = setTimeout(() => {
+                if (!locked && searchDialog.isConnected) searchDialog.close();
+            }, 200);
+            if (restoreFocus && lastFocusedElement?.isConnected && lastFocusedElement instanceof HTMLElement) {
+                lastFocusedElement.focus({ preventScroll: true });
+            }
+            if (searchInput) searchInput.value = "";
+            searchList?.replaceChildren();
+            showEmpty();
         }
 
-        searchTrigger?.addEventListener("click", () => setSearchOpen(true));
+        disposeSearchOverlay = () => {
+            setSearchOpen(false, true, false);
+            controller.abort();
+            clearTimeout(closeTimer);
+        };
+
+        searchTrigger?.addEventListener("click", () => setSearchOpen(true), options);
         searchCloseButtons.forEach((btn) =>
-            btn.addEventListener("click", () => setSearchOpen(false))
+            btn.addEventListener("click", () => setSearchOpen(false), options)
         );
 
         // Intercept browser Escape to run animated close instead
         searchDialog?.addEventListener("cancel", (e) => {
             e.preventDefault();
             setSearchOpen(false);
-        });
+        }, options);
+
+        searchList?.addEventListener("click", (event) => {
+            if ((event.target as Element).closest("a")) setSearchOpen(false, true, false);
+        }, options);
+        searchDialog?.addEventListener("close", () => {
+            if (!searchDialog.open && locked) setSearchOpen(false, true, false);
+        }, options);
 
         document.addEventListener("keydown", (e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -311,25 +350,31 @@
                     selected.click();
                 }
             }
-        });
-
-        let debounceTimer: ReturnType<typeof setTimeout>;
+        }, options);
         searchInput?.addEventListener("input", (e) => {
             const query = (e.target as HTMLInputElement).value;
+            const request = ++revision;
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => performSearch(query), 200);
-        });
+            debounceTimer = setTimeout(() => {
+                void performSearch(query, request).catch((error) => {
+                    if (current(request)) console.error("Search failed:", error);
+                });
+            }, 200);
+        }, options);
     }
 
-    initSearchOverlay();
-    document.addEventListener("astro:after-swap", initSearchOverlay);
+    document.addEventListener("astro:page-load", initSearchOverlay);
+    document.addEventListener("astro:before-swap", () => {
+        disposeSearchOverlay?.();
+        disposeSearchOverlay = undefined;
+    });
 </script>
 
 <style>
     /* Pagefind highlight styles */
     .search-excerpt :global(mark) {
-        background-color: var(--color-accent-soft);
-        color: var(--color-accent-dark);
+        background-color: var(--color-channel);
+        color: var(--color-on-channel);
         border-radius: 2px;
         padding: 0 2px;
     }

@@ -10,14 +10,14 @@
  * @returns Debounced function
  */
 export function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: number): T {
-	let timeoutId: number | null = null;
-	return ((...args: unknown[]) => {
-		if (timeoutId !== null) clearTimeout(timeoutId);
-		timeoutId = window.setTimeout(() => {
-			fn(...args);
-			timeoutId = null;
-		}, delay);
-	}) as T;
+    let timeoutId: number | null = null;
+    return ((...args: unknown[]) => {
+        if (timeoutId !== null) clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+            fn(...args);
+            timeoutId = null;
+        }, delay);
+    }) as T;
 }
 
 /**
@@ -27,12 +27,12 @@ export function debounce<T extends (...args: unknown[]) => void>(fn: T, delay: n
  * @returns Throttled function
  */
 export function throttle<T extends (...args: unknown[]) => void>(fn: T, delay: number): T {
-	let timeoutId: number | null = null;
-	return ((...args: unknown[]) => {
-		if (timeoutId !== null) return;
-		timeoutId = window.setTimeout(() => {
-			fn(...args);
-			timeoutId = null;
-		}, delay);
-	}) as T;
+    let timeoutId: number | null = null;
+    return ((...args: unknown[]) => {
+        if (timeoutId !== null) return;
+        timeoutId = window.setTimeout(() => {
+            fn(...args);
+            timeoutId = null;
+        }, delay);
+    }) as T;
 }

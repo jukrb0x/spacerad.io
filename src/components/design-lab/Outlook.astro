@@ -1,0 +1,109 @@
+<figure class="outlook" data-outlook data-light="daylight">
+    <svg id="outlook-print" viewBox="0 0 900 720" role="img" aria-labelledby="outlook-title outlook-description" class="outlook__print">
+        <title id="outlook-title">An open place overlooking the water</title>
+        <desc id="outlook-description">An original architectural print: pale concrete terraces and an elevated walkway, a vermilion interior, planting, blue sky and reflected light. Change the light with the button below.</desc>
+        <defs>
+            <linearGradient id="outlook-sky" x2="0" y2="1"><stop stop-color="var(--sky-high)"/><stop offset="1" stop-color="var(--sky-low)"/></linearGradient>
+            <linearGradient id="outlook-water" x2="0" y2="1"><stop stop-color="var(--water-high)"/><stop offset="1" stop-color="var(--water-low)"/></linearGradient>
+            <linearGradient id="outlook-concrete" x1="0" x2="1" y2="0.8"><stop stop-color="var(--stone-light)"/><stop offset="1" stop-color="#d9d8c8"/></linearGradient>
+            <clipPath id="outlook-water-clip"><path d="M0 518 900 482V720H0Z"/></clipPath>
+            <clipPath id="outlook-opening"><path d="M475 237 729 274 729 463 475 426Z"/></clipPath>
+        </defs>
+        <!-- A low, open horizon. The sky is part of the composition, not a backdrop card. -->
+        <path d="M0 0H900V720H0Z" fill="url(#outlook-sky)"/>
+        <g fill="#fff" opacity=".55">
+            <path d="M565 96c29-24 49-20 73-8 13-25 51-27 67-5 29-11 51 0 61 15 33-3 55 3 75 18H537c8-13 18-17 28-20Z"/>
+            <path d="M40 191c20-17 39-14 54-6 17-18 38-13 47 4 23-3 43 5 61 16H16c7-8 13-12 24-14Z" opacity=".5"/>
+        </g>
+        <!-- Distant city rhythm, intentionally without identifiable landmarks. -->
+        <g fill="#759da5" opacity=".42">
+            <path d="M673 406v-81h21v81h10v-55h27v55h12V303h28v103h16v-66h19v66h17V365h24v41Z"/>
+            <path d="M28 447v-62h28v62h10v-45h21v45h21V352h20v95h22v-26h28v26Z"/>
+        </g>
+        <path d="M0 518 900 482V720H0Z" fill="url(#outlook-water)"/>
+        <g clip-path="url(#outlook-water-clip)" opacity=".22" class="outlook__reflection">
+            <path d="M359 562 427 570 420 690 353 675Z" fill="#203f46"/>
+            <path d="M476 560 729 594 710 695 480 667Z" fill="#eee6ce"/>
+            <path d="M523 568 579 578 571 659 519 650Z" fill="#d45432"/>
+            <path d="M167 533 255 549 242 647 161 629Z" fill="#fbf7e4"/>
+            <path d="M0 582 807 618" stroke="#d0eddd" stroke-width="3"/>
+            <path d="M174 665 897 690M4 697 414 714" stroke="#e2f0df" stroke-width="2"/>
+        </g>
+        <!-- Lower public terrace: one continuous ground, with a projecting edge. -->
+        <path d="M0 458 590 410 900 520 293 619 0 568Z" fill="var(--stone-light)"/>
+        <path d="M0 568 293 619 900 520V540L293 642 0 592Z" fill="#abb9b3"/>
+        <path d="M0 562 293 612 900 513" fill="none" stroke="#ffffef" stroke-width="3" opacity=".85"/>
+        <g class="outlook__shadow" fill="var(--shade)" opacity="var(--shadow-opacity)">
+            <path d="M360 459 428 511 664 551 577 568 226 510Z"/>
+            <path d="M735 499 795 522 900 508 900 568 563 582Z"/>
+            <path d="M166 448 262 468 453 524 348 540 117 476Z"/>
+        </g>
+        <!-- Offset inhabited terrace block. Thin recessed bands give a structural rhythm. -->
+        <path d="M89 168 207 132 289 171 174 207Z" fill="#f8f3df"/>
+        <path d="M89 168 174 207V460L89 425Z" fill="#bdc9be"/>
+        <path d="M174 207 289 171V426L174 460Z" fill="url(#outlook-concrete)"/>
+        <g fill="#6c8680">
+            <path d="M189 240 275 214v17l-86 27Z"/><path d="M189 289 275 263v17l-86 27Z"/>
+            <path d="M189 338 275 312v17l-86 27Z"/><path d="M189 387 275 361v17l-86 27Z"/>
+        </g>
+        <g fill="#edf0dd">
+            <path d="M166 250 296 210v10l-130 40Z"/><path d="M166 299 296 259v10l-130 40Z"/>
+            <path d="M166 348 296 308v10l-130 40Z"/><path d="M166 397 296 357v10l-130 40Z"/>
+        </g>
+        <g stroke="#294e46" stroke-width="4"><path d="M203 242v12m30-21v11m25-20v12M204 291v12m29-21v11m25-20v12"/></g>
+        <!-- The highwalk connects occupied masses, and projects into open space. -->
+        <path d="M125 361 348 325 469 368 241 412Z" fill="#eee9d5"/>
+        <path d="M125 361 241 412V433L125 384Z" fill="#b8c3b7"/>
+        <path d="M241 412 469 368V389L241 433Z" fill="#758d82"/>
+        <path d="M262 412v73l-18 6v-75ZM439 379v102l-19-5v-93Z" fill="#d0d8c9"/>
+        <path d="M127 351 240 394 465 356" fill="none" stroke="#506d62" stroke-width="3"/>
+        <g stroke="#506d62" stroke-width="2"><path d="M150 360v12m28-2v14m28-2v14m31-3v15m41-22v16m40-24v16m40-24v16m40-24v16m40-23v15"/></g>
+        <!-- Portal with depth and a strong internal colour. The aperture is cut through the mass. -->
+        <path d="M350 118 713 169 787 226 415 174Z" fill="#faf4df"/>
+        <path d="M350 118 415 174V511L350 459Z" fill="#aab9a9"/>
+        <g clip-path="url(#outlook-opening)">
+            <path d="M471 230H751V477H471Z" fill="url(#outlook-sky)"/>
+            <path d="M491 398 760 426v59L471 445Z" fill="#67b0b2"/>
+            <path d="M671 405v-77h18v77h10v-49h26v49h11v-62h20v62Z" fill="#709ba2" opacity=".4"/>
+            <path d="M475 237 531 216V422L475 426Z" fill="#e24d2d"/>
+            <path d="M475 426 531 402 751 433 729 463Z" fill="#cd4328"/>
+            <path d="M475 237 729 274 758 244 531 216Z" fill="#cc512e"/>
+            <path d="M537 385 743 414v14l-206-29Z" fill="#f5e8c7"/>
+            <path d="M557 389v29m38-24v29m38-24v29m38-24v29m38-24v29" stroke="#6a7262" stroke-width="2"/>
+        </g>
+        <path d="M415 174 787 226V565L415 511Z M475 237V426L729 463V274Z" fill="url(#outlook-concrete)" fill-rule="evenodd"/>
+        <path d="M787 226 816 218V554L787 565Z" fill="#8caaa0"/>
+        <path d="M415 174 787 226M415 511 787 565" fill="none" stroke="#ffffec" stroke-width="2" opacity=".8"/>
+        <!-- A generous pale forecourt and a small amount of public life. -->
+        <path d="M0 625 247 579 655 641 389 720H0Z" fill="#f1edda"/>
+        <path d="M0 642 245 597 603 652" fill="none" stroke="#d7ddcc" stroke-width="2"/>
+        <path d="M594 526 649 518 677 535 622 547Z" fill="#f3e8cd"/>
+        <path d="M622 547 677 535v23l-55 12Z" fill="#a3b5a2"/>
+        <path d="M594 526 622 547v23l-28-22Z" fill="#c8d0b9"/>
+        <g fill="#52794c"><ellipse cx="620" cy="520" rx="18" ry="10"/><ellipse cx="644" cy="517" rx="17" ry="11"/><ellipse cx="656" cy="527" rx="14" ry="8"/></g>
+        <g fill="#769f60"><ellipse cx="623" cy="515" rx="11" ry="7"/><ellipse cx="643" cy="511" rx="9" ry="7"/></g>
+        <g fill="#e55430"><circle cx="619" cy="512" r="2.7"/><circle cx="649" cy="517" r="2.4"/></g>
+        <path d="M74 563 112 556 139 567 102 575Z" fill="#a77345"/><path d="M83 567v15m45-17v14" stroke="#547367" stroke-width="3"/>
+        <g transform="translate(312 520)"><ellipse cy="16" rx="11" ry="3" fill="#627f78" opacity=".25"/><circle cy="-14" r="4" fill="#243c3b"/><path d="M-5-8h10l2 16H-6Z" fill="#d75232"/><path d="M-3 8-4 18m7-10 2 10" stroke="#263e3d" stroke-width="2.5"/></g>
+        <g fill="none" stroke="#536d76" stroke-width="1.6"><path d="M320 81q7-5 14 0 7-5 14 0M333 62q4-3 8 0 4-3 8 0"/></g>
+    </svg>
+    <figcaption class="outlook__caption"><span>An architectural sketch, made with code.</span><span class="outlook__light"><button type="button" data-outlook-change aria-controls="outlook-print" hidden>Change the light <span aria-hidden="true">↗</span></button><output data-outlook-state aria-live="polite">Daylight</output></span></figcaption>
+</figure>
+<script>
+    import { autoInit } from "../../utils/spaLifecycle";
+    const lightStates = ["daylight", "morning", "evening"];
+    autoInit(() => {
+        const root = document.querySelector<HTMLElement>("[data-outlook]");
+        const button = root?.querySelector<HTMLButtonElement>("[data-outlook-change]");
+        const output = root?.querySelector<HTMLOutputElement>("[data-outlook-state]");
+        if (!root || !button || !output || button.dataset.bound) return;
+        button.hidden = false;
+        button.dataset.bound = "true";
+        button.addEventListener("click", () => {
+            const index = lightStates.indexOf(root.dataset.light || "daylight");
+            const light = lightStates[(index + 1) % lightStates.length];
+            root.dataset.light = light;
+            output.textContent = light[0].toUpperCase() + light.slice(1);
+        });
+    }, "page-load");
+</script>

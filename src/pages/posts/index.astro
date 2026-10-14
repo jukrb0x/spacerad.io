@@ -5,18 +5,15 @@ import Header from "@components/Header.astro";
 import PostList from "@components/PostList.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 ---
-
 <!doctype html>
-<html lang="zh-CN">
-	<head>
-		<BaseHead title={`Blog | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main class="page-shell" transition:animate="fade">
-			<h1 class="text-2xl sm:text-3xl font-bold text-primary mb-4">Blog</h1>
-			<PostList />
-		</main>
-		<Footer />
-	</body>
+<html lang="en">
+    <head><BaseHead title={`Posts | ${SITE_TITLE}`} description={SITE_DESCRIPTION} /></head>
+    <body class="archive-page">
+        <Header />
+        <main id="main-content" tabindex="-1" class="page-shell" transition:animate="fade">
+            <div class="archive-heading"><h1>Posts</h1><p>Essays and explorations, in English and Chinese.</p></div>
+            <PostList />
+        </main>
+        <Footer />
+    </body>
 </html>

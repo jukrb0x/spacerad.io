@@ -4,7 +4,7 @@
  */
 
 import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
-import { debounce, throttle } from "../utils/timing";
+import { debounce } from "../utils/timing";
 
 // ============ Responsive Table Handling ============
 function unwrapCardCells(table: HTMLTableElement) {
@@ -223,49 +223,81 @@ function initTocObserver() {
 }
 
 // ============ Mobile TOC Drawer ============
+let disposeMobileTocDrawer: (() => void) | undefined;
+
 function initMobileTocDrawer() {
+    disposeMobileTocDrawer?.();
+    disposeMobileTocDrawer = undefined;
     const toggleBtn = document.querySelector("[data-toc-mobile-toggle]");
     const dialog = document.querySelector<HTMLDialogElement>("[data-toc-mobile-drawer]");
-    const content = document.querySelector("[data-toc-mobile-content]");
-    const closeBtns = dialog?.querySelectorAll("[data-toc-mobile-close]");
-    const tocLinks = dialog?.querySelectorAll("[data-toc-link]");
+    if (!toggleBtn || !dialog) return;
 
-    if (!toggleBtn || !dialog || !content) return;
+    const controller = new AbortController();
+    const options = { signal: controller.signal };
+    let locked = false;
+    let frame: number | undefined;
+    let closeTimer: ReturnType<typeof setTimeout> | undefined;
 
     const openDrawer = () => {
-        dialog.showModal();
+        if (locked || controller.signal.aborted) return;
+        clearTimeout(closeTimer);
+        if (!dialog.open) dialog.showModal();
+        locked = true;
         lockScrollForDialog();
-        // Animate in next frame after dialog is visible
-        requestAnimationFrame(() => {
-            dialog.classList.add("is-open");
+        frame = requestAnimationFrame(() => {
+            frame = undefined;
+            if (locked && !controller.signal.aborted) dialog.classList.add("is-open");
         });
     };
-
-    const closeDrawer = () => {
+    const closeDrawer = (immediate = false) => {
+        clearTimeout(closeTimer);
+        if (frame !== undefined) cancelAnimationFrame(frame);
+        frame = undefined;
         dialog.classList.remove("is-open");
-        unlockScrollForDialog();
-        // Close dialog after CSS transition completes
-        setTimeout(() => {
-            if (!dialog.classList.contains("is-open")) {
-                dialog.close();
-            }
-        }, 300);
+        if (locked) {
+            locked = false;
+            unlockScrollForDialog();
+        }
+        if (immediate) dialog.close();
+        else
+            closeTimer = setTimeout(() => {
+                if (!locked && dialog.isConnected) dialog.close();
+            }, 300);
     };
 
-    toggleBtn.addEventListener("click", openDrawer);
-    closeBtns?.forEach((btn) => btn.addEventListener("click", closeDrawer));
-
-    // Intercept browser Escape to run animated close instead
-    dialog.addEventListener("cancel", (e) => {
-        e.preventDefault();
-        closeDrawer();
+    toggleBtn.addEventListener("click", openDrawer, options);
+    dialog.querySelectorAll("[data-toc-mobile-close]").forEach((button) => {
+        button.addEventListener("click", () => closeDrawer(), options);
     });
-
-    // Auto-close drawer when clicking TOC links
-    tocLinks?.forEach((link) => {
-        link.addEventListener("click", closeDrawer);
+    dialog.addEventListener(
+        "cancel",
+        (event) => {
+            event.preventDefault();
+            closeDrawer();
+        },
+        options,
+    );
+    dialog.addEventListener(
+        "close",
+        () => {
+            if (!dialog.open && locked) closeDrawer(true);
+        },
+        options,
+    );
+    dialog.querySelectorAll("[data-toc-link]").forEach((link) => {
+        link.addEventListener("click", () => closeDrawer(true), options);
     });
+    disposeMobileTocDrawer = () => {
+        closeDrawer(true);
+        controller.abort();
+        clearTimeout(closeTimer);
+    };
 }
+
+document.addEventListener("astro:before-swap", () => {
+    disposeMobileTocDrawer?.();
+    disposeMobileTocDrawer = undefined;
+});
 
 // ============ Sidebar Positioning (TOC + Share Bar) ============
 // Dynamically calculate sidebar starting position, implementing scroll floating effect

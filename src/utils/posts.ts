@@ -9,15 +9,13 @@ export type BlogPost = CollectionEntry<"blog">;
  * Sorted by publication date descending (newest first).
  */
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-	const posts = await getCollection("blog", (post) => {
-		if (post.data.hidden) return false;
-		if (post.data.draft && !isDev) return false;
-		return true;
-	});
+    const posts = await getCollection("blog", (post) => {
+        if (post.data.hidden) return false;
+        if (post.data.draft && !isDev) return false;
+        return true;
+    });
 
-	return posts.sort(
-		(a, b) => b.data.published.valueOf() - a.data.published.valueOf(),
-	);
+    return posts.sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf());
 }
 
 /**
@@ -25,25 +23,23 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
  * Excludes drafts in production but keeps hidden posts (they have routes, just aren't listed).
  */
 export async function getAllRenderablePosts(): Promise<BlogPost[]> {
-	return getCollection("blog", (post) => {
-		if (post.data.draft && !isDev) return false;
-		return true;
-	});
+    return getCollection("blog", (post) => {
+        if (post.data.draft && !isDev) return false;
+        return true;
+    });
 }
 
 /** Group posts by year, preserving insertion order (assumes pre-sorted). */
-export function groupPostsByYear(
-	posts: BlogPost[],
-): [string, BlogPost[]][] {
-	const byYear = new Map<string, BlogPost[]>();
-	for (const post of posts) {
-		const year = String(post.data.published.getFullYear());
-		let group = byYear.get(year);
-		if (!group) {
-			group = [];
-			byYear.set(year, group);
-		}
-		group.push(post);
-	}
-	return Array.from(byYear.entries());
+export function groupPostsByYear(posts: BlogPost[]): [string, BlogPost[]][] {
+    const byYear = new Map<string, BlogPost[]>();
+    for (const post of posts) {
+        const year = String(post.data.published.getFullYear());
+        let group = byYear.get(year);
+        if (!group) {
+            group = [];
+            byYear.set(year, group);
+        }
+        group.push(post);
+    }
+    return Array.from(byYear.entries());
 }

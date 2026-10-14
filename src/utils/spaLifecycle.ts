@@ -11,17 +11,25 @@
  * @param event - Which Astro event to listen for ('after-swap' or 'page-load')
  */
 export function autoInit(initFn: () => void, event: "after-swap" | "page-load" = "after-swap"): void {
-	const astroEvent = event === "after-swap" ? "astro:after-swap" : "astro:page-load";
+    const astroEvent = event === "after-swap" ? "astro:after-swap" : "astro:page-load";
 
-	// Run on initial load
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", initFn, { once: true });
-	} else {
-		initFn();
-	}
+    // ClientRouter dispatches page-load on initial load AND every navigation.
+    // Also running at DOMContentLoaded duplicates API requests and listeners.
+    if (event === "page-load") {
+        document.addEventListener(astroEvent, initFn);
+        return;
+    }
 
-	// Re-run after SPA navigation
-	document.addEventListener(astroEvent, initFn);
+    // after-swap does not cover the initial document.
+    // Run on initial load
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initFn, { once: true });
+    } else {
+        initFn();
+    }
+
+    // Re-run after SPA navigation
+    document.addEventListener(astroEvent, initFn);
 }
 
 /**
@@ -34,31 +42,26 @@ export function autoInit(initFn: () => void, event: "after-swap" | "page-load" =
  * @param options - Event listener options
  * @returns Cleanup function to remove the listener
  */
-export function createPersistentListener(
-	target: EventTarget,
-	event: string,
-	handler: EventListener,
-	options?: AddEventListenerOptions,
-): () => void {
-	let attached = false;
+export function createPersistentListener(target: EventTarget, event: string, handler: EventListener, options?: AddEventListenerOptions): () => void {
+    let attached = false;
 
-	const attach = () => {
-		if (!attached) {
-			attached = true;
-			target.addEventListener(event, handler, options);
-		}
-	};
+    const attach = () => {
+        if (!attached) {
+            attached = true;
+            target.addEventListener(event, handler, options);
+        }
+    };
 
-	// Attach immediately
-	attach();
+    // Attach immediately
+    attach();
 
-	// Return cleanup function
-	return () => {
-		if (attached) {
-			target.removeEventListener(event, handler, options);
-			attached = false;
-		}
-	};
+    // Return cleanup function
+    return () => {
+        if (attached) {
+            target.removeEventListener(event, handler, options);
+            attached = false;
+        }
+    };
 }
 
 /**
@@ -70,26 +73,21 @@ export function createPersistentListener(
  * @param handler - Event handler
  * @param options - Event listener options
  */
-export function createNavigationListener(
-	target: EventTarget,
-	event: string,
-	handler: EventListener,
-	options?: AddEventListenerOptions,
-): void {
-	const controller = new AbortController();
-	const signal = controller.signal;
+export function createNavigationListener(target: EventTarget, event: string, handler: EventListener, options?: AddEventListenerOptions): void {
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-	// Add listener with abort signal
-	target.addEventListener(event, handler, { ...options, signal });
+    // Add listener with abort signal
+    target.addEventListener(event, handler, { ...options, signal });
 
-	// Clean up on navigation
-	document.addEventListener(
-		"astro:before-swap",
-		() => {
-			controller.abort();
-		},
-		{ once: true },
-	);
+    // Clean up on navigation
+    document.addEventListener(
+        "astro:before-swap",
+        () => {
+            controller.abort();
+        },
+        { once: true },
+    );
 }
 
 /**
@@ -100,11 +98,11 @@ export function createNavigationListener(
  * @returns Guarded function that only executes once
  */
 export function once<T extends (...args: unknown[]) => void>(fn: T): T {
-	let called = false;
-	return ((...args: unknown[]) => {
-		if (!called) {
-			called = true;
-			fn(...args);
-		}
-	}) as T;
+    let called = false;
+    return ((...args: unknown[]) => {
+        if (!called) {
+            called = true;
+            fn(...args);
+        }
+    }) as T;
 }

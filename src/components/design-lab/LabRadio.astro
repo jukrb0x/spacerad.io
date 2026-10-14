@@ -1,0 +1,21 @@
+---
+import radioPreview from "../../assets/design-lab/radio-preview.json";
+import { fetchTelegramChannel, type TelegramPost } from "../../utils/telegram";
+import FormattedDate from "../FormattedDate.astro";
+
+let posts: TelegramPost[] = [];
+try {
+    const channel = await fetchTelegramChannel("SpaceRad_io");
+    const picks = ["1294", "1288", "1286"];
+    posts = picks.map((id) => channel.posts.find((post) => String(post.id) === id)).filter((post): post is TelegramPost => Boolean(post));
+    if (posts.length < 2) posts = channel.posts.slice(0, 3);
+} catch {
+    /* The direct channel link remains useful if the public upstream is unavailable. */
+}
+Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=30");
+---
+{posts.length ? <div class="lab-radio-feed">{posts.map(post => <article>
+    <time datetime={post.datetime}><FormattedDate date={new Date(post.datetime)} /></time>
+    <p><a href={`/channel#${post.id}`}>{(post.text || post.title).replace(/https?:\/\/\S+/g, "").trim().slice(0, 180)}{(post.text || post.title).length > 180 ? "…" : ""}</a></p>
+    <a class="lab-radio-open" href={`/channel#${post.id}`} aria-label={`Read note from ${new Date(post.datetime).toLocaleDateString("en-US")}`}>Read note <span aria-hidden="true">↗</span></a>
+</article>)}</div> : <Fragment set:html={radioPreview.html} />}

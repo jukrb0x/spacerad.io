@@ -1,5 +1,5 @@
-import { defineConfig, presetWebFonts, transformerDirectives, transformerVariantGroup } from "unocss";
 import presetWind3 from "@unocss/preset-wind3";
+import { defineConfig, presetWebFonts, transformerDirectives, transformerVariantGroup } from "unocss";
 
 export default defineConfig({
     presets: [
@@ -153,7 +153,7 @@ export default defineConfig({
         "card-interactive": "surface-card transition-all duration-200 hover:(border-accent shadow-soft -translate-y-0.5)",
 
         // Page shell (main container)
-        "page-shell": "max-w-5xl mx-auto px-6 py-8 sm:px-6",
+        "page-shell": "mx-auto",
         "container-base": "max-w-[72rem] mx-auto px-4 sm:px-6",
         "section-padding": "py-12 sm:py-16 lg:py-20",
     },

@@ -1,298 +1,40 @@
 ---
-import { SITE_TITLE, SITE_TITLE_ALT, NAV_LINKS } from "../consts"; 
+import { NAV_LINKS } from "../consts";
+import ProfileCard from "./home/ProfileCard.astro";
+import NavDrawer from "./NavDrawer.astro";
 import SearchModal from "./SearchModal.astro";
 import SearchOverlay from "./SearchOverlay.astro";
-import NavDrawer from "./NavDrawer.astro";
 import ThemeToggle from "./ThemeToggle.astro";
 
-const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
-const subpath = pathname.match(/[^/]+/g);
-const isActive = (href: string) => href === pathname || href === `/${subpath?.[0] || ""}`;
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 ---
-
-<header
-    data-header
-    class="header-wrapper sticky top-0 z-sticky bg-surface border-b border-border transition-all duration-300"
-    transition:animate="none"
->
-    <!-- Subtle neon glow effect on scroll -->
-    <div
-        data-header-glow
-        class="header-glow absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500"
-    ></div>
-
-    <!-- Reading progress indicator -->
-    <div
-        data-reading-progress
-        class="absolute bottom-0 left-0 w-full h-0.5 origin-left transform scale-x-0"
-        style="background: var(--gradient-warm-to-cool)"
-        role="progressbar"
-        aria-label="Reading progress"
-        aria-valuenow="0"
-        aria-valuemin="0"
-        aria-valuemax="100"
-    ></div>
-
-    <nav
-        class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-2 sm:px-6"
-    >
-        <!-- Left: Logo + Site Name -->
-        <h2
-            class="text-[1.1rem] font-semibold tracking-tight text-primary sm:text-[1.15rem] shrink-0"
-        >
-            <a
-                href="/"
-                class="inline-flex items-center gap-2 no-underline transition-interactive hover:text-accent focus-accent"
-                data-site-title-trigger
-            >
-                <span class="text-xl" aria-hidden="true">📻</span>
-                <span class="site-title-wrapper" data-site-title data-alt-titles={JSON.stringify(SITE_TITLE_ALT)}>
-                    <span class="site-title-text" data-title-main>{SITE_TITLE}</span>
-                    <span class="site-title-text site-title-alt" data-title-alt aria-hidden="true"></span>
-                </span>
-            </a>
-        </h2>
-
-        <!-- Right: Search | NavLinks | ThemeToggle -->
-        <div class="flex items-center gap-1 sm:gap-2">
-            <!-- Search trigger button -->
-            <SearchModal />
-
-            <!-- Nav Links (desktop) -->
-            <div class="hidden items-center gap-1 md:flex" data-no-preview>
-                {
-                    NAV_LINKS.filter((link) => !link.drawer_only).map((link) => (
-                        <a
-                            href={link.href}
-                            class:list={[
-                                "no-underline nav-link px-3 py-1.5 text-[0.9rem] font-medium rounded-md transition-all duration-200",
-                                isActive(link.href)
-                                    ? "text-muted cursor-default"
-                                    : "text-secondary hover:text-accent hover:bg-accent-tint-6",
-                            ]}
-                        >
-                            {link.label}
-                        </a>
-                    ))
-                }
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header data-header data-pagefind-ignore class="header-wrapper site-header z-sticky" transition:animate="none">
+    <nav class="site-header__inner" aria-label="Main navigation">
+        <div data-reading-progress class="absolute bottom-0 left-0 w-full h-0.5 origin-left transform scale-x-0" role="progressbar" aria-label="Reading progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        <a href="/" class="site-brand" aria-label="Space Radio — Jabriel’s journal, home">
+            <span class="site-brand__text">Space Radio</span>
+        </a>
+        <div class="site-header__controls">
+            <div class="site-header__links hidden md:flex" data-no-preview>
+                {NAV_LINKS.filter(link => !link.drawer_only).map(link => <a href={link.href} class="nav-link" aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</a>)}
             </div>
-
-            <!-- Spacer -->
-            <span class="hidden sm:block text-border mx-1 select-none">|</span>
-
-            <!-- Theme Toggle -->
+            <SearchModal />
             <ThemeToggle variant="header" />
-
-            <!-- Mobile menu toggle -->
-            <button
-                type="button"
-                class="icon-btn icon-btn--sm icon-btn--square icon-btn--bordered focus-accent md:hidden ml-1"
-                aria-label="Open navigation menu"
-                aria-expanded="false"
-                data-nav-toggle
-            >
-                <span
-                    aria-hidden="true"
-                    class="flex h-4 w-5 flex-col justify-between"
-                >
-                    <span
-                        class="h-0.5 w-full rounded-full bg-current transition-transform duration-300"
-                        data-bar-top></span>
-                    <span
-                        class="h-0.5 w-full rounded-full bg-current transition-opacity duration-300"
-                        data-bar-middle></span>
-                    <span
-                        class="h-0.5 w-full rounded-full bg-current transition-transform duration-300"
-                        data-bar-bottom></span>
+            <button type="button" class="icon-btn icon-btn--sm icon-btn--square md:hidden" aria-label="Open navigation menu" aria-expanded="false" data-nav-toggle>
+                <span aria-hidden="true" class="flex h-4 w-5 flex-col justify-between">
+                    <span class="h-0.5 w-full bg-current transition-transform" data-bar-top></span>
+                    <span class="h-0.5 w-full bg-current transition-opacity" data-bar-middle></span>
+                    <span class="h-0.5 w-full bg-current transition-transform" data-bar-bottom></span>
                 </span>
             </button>
         </div>
     </nav>
-    <link
-        rel="alternate"
-        type="application/rss+xml"
-        title={SITE_TITLE}
-        href={new URL("rss.xml", Astro.site)}
-    />
+    {pathname === "/" && <ProfileCard />}
 </header>
-
-<!-- Overlays rendered outside header to avoid transform positioning issues -->
 <NavDrawer />
 <SearchOverlay />
-
 <script>
     import "../scripts/header-scroll.ts";
-
-    const STORAGE_KEY_LAST_TITLE = "site-title-last";
-    const STORAGE_KEY_LAST_ANIM = "site-title-last-anim";
-    const ANIM_COOLDOWN_MS = 15000; // 15 seconds between auto-animations
-
-    // Site title animation
-    function initTitleAnimation() {
-        const wrapper = document.querySelector<HTMLElement>("[data-site-title]");
-        const trigger = document.querySelector<HTMLElement>("[data-site-title-trigger]");
-        if (!wrapper || !trigger) return;
-
-        const altTitles = JSON.parse(wrapper.dataset.altTitles || "[]") as string[];
-        if (altTitles.length === 0) return;
-
-        const altEl = wrapper.querySelector<HTMLElement>("[data-title-alt]");
-        if (!altEl) return;
-
-        let isAnimating = false;
-        let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
-
-        function getLastTitle(): string {
-            return localStorage.getItem(STORAGE_KEY_LAST_TITLE) || "";
-        }
-
-        function setLastTitle(title: string) {
-            localStorage.setItem(STORAGE_KEY_LAST_TITLE, title);
-        }
-
-        function getLastAnimTime(): number {
-            try {
-                return parseInt(localStorage.getItem(STORAGE_KEY_LAST_ANIM) || "0", 10);
-            } catch {
-                return 0;
-            }
-        }
-
-        function setLastAnimTime() {
-            localStorage.setItem(STORAGE_KEY_LAST_ANIM, Date.now().toString());
-        }
-
-        function pickRandomTitle() {
-            const lastTitle = getLastTitle();
-            if (altTitles.length === 1) {
-                setLastTitle(altTitles[0]);
-                return altTitles[0];
-            }
-            let title: string;
-            do {
-                title = altTitles[Math.floor(Math.random() * altTitles.length)];
-            } while (title === lastTitle);
-            setLastTitle(title);
-            return title;
-        }
-
-        function playAnimation(updateTimestamp = true) {
-            if (isAnimating) return;
-            isAnimating = true;
-
-            if (updateTimestamp) {
-                setLastAnimTime();
-            }
-
-            altEl!.textContent = pickRandomTitle();
-
-            wrapper!.classList.add("show-alt");
-            setTimeout(() => {
-                wrapper!.classList.remove("show-alt");
-                // Wait for exit transition to complete
-                setTimeout(() => {
-                    isAnimating = false;
-                }, 800);
-            }, 2500);
-        }
-
-        // Only auto-animate if enough time has passed since last animation
-        const timeSinceLastAnim = Date.now() - getLastAnimTime();
-        if (timeSinceLastAnim >= ANIM_COOLDOWN_MS) {
-            setTimeout(() => playAnimation(true), 500);
-        }
-
-        // Hover trigger with delay (includes logo) - always allowed
-        trigger.addEventListener("mouseenter", () => {
-            if (isAnimating) return;
-            hoverTimeout = setTimeout(() => playAnimation(false), 10);
-        });
-
-        trigger.addEventListener("mouseleave", () => {
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
-        });
-    }
-
-    // Run on initial load and after view transitions
-    initTitleAnimation();
-    document.addEventListener("astro:after-swap", initTitleAnimation);
 </script>
-
-<style lang="scss">
-    /* Prevent flash of mobile nav toggle on desktop */
-    @media (min-width: 768px) {
-        [data-nav-toggle] {
-            display: none !important;
-        }
-    }
-
-    /* Subtle neon/space-radio glow effect */
-    .header-glow {
-        background: linear-gradient(
-            90deg,
-            transparent 0%,
-            color-mix(in srgb, var(--color-space-purple) 3%, transparent) 20%,
-            color-mix(in srgb, var(--color-space-cyan) 5%, transparent) 50%,
-            color-mix(in srgb, var(--color-space-purple) 3%, transparent) 80%,
-            transparent 100%
-        );
-    }
-
-    :global([data-theme="dark"]) .header-glow {
-        background: linear-gradient(
-            90deg,
-            transparent 0%,
-            color-mix(in srgb, var(--color-space-purple) 8%, transparent) 20%,
-            color-mix(in srgb, var(--color-space-cyan) 12%, transparent) 50%,
-            color-mix(in srgb, var(--color-space-purple) 8%, transparent) 80%,
-            transparent 100%
-        );
-    }
-
-    .header-wrapper.is-scrolled .header-glow {
-        opacity: 1;
-    }
-
-    /* Site title animation */
-    .site-title-wrapper {
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .site-title-text {
-        display: inline-block;
-        transition:
-            opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-            transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-            filter 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-            text-shadow 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .site-title-alt {
-        position: absolute;
-        left: 0;
-        top: 0;
-        opacity: 0;
-        transform: translateX(8px);
-        filter: blur(4px);
-    }
-
-    /* Main title exit animation */
-    .site-title-wrapper.show-alt [data-title-main] {
-        opacity: 0;
-        transform: translateX(-8px);
-        filter: blur(4px);
-    }
-
-    /* Alt title enter animation */
-    .site-title-wrapper.show-alt [data-title-alt] {
-        opacity: 1;
-        transform: translateX(0);
-        filter: blur(0);
-        color: var(--color-accent);
-    }
-</style>
