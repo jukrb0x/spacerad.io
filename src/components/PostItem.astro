@@ -11,6 +11,13 @@ const { lang = "en", draft } = post.data;
 const translation = getPostTranslation(post.id, posts);
 ---
 <li lang={lang === "zh" ? "zh-CN" : "en"} data-lang={lang} class="post-item-wrapper">
+    <div class="mobile-post-meta post-meta">
+        <time datetime={post.data.published.toISOString()}>{post.data.published.toISOString().slice(0, 10).replaceAll("-", ".")}</time>
+        <span class="mobile-post-languages">
+            <span class="language-label">{lang === "zh" ? "中文" : "English"}</span>
+            {translation && <a class="mobile-translation" href={`/posts/${translation.id}`} hreflang={translation.data.lang} lang={translation.data.lang} aria-label={`${translation.data.lang === "en" ? "EN — English translation" : "中文 — 中文版"}: ${translation.data.title}`} data-preview="off">{translation.data.lang === "en" ? "EN" : "中文"}</a>}
+        </span>
+    </div>
     <a href={`/posts/${post.id}`} class="post-item" data-post-id={post.id}>
         <time datetime={post.data.published.toISOString()}>{post.data.published.toISOString().slice(0, 10).replaceAll("-", ".")}</time>
         <span class="language-label">{lang === "zh" ? "中文" : "English"}</span>

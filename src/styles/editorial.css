@@ -929,6 +929,13 @@ body.article-page [data-like-count] {
         gap: 24px;
     }
 }
+.mobile-post-meta,
+.translation-label--mobile {
+    display: none;
+}
+.mobile-post-languages {
+    display: contents;
+}
 @media (max-width: 767px) {
     .site-header[data-nav-floating]::before {
         height: 64px;
@@ -995,9 +1002,35 @@ body.article-page [data-like-count] {
         gap: 12px;
         font-size: 12px;
     }
+    .mobile-post-languages {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .translation-label--desktop {
+        display: none;
+    }
+    .translation-label--mobile {
+        display: inline;
+    }
+    .post-meta .mobile-translation {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        color: var(--color-text-secondary);
+        text-decoration: none;
+    }
+    .post-meta .mobile-translation:hover,
+    .post-meta .mobile-translation:focus-visible {
+        color: var(--color-link);
+    }
     .lead-post h3 {
         font-size: 25px;
         margin: 12px 0 24px;
+        text-wrap: wrap;
+        overflow-wrap: anywhere;
     }
     .lead-post__image {
         margin-left: 0;
@@ -1027,19 +1060,23 @@ body.article-page [data-like-count] {
         margin-top: 48px;
     }
     .home-channel__identity {
-        min-height: 112px;
-        max-width: 200px;
+        width: 80%;
+        min-height: 100px;
+        max-width: 320px;
+        justify-self: start;
+        gap: 12px;
     }
     .channel-index {
         grid-template-columns: 1fr;
-        gap: 16px;
+        align-content: start;
+        gap: 28px;
     }
     .channel-entry {
-        padding-block: 0 12px;
+        padding: 0;
     }
     .home-channel__content,
     .channel-fallback {
-        min-height: 384px;
+        min-height: 0;
     }
     .site-footer__inner {
         gap: 14px;
@@ -1062,10 +1099,19 @@ body.article-page [data-like-count] {
     .archive-page .section-stack > div:first-child {
         margin-bottom: 16px;
     }
+    .mobile-post-meta {
+        display: flex;
+        padding-top: 16px;
+        gap: 4px 16px;
+    }
+    .post-item > time,
+    .post-item > .language-label,
+    .post-item__translation {
+        display: none;
+    }
     .post-item {
-        grid-template-columns: 88px 1fr;
-        gap: 10px 16px;
-        padding: 16px 0 20px;
+        display: block;
+        padding: 10px 0 24px;
     }
     .post-item__title {
         grid-column: 1 / -1;
