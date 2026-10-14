@@ -20,14 +20,38 @@ async function open(options = {}) {
     });
     await context.route("**/*", (route) => (["GET", "HEAD", "OPTIONS"].includes(route.request().method()) ? route.continue() : route.abort()));
     const page = await context.newPage();
+    await page.addInitScript(() => {
+        Math.random = () => 0.5;
+        document.addEventListener("astro:page-load", () => {
+            window.carouselPageLoaded = true;
+        });
+    });
     page.setDefaultTimeout(5000);
     await page.clock.install();
-    await page.goto(baseURL, { waitUntil: "networkidle" });
+    await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => window.carouselPageLoaded);
     return { context, page };
 }
 const current = (page) => page.locator(".home-profile__word[data-current]");
 
-// Removing animate(), collapsing reserved width, or skipping/wrapping a phrase must fail.
+test("opening phrase is visible before enhancement scripts can load", async () => {
+    const context = await browser.newContext({ reducedMotion: "reduce", serviceWorkers: "block" });
+    await context.route("**/*", (route) => (route.request().resourceType() === "script" ? route.abort() : route.continue()));
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+        Math.random = () => 0.5;
+    });
+    try {
+        await page.goto(baseURL);
+        assert.equal(await current(page).textContent(), "games.");
+        assert.equal(await current(page).isVisible(), true);
+        assert.equal(await page.locator(".home-profile__word[data-current]").count(), 1);
+    } finally {
+        await context.close();
+    }
+});
+
+// Removing animate(), collapsing reserved width, or skipping/repeating a phrase must fail.
 for (const width of [1440, 390, 320]) {
     test(`whole phrases move vertically without changing surrounding geometry (${width}px)`, async () => {
         const { context, page } = await open({ viewport: { width, height: 960 } });
@@ -35,7 +59,9 @@ for (const width of [1440, 390, 320]) {
             const frame = page.locator(".home-profile__carousel");
             const initial = await frame.boundingBox();
             const heading = await page.locator("#home-title").boundingBox();
-            for (let index = 0; index < 6; index++) {
+            assert.equal(await current(page).textContent(), "games.", "controlled opening sample chooses a random phrase");
+            const seen = [await current(page).textContent()];
+            for (let index = 0; index < 11; index++) {
                 await page.clock.fastForward(4000);
                 assert.equal(
                     await frame.evaluate((el) => el.getAnimations({ subtree: true }).length),
@@ -54,12 +80,15 @@ for (const width of [1440, 390, 320]) {
                     return { gap: next.top - old.top, height: old.height };
                 });
                 assert.ok(separation.gap >= separation.height, "the moving lines must not collide inside the clipped window");
-                await page.waitForFunction(
-                    (expected) => document.querySelector(".home-profile__word[data-current]")?.textContent === expected,
-                    phrases[(index + 1) % 6],
-                );
+                const next = await page.locator(".home-profile__word[data-incoming]").textContent();
+                assert.notEqual(next, seen.at(-1), "no adjacent repeats, including between rounds");
+                await page.waitForFunction((expected) => document.querySelector(".home-profile__word[data-current]")?.textContent === expected, next);
+                seen.push(next);
                 assert.deepEqual(await frame.boundingBox(), initial);
                 assert.deepEqual(await page.locator("#home-title").boundingBox(), heading);
+            }
+            for (const round of [seen.slice(0, 6), seen.slice(6)]) {
+                assert.deepEqual([...round].sort(), [...phrases].sort(), "each round contains every phrase exactly once");
             }
             assert.deepEqual(await page.locator(".home-profile__word").allTextContents(), phrases);
             assert.equal(
@@ -83,6 +112,7 @@ for (const width of [1440, 390, 320]) {
 test("hidden pages and reduced motion cancel exchanges and stay static until eligible", async () => {
     const { context, page } = await open();
     try {
+        const initial = await current(page).textContent();
         await page.clock.fastForward(4000);
         await page.waitForFunction(() => document.querySelector("[data-build-words]")?.getAnimations({ subtree: true }).length === 2);
         await page.evaluate(() => {
@@ -90,7 +120,7 @@ test("hidden pages and reduced motion cancel exchanges and stay static until eli
             document.dispatchEvent(new Event("visibilitychange"));
         });
         await page.clock.fastForward(20000);
-        assert.equal(await current(page).textContent(), "Unreal Engine.");
+        assert.equal(await current(page).textContent(), initial);
         assert.equal(await page.evaluate(() => document.querySelector("[data-build-words]").getAnimations({ subtree: true }).length), 0);
         await page.evaluate(() => {
             Object.defineProperty(document, "hidden", { configurable: true, value: false });
@@ -102,7 +132,7 @@ test("hidden pages and reduced motion cancel exchanges and stay static until eli
         // Chromium delivers its media-change event on a later rendering turn.
         await page.waitForFunction(() => document.querySelector("[data-build-words]").getAnimations({ subtree: true }).length === 0);
         await page.clock.fastForward(20000);
-        assert.equal(await current(page).textContent(), "Unreal Engine.");
+        assert.equal(await current(page).textContent(), initial);
         assert.equal(await page.evaluate(() => document.querySelector("[data-build-words]").getAnimations({ subtree: true }).length), 0);
     } finally {
         await context.close();
@@ -124,9 +154,11 @@ test("route swaps dispose the old carousel and bind one fresh exchange", async (
         await page.locator(".site-brand").click();
         await page.waitForURL(`${baseURL.replace(/\/$/, "")}/`);
         await page.waitForFunction(() => document.querySelector("[data-build-words]"));
+        assert.equal(await current(page).textContent(), "games.", "SPA return reinitializes the opening phrase");
         await page.clock.fastForward(4000);
         await page.waitForFunction(() => document.querySelector("[data-build-words]")?.getAnimations({ subtree: true }).length === 2);
-        await page.waitForFunction(() => document.querySelector(".home-profile__word[data-current]")?.textContent === "tools.");
+        const next = await page.locator(".home-profile__word[data-incoming]").textContent();
+        await page.waitForFunction((expected) => document.querySelector(".home-profile__word[data-current]")?.textContent === expected, next);
     } finally {
         await context.close();
     }
@@ -134,15 +166,19 @@ test("route swaps dispose the old carousel and bind one fresh exchange", async (
 
 // SSR must remain useful without JavaScript and with reduced motion from initial load.
 for (const options of [{ javaScriptEnabled: false }, { reducedMotion: "reduce" }]) {
-    test(`static first phrase fallback (${JSON.stringify(options)})`, async () => {
+    test(`static phrase with progressive enhancement (${JSON.stringify(options)})`, async () => {
         const context = await browser.newContext(options);
         const page = await context.newPage();
+        await page.addInitScript(() => {
+            Math.random = () => 0.5;
+        });
         try {
             await page.goto(baseURL);
-            assert.equal(await current(page).textContent(), "Unreal Engine.");
+            const expected = options.javaScriptEnabled === false ? "Unreal Engine." : "games.";
+            assert.equal(await current(page).textContent(), expected);
             assert.equal(await current(page).isVisible(), true);
             await page.waitForTimeout(4500);
-            assert.equal(await current(page).textContent(), "Unreal Engine.");
+            assert.equal(await current(page).textContent(), expected);
         } finally {
             await context.close();
         }

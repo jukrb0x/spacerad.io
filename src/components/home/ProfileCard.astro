@@ -5,6 +5,16 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
     <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance.">I build <span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
     <a href="/me" class="home-profile__name">Jabriel</a>
 </div>
+<script is:inline data-astro-rerun>
+    // Select before first paint; the server-rendered phrase remains the no-JS fallback.
+    {
+        const words = document.currentScript.previousElementSibling.querySelectorAll(".home-profile__word");
+        if (words.length > 0) {
+            words.forEach((word) => word.removeAttribute("data-current"));
+            words[Math.floor(Math.random() * words.length)].setAttribute("data-current", "");
+        }
+    }
+</script>
 <script>
     let disposeCarousel: (() => void) | undefined;
 
@@ -18,9 +28,25 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
         const controller = new AbortController();
         const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
         let index = Math.max(0, words.findIndex((word) => word.hasAttribute("data-current")));
+        const indices = words.map((_, i) => i);
+        let round = [index, ...shuffle(indices.filter((i) => i !== index))];
+        let position = 0;
         let timer: ReturnType<typeof setTimeout> | undefined;
         let animations: Animation[] = [];
         const eligible = () => !controller.signal.aborted && !document.hidden && !motion.matches;
+
+        function shuffle(values: number[], previous?: number) {
+            const order = [...values];
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+            if (order.length > 1 && order[0] === previous) {
+                const j = 1 + Math.floor(Math.random() * (order.length - 1));
+                [order[0], order[j]] = [order[j], order[0]];
+            }
+            return order;
+        }
 
         function pause() {
             clearTimeout(timer);
@@ -35,7 +61,11 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
 
         async function exchange() {
             if (!eligible()) return;
-            const next = (index + 1) % words.length;
+            if (position === round.length - 1) {
+                round = shuffle(indices, index);
+                position = -1;
+            }
+            const next = round[position + 1];
             words[next].setAttribute("data-incoming", "");
             const outgoing = words[index].animate(
                 [{ transform: "translateY(0)" }, { transform: "translateY(-110%)" }],
@@ -57,6 +87,7 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
             words[next].removeAttribute("data-incoming");
             words[next].setAttribute("data-current", "");
             index = next;
+            position++;
             animations.forEach((animation) => animation.cancel());
             animations = [];
             schedule();
