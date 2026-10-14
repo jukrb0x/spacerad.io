@@ -97,12 +97,40 @@ header.site-header[data-header].is-scrolled {
     transition: none;
 }
 .site-brand {
+    position: relative;
     color: inherit;
     text-decoration: none;
     flex-shrink: 0;
     font-size: 26px;
     font-weight: 600;
     line-height: 1.2;
+}
+.site-brand__whisper {
+    position: absolute;
+    inset-inline-start: calc(100% + 22px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 140px;
+    font-family: var(--font-family-sans);
+    font-size: 15px;
+    font-weight: 400;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 140ms ease;
+}
+.site-brand__whisper[data-visible] {
+    opacity: 0.8;
+}
+@media (max-width: 1099px) {
+    .site-brand__whisper {
+        display: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .site-brand__whisper {
+        transition: none;
+    }
 }
 .site-header__controls {
     display: flex;
