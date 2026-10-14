@@ -107,4 +107,7 @@ const { label = "Toggle theme", class: className = "", variant = "header" } = (A
 	:global(html[data-theme="dark"]) .theme-toggle [data-theme-toggle]:hover {
 		color: var(--color-link-hover);
 	}
+	:global(html[data-theme="dark"]) .theme-toggle[data-variant="header"] [data-theme-toggle] {
+		color: var(--color-on-structure);
+	}
 </style>
