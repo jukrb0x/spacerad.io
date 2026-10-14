@@ -675,47 +675,78 @@ header.site-header[data-header].is-scrolled {
     border-radius: 0;
     box-shadow: none;
 }
+/* One rail for article controls: action centers cannot drift from their trigger. */
+body.article-page {
+    --article-control-size: 44px;
+    --article-control-inset: max(24px, env(safe-area-inset-right));
+    --article-control-surface: var(--color-bg-surface);
+    --article-control-ink: var(--color-text-primary);
+    --article-control-border: var(--color-border-strong);
+}
+html[data-theme="dark"] body.article-page {
+    --article-control-surface: #242421;
+    --article-control-ink: #f0f0eb;
+    --article-control-border: #8b8b82;
+}
+body.article-page [data-toc-mobile-toggle],
+body.article-page [data-share-mobile-toggle],
+body.article-page [data-share-menu] {
+    right: var(--article-control-inset);
+    width: var(--article-control-size);
+}
 body.article-page [data-toc-mobile-toggle],
 body.article-page [data-share-mobile-toggle] {
     border-radius: 50%;
     box-shadow: none;
-    width: 44px;
-    height: 44px;
+    height: var(--article-control-size);
     background: var(--color-structure);
     color: var(--color-on-structure);
     border: 0;
     backdrop-filter: none;
+}
+html[data-theme="dark"] body.article-page [data-share-mobile-toggle],
+html[data-theme="dark"] body.article-page [data-toc-mobile-toggle] {
+    border: 1px solid var(--article-control-border);
 }
 body.article-page [data-share-mobile-toggle]:hover,
 body.article-page [data-toc-mobile-toggle]:hover {
     background: var(--color-structure);
     box-shadow: none;
 }
+body.article-page [data-share-menu-item] {
+    width: var(--article-control-size);
+    height: var(--article-control-size);
+}
 [data-share-sidebar] > a,
 [data-share-sidebar] > button,
 [data-share-menu-item] {
     border-radius: 50%;
     box-shadow: none;
-    color: var(--color-link);
-    border-color: var(--color-border-strong);
-    background: var(--color-bg-surface);
+    color: var(--article-control-ink);
+    border-color: var(--article-control-border);
+    background: var(--article-control-surface);
 }
 [data-share-sidebar] > a:hover,
 [data-share-sidebar] > button:hover,
 [data-share-menu-item]:hover {
-    color: var(--color-link);
-    background: color-mix(in srgb, var(--color-link) 14%, var(--color-bg-surface));
-    border-color: var(--color-link);
+    color: var(--article-control-ink);
+    background: color-mix(in srgb, var(--article-control-ink) 12%, var(--article-control-surface));
+    border-color: var(--article-control-ink);
 }
 [data-share-sidebar] > a:focus-visible,
 [data-share-sidebar] > button:focus-visible,
 [data-share-menu-item]:focus-visible {
-    color: var(--color-link);
-    outline: 2px solid var(--color-link);
+    color: var(--article-control-ink);
+    outline: 2px solid var(--article-control-ink);
     outline-offset: 4px;
 }
 [data-share-menu-item] svg:not(.text-red-500) {
     color: inherit;
+}
+body.article-page [data-like-count] {
+    color: var(--article-control-ink);
+    background: var(--article-control-surface);
+    border-color: var(--article-control-border);
 }
 [data-like-count]:empty {
     display: none;
@@ -874,13 +905,21 @@ body.article-page [data-toc-mobile-toggle]:hover {
     .site-header[data-nav-floating]::before {
         height: 64px;
     }
-    header.site-header[data-header] {
-        margin-top: 20px;
+    /* The blue masthead reaches the screen edges; text keeps the reading grid. */
+    header.site-header[data-header],
+    header.site-header[data-header].is-scrolled {
+        width: 100%;
+        max-width: none;
+        margin-top: 0;
     }
     .site-header__inner {
         min-height: 64px;
-        padding-inline: 16px 4px;
+        padding-inline: max(var(--page-gutter), env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
         gap: 8px;
+    }
+    .site-header[data-nav-floating] .site-header__inner {
+        width: 100%;
+        max-width: none;
     }
     .site-brand {
         font-size: 22px;
@@ -898,7 +937,7 @@ body.article-page [data-toc-mobile-toggle]:hover {
         width: 100%;
         min-height: 80px;
         flex-wrap: wrap;
-        padding: 12px 16px 20px;
+        padding: 12px max(var(--page-gutter), env(safe-area-inset-right)) 20px max(var(--page-gutter), env(safe-area-inset-left));
         gap: 0 16px;
     }
     .home-profile h1 {
