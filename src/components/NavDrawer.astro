@@ -21,7 +21,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         aria-label="Close navigation menu"></button>
     <div
         data-nav-drawer
-    aria-label="Navigation menu"
+        aria-label="Navigation menu"
         data-scroll-container
         class="nav-drawer__panel"
     >
@@ -79,6 +79,8 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const barBottom = toggleButton?.querySelector<HTMLElement>("[data-bar-bottom]");
         let lastFocusedElement: Element | null = null;
         let locked = false;
+        let openingFrame = 0;
+        let closingTimer: ReturnType<typeof setTimeout> | undefined;
 
         if (!overlay || !drawer) return;
 
@@ -96,21 +98,28 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const setNavOpen = (open: boolean) => {
             if (!overlay || !drawer) return;
 
+            cancelAnimationFrame(openingFrame);
+            clearTimeout(closingTimer);
+
             toggleButton?.setAttribute("aria-expanded", String(open));
             toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
 
             if (open) {
-                lastFocusedElement = document.activeElement;
-                overlay.showModal();
+                if (!overlay.open) {
+                    lastFocusedElement = document.activeElement;
+                    overlay.showModal();
+                }
                 if (!locked) { locked = true; lockScrollForDialog(); }
-                // Animate in next frame after dialog is visible
-                requestAnimationFrame(() => {
+                // Resolve the offscreen state before starting the transition. A single
+                // rAF after display:none does not itself guarantee that style was resolved.
+                drawer.getBoundingClientRect();
+                openingFrame = requestAnimationFrame(() => {
                     overlay.classList.add("is-open");
+                    navLinks[0]?.focus({ preventScroll: true });
                 });
                 toggleClasses(barTop, ["translate-y-1.5", "rotate-45"], []);
                 toggleClasses(barBottom, ["-translate-y-1.5", "-rotate-45"], []);
                 toggleClasses(barMiddle, ["opacity-0"], []);
-                requestAnimationFrame(() => navLinks[0]?.focus({ preventScroll: true }));
             } else {
                 overlay.classList.remove("is-open");
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
@@ -118,7 +127,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 toggleClasses(barMiddle, [], ["opacity-0"]);
                 if (locked) { locked = false; unlockScrollForDialog(); }
                 // Close dialog after CSS transition completes
-                setTimeout(() => {
+                closingTimer = setTimeout(() => {
                     if (!overlay.classList.contains("is-open")) {
                         overlay.close();
                     }
@@ -130,7 +139,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         };
 
         // Element-level listeners (auto-cleaned when DOM swaps)
-        toggleButton?.addEventListener("click", () => setNavOpen(!overlay.open));
+        toggleButton?.addEventListener("click", () => setNavOpen(toggleButton.getAttribute("aria-expanded") !== "true"));
         closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
         navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
 
@@ -149,6 +158,8 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
         // Close drawer instantly before page swap to prevent flash
         document.addEventListener("astro:before-swap", () => {
+            cancelAnimationFrame(openingFrame);
+            clearTimeout(closingTimer);
             if (overlay.open) {
                 overlay.classList.remove("is-open");
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
@@ -163,7 +174,11 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const handleMdChange = (e: MediaQueryListEvent) => e.matches && setNavOpen(false);
         mdQuery.addEventListener("change", handleMdChange);
         // Clean up media query listener on abort too
-        signal.addEventListener("abort", () => mdQuery.removeEventListener("change", handleMdChange));
+        signal.addEventListener("abort", () => {
+            cancelAnimationFrame(openingFrame);
+            clearTimeout(closingTimer);
+            mdQuery.removeEventListener("change", handleMdChange);
+        });
     }
 
     // astro:page-load fires on initial load AND after each SPA navigation,

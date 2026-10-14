@@ -11,7 +11,7 @@
         "lint": "biome check .",
         "check": "astro check",
         "test": "pnpm test:unit",
-        "test:unit": "node --test tests/spa-lifecycle.test.mjs tests/post-translations.test.mjs tests/theme-effects.test.mjs tests/likes.test.mjs tests/search.test.mjs tests/test-browser.test.mjs tests/mobile-layout-source.test.mjs",
+        "test:unit": "node --test tests/spa-lifecycle.test.mjs tests/post-translations.test.mjs tests/theme-effects.test.mjs tests/likes.test.mjs tests/search.test.mjs tests/test-browser.test.mjs tests/mobile-layout-source.test.mjs tests/nav-drawer.test.mjs",
         "test:browser": "node scripts/test-browser.mjs",
         "test:release": "node --test tests/design-lab-build.test.mjs",
         "preview:verify": "node scripts/verify-preview.mjs"
