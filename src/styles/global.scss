@@ -92,6 +92,10 @@ body {
 
 // Nav drawer
 .nav-drawer {
+  // The translated panel must not make the dialog horizontally scrollable.
+  // Unlike hidden, clip also prevents focus-driven/programmatic scrolling
+  // (including native dialog focusing). The panel owns vertical scrolling.
+  overflow: clip;
   &__backdrop {
     position: absolute;
     inset: 0;

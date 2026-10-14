@@ -183,3 +183,7 @@ SITE_DESCRIPTION = "Space Radio, another random blog..."
 NAV_LINKS = [/* posts, channel, tags, friends, me — some drawer_only */]
 SOCIAL_LINKS = { github, email, telegram, rss }
 ```
+
+### Mobile navigation containment
+
+The navigation dialog clips overflow (`overflow: clip`) so its translated panel cannot create a horizontally scrollable outer dialog during focus/animation. Vertical menu scrolling remains on `[data-scroll-container]`. Opening resolves the initial panel geometry before adding `is-open`; opening frames and closing timers are cancelled on interruption and route swaps. `tests/nav-drawer.test.mjs` covers lifecycle races; `tests/home03-nav-drawer.test.mjs` samples animated geometry across mobile widths, themes, motion preferences, repeat opens and route changes. iOS Safari behavior still requires device verification.
