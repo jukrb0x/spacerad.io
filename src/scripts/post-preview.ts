@@ -5,6 +5,7 @@ interface PostMeta {
     description: string;
     image?: string;
     lang?: "en" | "zh";
+    tags?: string[];
 }
 type PostMetaMap = Record<string, PostMeta>;
 
@@ -37,7 +38,7 @@ class PreviewCard {
         card.id = "post-preview-tooltip";
         card.setAttribute("role", "tooltip");
         card.setAttribute("aria-hidden", "true");
-        card.innerHTML = `<div class="post-preview-card__content"><h4 class="post-preview-card__title"></h4><div class="post-preview-card__image-container" hidden><img class="post-preview-card__image" alt="" width="560" height="280" decoding="async" /></div><p class="post-preview-card__desc"></p></div>`;
+        card.innerHTML = `<div class="post-preview-card__content"><h4 class="post-preview-card__title"></h4><div class="post-preview-card__image-container" hidden><img class="post-preview-card__image" alt="" width="560" height="280" decoding="async" /></div><p class="post-preview-card__desc"></p><ul class="post-preview-card__tags" hidden></ul></div>`;
         document.body.appendChild(card);
         this.card = card;
         return card;
@@ -53,6 +54,60 @@ class PreviewCard {
         const y = Math.max(12, Math.min(this.y - height / 2, window.innerHeight - height - 12));
         this.card.style.transform = `translate(${x}px, ${y}px)`;
     };
+
+    private fit(meta: PostMeta): void {
+        const card = this.card;
+        if (!card) return;
+        const content = card.querySelector<HTMLElement>(".post-preview-card__content");
+        const title = card.querySelector<HTMLElement>(".post-preview-card__title");
+        const description = card.querySelector<HTMLElement>(".post-preview-card__desc");
+        const image = card.querySelector<HTMLElement>(".post-preview-card__image-container");
+        const list = card.querySelector<HTMLElement>(".post-preview-card__tags");
+        if (!content || !title || !description || !image || !list) return;
+        title.style.webkitLineClamp = "2";
+        description.style.webkitLineClamp = "3";
+        description.hidden = false;
+        image.hidden = !meta.image || getImageState(new URL(meta.image, window.location.origin).href) === "error";
+        const tags = meta.tags || [];
+        list.classList.remove("post-preview-card__tags--visually-hidden");
+        list.hidden = tags.length === 0;
+        list.setAttribute("aria-label", tags.length ? `Tags: ${tags.join(", ")}` : "Tags");
+        const items = tags.map((tag) => {
+            const item = document.createElement("li");
+            item.textContent = `#${tag}`;
+            item.setAttribute("aria-hidden", "true");
+            return item;
+        });
+        const trimTags = (rows: number): void => {
+            list.replaceChildren(...items);
+            if (!items.length) return;
+            const gap = parseFloat(getComputedStyle(list).rowGap) || 0;
+            const height = items[0].getBoundingClientRect().height * rows + gap * (rows - 1);
+            const more = document.createElement("li");
+            more.setAttribute("aria-hidden", "true");
+            let count = items.length;
+            // Fit the remainder as a whole capsule; never clip a partially visible row.
+            while (list.getBoundingClientRect().height > height + 0.5 && count > 0) {
+                items[--count].remove();
+                more.textContent = `+${items.length - count}`;
+                list.append(more);
+            }
+        };
+        trimTags(2);
+        const fits = (): boolean => content.scrollHeight + 2 <= window.innerHeight - 24;
+        // The noninteractive card cannot scroll. Sacrifice decorative/detail content
+        // before allowing the viewport's max-height to cut through a capsule.
+        if (!fits()) image.hidden = true;
+        if (!fits()) trimTags(1);
+        for (const lines of [2, 1]) {
+            if (!fits()) description.style.webkitLineClamp = String(lines);
+        }
+        if (!fits()) description.hidden = true;
+        if (!fits()) title.style.webkitLineClamp = "1";
+        // Keep full tag names in the tooltip's accessible description even when
+        // the viewport cannot accommodate a single visual row.
+        if (!fits()) list.classList.add("post-preview-card__tags--visually-hidden");
+    }
 
     private show(meta: PostMeta): void {
         const card = this.ensureCard();
@@ -75,17 +130,26 @@ class PreviewCard {
                 if (this.revision !== revision || !this.target) return;
                 if (getImageState(url) !== "loaded") {
                     container.hidden = true;
+                    this.fit(meta);
                     this.position();
                     return;
                 }
                 image.src = src;
                 image.classList.add("loaded");
+                this.fit(meta);
+                this.position();
             });
         }
+        this.fit(meta);
         card.classList.add("visible");
         card.setAttribute("aria-hidden", "false");
         this.target?.setAttribute("aria-describedby", [this.target.getAttribute("aria-describedby"), card.id].filter(Boolean).join(" "));
         this.position();
+        document.fonts.ready.then(() => {
+            if (this.revision !== revision || !this.target) return;
+            this.fit(meta);
+            this.position();
+        });
     }
 
     hide = (): void => {
