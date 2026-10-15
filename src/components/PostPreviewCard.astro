@@ -16,6 +16,7 @@ interface PostMeta {
     description: string;
     image?: string;
     lang?: "en" | "zh";
+    tags?: string[];
 }
 
 interface Props {
@@ -38,7 +39,13 @@ async function buildMetaMap(): Promise<Record<string, PostMeta>> {
                     : getImageUrl(source);
             return [
                 post.id,
-                { title: post.data.title, description: post.data.description || extractDescription(post.body || ""), image, lang: post.data.lang },
+                {
+                    title: post.data.title,
+                    description: post.data.description || extractDescription(post.body || ""),
+                    image,
+                    lang: post.data.lang,
+                    tags: post.data.tags,
+                },
             ] as const;
         }),
     );
