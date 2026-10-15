@@ -49,7 +49,7 @@ for (const width of [1440, 390]) {
             const sample = await page.evaluate(() => {
                 const profile = document.querySelector(".home-profile");
                 const rect = profile.getBoundingClientRect();
-                const sides = getComputedStyle(profile).clipPath.match(/[\d.]+px/g) ?? ["0px"];
+                const sides = getComputedStyle(profile).clipPath.match(/-?[\d.]+px/g) ?? ["0px"];
                 const bottom = rect.bottom - parseFloat(sides[2] ?? sides[0]);
                 return { bottom, writing: document.querySelector("#writing-title").getBoundingClientRect().top };
             });
@@ -62,6 +62,7 @@ for (const width of [1440, 390]) {
     test(`near-top exit protects profile text throughout painted navigation frames (${width}px)`, async () => {
         const { context, page } = await open(width);
         try {
+            const initialTitleTop = await page.locator(".home-profile h1").evaluate((el) => el.getBoundingClientRect().top + scrollY);
             const origin = (await nav(page).boundingBox()).y;
             await scroll(page, 700);
             await scroll(page, 636);
@@ -74,20 +75,23 @@ for (const width of [1440, 390]) {
                     const profile = document.querySelector(".home-profile");
                     const p = profile.getBoundingClientRect();
                     const t = profile.querySelector("h1").getBoundingClientRect();
-                    const sides = getComputedStyle(profile).clipPath.match(/[\d.]+px/g) ?? ["0px"];
+                    const sides = getComputedStyle(profile).clipPath.match(/-?[\d.]+px/g) ?? ["0px"];
                     const top = p.top + parseFloat(sides[0]);
                     const bottom = p.bottom - parseFloat(sides[2] ?? sides[0]);
                     frames.push({
                         inkTop: Math.max(0, top, t.top),
                         inkBottom: Math.min(bottom, t.bottom),
                         navBottom: document.querySelector(".site-header__inner").getBoundingClientRect().bottom,
+                        titleDocumentTop: t.top + scrollY,
                     });
                 }
                 return frames;
             });
-            for (const frame of frames)
+            for (const frame of frames) {
+                assert.ok(Math.abs(frame.titleDocumentTop - initialTitleTop) < 1, `drawer moves profile text: ${JSON.stringify(frame)}`);
                 if (frame.inkBottom > frame.inkTop + 1)
                     assert.ok(frame.inkTop >= frame.navBottom - 1, `exiting navigation covers profile: ${JSON.stringify(frame)}`);
+            }
         } finally {
             await context.close();
         }
@@ -151,6 +155,9 @@ for (const width of [1440, 390]) {
                 main: document.querySelector("main").getBoundingClientRect().top,
                 height: document.documentElement.scrollHeight,
                 nav: document.querySelector(".site-header__inner").getBoundingClientRect().top,
+                profile: document.querySelector(".home-profile").getBoundingClientRect().top + scrollY,
+                title: document.querySelector(".home-profile h1").getBoundingClientRect().top + scrollY,
+                name: document.querySelector(".home-profile__name").getBoundingClientRect().top + scrollY,
             }));
             await scroll(page, 700);
             await scroll(page, 636);
@@ -162,7 +169,7 @@ for (const width of [1440, 390]) {
                     const profile = document.querySelector(".home-profile");
                     const rect = profile.getBoundingClientRect();
                     const title = profile.querySelector("h1").getBoundingClientRect();
-                    const clips = getComputedStyle(profile).clipPath.match(/[\d.]+px/g) ?? ["0px"];
+                    const clips = getComputedStyle(profile).clipPath.match(/-?[\d.]+px/g) ?? ["0px"];
                     return {
                         top: nav.top,
                         bottom: nav.bottom,
@@ -170,6 +177,9 @@ for (const width of [1440, 390]) {
                         titleBottom: Math.min(title.bottom, rect.bottom - parseFloat(clips[2] ?? clips[0])),
                         main: document.querySelector("main").getBoundingClientRect().top + scrollY,
                         height: document.documentElement.scrollHeight,
+                        profileDocumentTop: rect.top + scrollY,
+                        titleDocumentTop: title.top + scrollY,
+                        nameDocumentTop: profile.querySelector(".home-profile__name").getBoundingClientRect().top + scrollY,
                     };
                 });
                 assert.ok(
@@ -181,6 +191,9 @@ for (const width of [1440, 390]) {
                 assert.ok(Math.abs(sample.top - expected) < 1, `masthead handoff lost at ${y}: ${JSON.stringify(sample)}`);
                 assert.equal(sample.main, initial.main);
                 assert.equal(sample.height, initial.height);
+                assert.ok(Math.abs(sample.profileDocumentTop - initial.profile) < 1, `profile moves at ${y}: ${JSON.stringify(sample)}`);
+                assert.ok(Math.abs(sample.titleDocumentTop - initial.title) < 1, `profile title moves at ${y}: ${JSON.stringify(sample)}`);
+                assert.ok(Math.abs(sample.nameDocumentTop - initial.name) < 1, `profile name moves at ${y}: ${JSON.stringify(sample)}`);
             }
         } finally {
             await context.close();

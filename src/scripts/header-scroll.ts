@@ -4,7 +4,6 @@ let navigation: HTMLElement | null = null;
 let profile: HTMLElement | null = null;
 let profileLink: HTMLElement | null = null;
 let profileLinkTop = 0;
-let profileLinkBottom = 0;
 let progressBar: HTMLElement | null = null;
 let frame: number | undefined;
 let directionAnchor = 0;
@@ -23,7 +22,6 @@ function measureNavigation() {
     navigationHeight = navigation.offsetHeight;
     profileHeight = profile?.offsetHeight ?? 0;
     profileLinkTop = profile && profileLink ? profileLink.getBoundingClientRect().top - profile.getBoundingClientRect().top : 0;
-    profileLinkBottom = profileLinkTop + (profileLink?.offsetHeight ?? 0);
     header.style.setProperty("--navigation-height", `${navigationHeight}px`);
 }
 
@@ -72,24 +70,15 @@ function updateHeader() {
     }
 
     if (profile) {
-        // Match the painted drawer on entrance, exit and interrupted transitions.
-        // Clip within the profile's original footprint so Blog never moves or gets covered.
-        const paintedFraction = floating ? Math.max(0, Math.min(1, navigation.getBoundingClientRect().bottom / navigationHeight)) : 0;
+        const paintedBottom = floating ? Math.max(0, navigation.getBoundingClientRect().bottom) : 0;
         const distance = Math.max(0, scrollY - headerTop);
-        let shift = distance * paintedFraction;
-        let clipTop = Math.max(0, distance - navigationHeight) * (1 - paintedFraction);
-        let clipBottom = shift;
-        const returning = floating && paintedFraction > 0;
-        if (clipTop + clipBottom >= profileHeight) {
-            shift = 0;
-            clipTop = profileHeight;
-            clipBottom = 0;
-        }
+        // Occlude in place: the drawer must never translate the profile's content.
+        // A negative inset exposes only background across the near-top gap.
+        const clipTop = Math.min(profileHeight, paintedBottom - (navigationHeight - distance));
+        const returning = floating && (paintedBottom > 0 || distance < navigationHeight);
         header.toggleAttribute("data-profile-return", returning);
-        header.style.setProperty("--profile-return-shift", `${shift}px`);
         header.style.setProperty("--profile-return-top", `${clipTop}px`);
-        header.style.setProperty("--profile-return-bottom", `${clipBottom}px`);
-        if (profileLink) profileLink.inert = returning && (clipTop > profileLinkTop || clipBottom > profileHeight - profileLinkBottom);
+        if (profileLink) profileLink.inert = returning && clipTop > profileLinkTop;
         if (
             navigation
                 .getAnimations()
