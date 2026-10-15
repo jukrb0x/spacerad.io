@@ -64,10 +64,9 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
   <body class="notes-page">
     <Header />
     <main id="main-content" tabindex="-1" class="page-shell" transition:animate="fade">
-      <div class="archive-heading"><p class="editorial-kicker">Jabriel’s Telegram channel</p><h1>Notes</h1><p>Passing thoughts, discoveries, and things worth sharing.</p></div>
       {error ? (
         <div class="error-message surface-card">
-          <h2>Notes are temporarily unavailable</h2>
+          <h1>Channel is temporarily unavailable</h1>
           <p>The channel couldn’t be reached. You can read the same notes on Telegram.</p>
           <p>
             Please visit <a href={`https://t.me/${CHANNEL_USERNAME}`} target="_blank" rel="noopener noreferrer">
@@ -77,6 +76,12 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
         </div>
       ) : channelData ? (
         <div class="channel-layout">
+          <ChannelSidebar
+            title={channelData.title}
+            description={channelData.description}
+            avatar={channelData.avatar}
+            username={CHANNEL_USERNAME}
+          />
           {/* Main content: posts + pagination */}
           <div class="channel-main section-stack">
             {/* Posts list */}
@@ -110,14 +115,6 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
               )}
             </nav>
           </div>
-
-          {/* Sidebar: channel info */}
-          <ChannelSidebar
-            title={channelData.title}
-            description={channelData.description}
-            avatar={channelData.avatar}
-            username={CHANNEL_USERNAME}
-          />
         </div>
       ) : null}
     </main>
@@ -141,20 +138,27 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
 </script>
 
 <style>
+  .page-shell {
+    padding-top: 28px;
+  }
+
   .channel-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-areas: "posts channel";
     gap: var(--space-8);
     max-width: 64rem;
     margin: 0 auto;
   }
 
   .channel-main {
+    grid-area: posts;
     min-width: 0;
   }
 
   /* Sidebar sticky positioning - align-self: start prevents grid stretching */
   .channel-layout > :global(.channel-sidebar) {
+    grid-area: channel;
     align-self: start;
   }
 
@@ -162,6 +166,16 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+  }
+
+  .posts-container > :global(.post-card:first-child .post-card__content > :first-child) {
+    margin-top: 0;
+  }
+
+  @media (min-width: 961px) {
+    .posts-container > :global(.post-card:first-child) {
+      padding-top: 0;
+    }
   }
 
   .error-message {
@@ -228,12 +242,13 @@ Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, s
   @media (max-width: 960px) {
     .channel-layout {
       grid-template-columns: 1fr;
+      grid-template-areas: "channel" "posts";
+      row-gap: 20px;
       max-width: 42rem;
     }
 
-    /* Sidebar moves to top on mobile */
-    .channel-layout > :global(.channel-sidebar) {
-      order: -1;
+    .posts-container > :global(.post-card:first-child) {
+      padding-top: var(--space-4);
     }
   }
 

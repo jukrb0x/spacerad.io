@@ -9,156 +9,113 @@ interface Props {
 const { title, description, avatar, username } = Astro.props;
 ---
 
-<aside class="channel-sidebar">
-    <div class="channel-sidebar__card surface-card">
+<aside class="channel-sidebar" aria-labelledby="channel-title">
+    <div class="channel-sidebar__card">
         <p class="channel-sidebar__identity">Channel</p>
-        <img src={avatar} alt={title} class="channel-sidebar__avatar" />
-        <h2 class="channel-sidebar__title">{title}</h2>
+        <img src={avatar} alt={title} width="88" height="88" class="channel-sidebar__avatar" />
+        <h1 id="channel-title" class="channel-sidebar__title">{title}</h1>
         {description && (
-            <div class="channel-sidebar__description text-left" set:html={description} />
+            <div class="channel-sidebar__description" set:html={description} />
         )}
-        <div class="channel-sidebar__actions">
-            <a href={`https://t.me/${username}`}
-               target="_blank"
-               rel="noopener noreferrer"
-               class="channel-sidebar__btn channel-sidebar__btn--primary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Open in Telegram
-            </a>
-            <a href="/channel-rss.xml"
-               class="channel-sidebar__btn channel-sidebar__btn--ghost">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="5" cy="19" r="1" fill="currentColor"/>
-                </svg>
-                RSS Feed
-            </a>
-        </div>
     </div>
+    <nav class="channel-sidebar__actions" aria-label="Follow the channel">
+        <a href={`https://t.me/${username}`}
+           target="_blank"
+           rel="noopener noreferrer"
+           class="channel-sidebar__btn channel-sidebar__btn--primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Open in Telegram
+        </a>
+        <a href="/channel-rss.xml"
+           class="channel-sidebar__btn channel-sidebar__btn--ghost">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="5" cy="19" r="1" fill="currentColor"/>
+            </svg>
+            RSS Feed
+        </a>
+    </nav>
 </aside>
 
 <style>
 .channel-sidebar {
+    display: flow-root;
     position: sticky;
-    top: calc(var(--header-offset, 0px) + var(--space-4));
+    top: calc(var(--header-offset, 0px) + 28px);
     transition: top 0.3s ease;
-}
-
-@media (max-width: 960px) {
-    .channel-sidebar {
-        position: static;
-    }
-
-    .channel-sidebar__card {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        text-align: left;
-        gap: var(--space-3);
-    }
-
-    .channel-sidebar__avatar {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 0;
-    }
-
-    .channel-sidebar__title {
-        flex: 1;
-        margin: 0;
-    }
-
-    .channel-sidebar__description {
-        width: 100%;
-        margin-bottom: var(--space-3);
-    }
-
-    .channel-sidebar__actions {
-        flex-direction: row;
-    }
+    width: 100%;
+    max-width: 280px;
+    margin-inline: auto;
 }
 
 .channel-sidebar__card {
-    padding: 32px 20px 24px;
-    border: 0;
-    border-radius: 140px 140px 0 0;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+    margin-top: -8%;
+    padding: 28px 16px 40px;
+    border-radius: 50%;
+    clip-path: inset(8% 0 0);
     background: var(--color-channel);
     color: var(--color-on-channel);
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
 }
 
+.channel-sidebar__identity {
+    margin: 0 0 14px;
+    color: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
 .channel-sidebar__avatar {
-    width: 72px;
-    height: 72px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 88px;
+    height: 88px;
+    border: 3px solid var(--color-on-structure);
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: var(--space-3);
+    margin-bottom: 12px;
 }
 
 .channel-sidebar__title {
-    font-size: var(--font-size-lg);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
     font-weight: 700;
-    color: var(--color-on-channel);
-    margin: 0 0 var(--space-2);
-    line-height: var(--line-height-tight);
+    color: inherit;
+    margin: 0 0 8px;
+    line-height: 1.2;
 }
 
 .channel-sidebar__description {
     font-size: var(--font-size-xs);
-    color: var(--color-on-channel);
+    color: inherit;
     line-height: 1.5;
-    margin-bottom: var(--space-4);
-    /* text-align: left; */
     width: 100%;
+    overflow-wrap: anywhere;
 }
 
+.channel-sidebar__description :global(a) { color: inherit; text-decoration: underline; }
 .channel-sidebar__description :global(ol),
-.channel-sidebar__description :global(ul) {
-    margin: var(--space-2) 0;
-    padding-left: 0;
-    list-style: none;
-}
-
-.channel-sidebar__description :global(li) {
-    position: relative;
-    padding-left: var(--space-4);
-    margin-bottom: var(--space-1);
-}
-
-.channel-sidebar__description :global(ol) {
-    counter-reset: list-counter;
-}
-
-.channel-sidebar__description :global(ol li) {
-    counter-increment: list-counter;
-}
-
-.channel-sidebar__description :global(ol li::before) {
-    content: counter(list-counter) ".";
-    position: absolute;
-    left: 0;
-    color: var(--color-on-channel);
-    font-weight: 500;
-    font-size: var(--font-size-xs);
-}
-
-.channel-sidebar__description :global(ul li::before) {
-    content: "\2022";
-    position: absolute;
-    left: var(--space-1);
-    color: var(--color-on-channel);
-}
+.channel-sidebar__description :global(ul) { margin: var(--space-2) 0; padding-left: var(--space-4); text-align: left; }
+.channel-sidebar__description :global(ol) { list-style: decimal; }
+.channel-sidebar__description :global(ul) { list-style: disc; }
 
 .channel-sidebar__actions {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    width: 100%;
+    width: calc(100% - 32px);
+    margin: var(--space-3) auto 0;
 }
 
 .channel-sidebar__btn {
@@ -172,39 +129,25 @@ const { title, description, avatar, username } = Astro.props;
     font-size: var(--font-size-xs);
     font-weight: 600;
     text-decoration: none;
-    transition: all var(--transition-base);
+    transition: background var(--transition-base), color var(--transition-base);
 }
 
- .channel-sidebar__identity {
-    margin: 0 0 16px;
-    color: var(--color-on-channel);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-}
 .channel-sidebar__btn--primary {
     background: var(--color-structure);
     color: var(--color-on-structure);
     border: 1px solid var(--color-structure);
 }
+
 .channel-sidebar__btn--ghost {
     background: transparent;
-    color: var(--color-on-channel);
+    color: var(--color-text-primary);
     border: 1px solid currentColor;
 }
+
 .channel-sidebar__btn:hover { text-decoration: underline; }
-.channel-sidebar__description :global(a) { color: inherit; text-decoration: underline; }
+.channel-sidebar__btn:focus-visible { outline: 3px solid var(--color-language); outline-offset: 3px; }
+
 @media (max-width: 960px) {
-    .channel-sidebar__card {
-        border-radius: 64px 64px 0 0;
-        padding: 24px;
-        flex-direction: row;
-        flex-wrap: wrap;
-        text-align: left;
-    }
-    .channel-sidebar__identity { width: 100%; margin-bottom: 0; }
-    .channel-sidebar__actions { flex-direction: row; }
-    .channel-sidebar__btn { flex: 1; }
+    .channel-sidebar { position: static; }
 }
 </style>
