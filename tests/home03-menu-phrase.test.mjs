@@ -82,6 +82,8 @@ test("menu footer stays reachable on narrow and short screens in both themes and
                     await page.evaluate((value) => {
                         document.documentElement.dataset.theme = value;
                     }, theme);
+                    await page.evaluate(() => new Promise(requestAnimationFrame));
+                    await waitForPageAnimations(page);
                     await page.locator("[data-nav-toggle]").click();
                     await waitForPageAnimations(page);
                     const layout = await page.locator("[data-nav-drawer]").evaluate((panel) => {
