@@ -80,7 +80,7 @@ header.site-header[data-header].is-scrolled {
 .site-header[data-nav-floating]::before {
     content: "";
     display: block;
-    height: 70px;
+    height: var(--navigation-height, 70px);
 }
 .site-header[data-nav-floating] .site-header__inner {
     position: fixed;
@@ -90,11 +90,29 @@ header.site-header[data-header].is-scrolled {
     width: calc(100% - var(--page-gutter) * 2);
     max-width: var(--layout-max-width);
     transform: translateY(0);
-    transition: transform 180ms ease-out;
+    visibility: visible;
+}
+.site-header[data-nav-floating][data-nav-ready] .site-header__inner {
+    transition:
+        transform 180ms cubic-bezier(0.2, 0.7, 0.3, 1),
+        visibility 0s;
 }
 .site-header[data-nav-hidden] .site-header__inner {
     transform: translateY(-100%);
-    transition: none;
+    visibility: hidden;
+    pointer-events: none;
+}
+.site-header[data-nav-hidden][data-nav-ready] .site-header__inner {
+    transition-delay: 0s, 180ms;
+}
+.site-header[data-profile-return] .home-profile {
+    transform: translateY(var(--profile-return-shift));
+    clip-path: inset(var(--profile-return-top) 0 var(--profile-return-bottom) 0);
+}
+@media (prefers-reduced-motion: reduce) {
+    .site-header[data-nav-floating][data-nav-ready] .site-header__inner {
+        transition: none;
+    }
 }
 .site-brand {
     position: relative;
@@ -984,7 +1002,7 @@ body.article-page [data-like-count] {
 }
 @media (max-width: 767px) {
     .site-header[data-nav-floating]::before {
-        height: 64px;
+        height: var(--navigation-height, 64px);
     }
     /* The blue masthead reaches the screen edges; text keeps the reading grid. */
     header.site-header[data-header],
