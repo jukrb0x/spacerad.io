@@ -265,10 +265,12 @@ header.site-header[data-header].is-scrolled {
 .language-label {
     display: inline-block;
     justify-self: start;
-    width: fit-content;
-    padding: 2px 7px;
-    background: var(--color-language);
-    color: #fff;
+    width: 60px;
+    padding: 2px 0;
+    text-align: center;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-bg-page));
+    color: var(--color-text-secondary);
     font-size: 12px;
     font-weight: 500;
     line-height: 1.5;
@@ -590,6 +592,50 @@ header.site-header[data-header].is-scrolled {
 }
 .post-item__translation:hover {
     text-decoration: underline;
+}
+/* Year numerals sit behind the existing archive rows. */
+section.archive-year {
+    position: relative;
+    isolation: isolate;
+    padding-top: 48px;
+}
+section.archive-year + section.archive-year {
+    margin-top: 24px;
+}
+.archive-year__heading {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    margin: 0;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    z-index: -1;
+}
+.archive-year__label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    padding: 2px 4px;
+    background: var(--color-bg-page);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+.home-writing .editorial-heading h2,
+.archive-year__label {
+    color: var(--color-language);
+}
+[data-theme="dark"] .home-writing .editorial-heading h2,
+[data-theme="dark"] .archive-year__label {
+    color: color-mix(in srgb, var(--color-language) 78%, var(--color-text-primary));
+}
+.archive-year__number {
+    color: var(--color-text-primary);
+    opacity: 0.06;
+    font-size: 128px;
+    font-weight: 700;
+    letter-spacing: -0.05em;
 }
 .draft-badge {
     color: var(--color-text-secondary);
@@ -1098,6 +1144,15 @@ body.article-page [data-like-count] {
     }
     .archive-page .section-stack > div:first-child {
         margin-bottom: 16px;
+    }
+    section.archive-year {
+        padding-top: 36px;
+    }
+    .archive-year__heading {
+        left: 0;
+    }
+    .archive-year__number {
+        font-size: 96px;
     }
     .mobile-post-meta {
         display: flex;
