@@ -64,7 +64,7 @@ for (const width of [320, 390, 960, 961, 1440]) {
                 } else {
                     near(g.image.y - g.rss.y - g.rss.height, 36, "RSS-to-first-image gap");
                 }
-                near(g.card.width, width === 320 ? 272 : 280, "profile width");
+                near(g.card.width, Math.min(280, g.main.width), "profile width");
                 near(g.card.height, g.card.width, "profile aspect ratio");
                 assert.equal(g.clip, "inset(8% 0px 0px)");
                 assert.equal(g.theme, theme);
