@@ -1,8 +1,9 @@
 ---
-import { getPublishedPosts } from "../utils/posts";
+import { getPublishedPosts, groupPostsByYear } from "../utils/posts";
 import PostItem from "./PostItem.astro";
 
 const posts = await getPublishedPosts();
+const groupedPosts = groupPostsByYear(posts);
 ---
 
 <section class="section-stack">
@@ -28,7 +29,15 @@ const posts = await getPublishedPosts();
 			>中文</button>
 		</div>
 	</div>
-    <ul class="archive-list" data-year-group>{posts.map(post => <PostItem post={post} posts={posts} />)}</ul>
+    {groupedPosts.map(([year, yearPosts]) => (
+        <section class="archive-year" data-year-group aria-labelledby={`archive-year-${year}`}>
+            <h2 class="archive-year__heading" id={`archive-year-${year}`}>
+                <span class="archive-year__label">{year}</span>
+                <span class="archive-year__number" aria-hidden="true">{year}</span>
+            </h2>
+            <ul class="archive-list">{yearPosts.map(post => <PostItem post={post} posts={posts} />)}</ul>
+        </section>
+    ))}
 </section>
 
 
