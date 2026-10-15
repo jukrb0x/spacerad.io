@@ -12,6 +12,7 @@ let navigationHeight = 0;
 let profileHeight = 0;
 let floating = false;
 let hidden = false;
+let pointerInput = false;
 const REVEAL_DISTANCE = 32;
 const HIDE_DISTANCE = 24;
 const MIN_SCROLL_DISTANCE_VH = 1.5;
@@ -29,7 +30,9 @@ function updateHeader() {
     frame = undefined;
     if (!header || !navigation) return;
     const scrollY = Math.max(0, window.scrollY);
-    const focused = navigation.contains(document.activeElement);
+    // Dialogs restore focus to their trigger for every input method. Only
+    // keyboard focus should hold the bar open once pointer reading resumes.
+    const focused = !pointerInput && navigation.contains(document.activeElement);
     // Scroll locks may restore position on close; don't interpret them as intent.
     if (!document.querySelector("dialog[open]")) {
         const wasFloating = floating;
@@ -123,6 +126,20 @@ function initHeader() {
 
 // Persistent module listeners bind once; references and queued work are reset per page.
 window.addEventListener("scroll", queueUpdate, { passive: true });
+for (const inputEvent of ["pointerdown", "wheel"]) {
+    document.addEventListener(
+        inputEvent,
+        () => {
+            pointerInput = true;
+            queueUpdate();
+        },
+        { passive: true },
+    );
+}
+document.addEventListener("keydown", () => {
+    pointerInput = false;
+    queueUpdate();
+});
 document.addEventListener("focusin", queueUpdate);
 document.addEventListener("focusout", queueUpdate);
 window.addEventListener(
