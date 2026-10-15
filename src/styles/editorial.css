@@ -106,8 +106,16 @@ header.site-header[data-header].is-scrolled {
     transition-delay: 0s, 180ms;
 }
 .site-header[data-profile-return] .home-profile {
-    transform: translateY(var(--profile-return-shift));
-    clip-path: inset(var(--profile-return-top) 0 var(--profile-return-bottom) 0);
+    position: relative;
+    clip-path: inset(var(--profile-return-top) 0 0);
+}
+.site-header[data-profile-return] .home-profile::before {
+    content: "";
+    position: absolute;
+    inset: min(0px, var(--profile-return-top)) 0 0;
+    z-index: -1;
+    background: var(--color-structure);
+    pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
     .site-header[data-nav-floating][data-nav-ready] .site-header__inner {
