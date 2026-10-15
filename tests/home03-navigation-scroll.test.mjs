@@ -1,13 +1,11 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
-import { chromium, webkit } from "playwright";
-import { baseURL, launchOptions, waitForPageAnimations } from "./helpers/browser.mjs";
+import { baseURL, waitForPageAnimations } from "./helpers/browser.mjs";
+import { launchNavigationBrowser, navigationBrowserName } from "./helpers/navigation-browser.mjs";
 
 let browser;
 before(async () => {
-    const browserType = { chromium, webkit }[process.env.PLAYWRIGHT_BROWSER || "chromium"];
-    assert.ok(browserType, "PLAYWRIGHT_BROWSER must be chromium or webkit");
-    browser = await browserType.launch(launchOptions);
+    browser = await launchNavigationBrowser();
 });
 after(async () => {
     await browser?.close();
@@ -367,7 +365,7 @@ for (const width of [1440, 390]) {
             assert.equal(await nav(page).evaluate((el) => el.inert), false, "continuously visible controls must stay accessible");
             assert.ok((await nav(page).boundingBox()).y >= 0);
             await page.locator("[data-search-trigger]").focus();
-            await page.keyboard.press(process.env.PLAYWRIGHT_BROWSER === "webkit" ? "Alt+Shift+Tab" : "Tab");
+            await page.keyboard.press(navigationBrowserName === "webkit" ? "Alt+Shift+Tab" : "Tab");
             assert.equal(await nav(page).evaluate((el) => el.contains(document.activeElement)), true);
             await scroll(page, 0);
             assert.equal(await nav(page).evaluate((el) => el.inert), false);

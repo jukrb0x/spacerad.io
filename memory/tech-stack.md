@@ -163,6 +163,14 @@ All scripts are SPA-aware — they use `astro:page-load` or `astro:after-swap` f
 | `likes.ts` | Like button system with localStorage + API sync | Uses `autoInit()`, manages like state and animations |
 | `shareMenu.ts` | Mobile share menu toggle and copy link | Uses `autoInit()`, handles menu animations and clipboard |
 
+`NavDrawer.astro` owns modal focus restoration and its scroll-lock acquisition;
+`header-scroll.ts` owns navigation visibility. Restored DOM focus alone is not
+keyboard intent: the header holds focused controls visible after keyboard input,
+and releases that hold on pointer/touch or wheel input so reading can retract the bar.
+The input modality persists across page swaps; DOM references and queued frames
+are cleared before swap and measured again on page load. Open dialogs freeze
+direction tracking while their scroll locks are active.
+
 ---
 
 ## Utility Functions (`src/utils/`)

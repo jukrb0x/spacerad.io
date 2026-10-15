@@ -44,6 +44,16 @@ BASE_URL=http://127.0.0.1:4321 PLAYWRIGHT_CHANNEL=chrome pnpm test:browser
 
 Browser assertions do not submit likes or comments. The app suite blocks non-read browser requests and service workers; the accessibility suite serves a local fixture containing the actual preview modules and stylesheet. These checks cover local UI behavior, not production KV writes, comment-service bootstrap, hosting headers or assistive-technology certification.
 
+The navigation focus and scroll suites share `PLAYWRIGHT_BROWSER=chromium|webkit`;
+the older `PLAYWRIGHT_ENGINE` alias is accepted, and conflicting values fail.
+They print the launched engine and version. Touch-pan regressions use trusted
+Chromium CDP input with a mobile touch context and explicitly skip on WebKit,
+which has no Playwright touch-pan API. Cross-engine focus/scroll checks are
+separate. Neither desktop WebKit nor Chromium mobile emulation verifies real
+iOS Safari behavior.
+The cross-engine suite also checks keyboard Escape followed by wheel reading in a narrow desktop context,
+including focus protection before wheel input and stable document geometry.
+
 `pnpm test:release` inspects the fresh production route manifest, emitted page files and sitemap. Run it after `pnpm build`; it rejects any design-lab route. The development suite separately verifies `/design-lab` and both reading studies remain available locally. Their templates live under Astro’s excluded `src/pages/_design-lab/` directory and are injected only for the `dev` command.
 
 ## Canonical local review
