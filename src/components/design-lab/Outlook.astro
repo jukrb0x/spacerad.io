@@ -1,3 +1,6 @@
+---
+import { Icon } from "astro-icon/components";
+---
 <figure class="outlook" data-outlook data-light="daylight">
     <svg id="outlook-print" viewBox="0 0 900 720" role="img" aria-labelledby="outlook-title outlook-description" class="outlook__print">
         <title id="outlook-title">An open place overlooking the water</title>
@@ -87,7 +90,7 @@
         <g transform="translate(312 520)"><ellipse cy="16" rx="11" ry="3" fill="#627f78" opacity=".25"/><circle cy="-14" r="4" fill="#243c3b"/><path d="M-5-8h10l2 16H-6Z" fill="#d75232"/><path d="M-3 8-4 18m7-10 2 10" stroke="#263e3d" stroke-width="2.5"/></g>
         <g fill="none" stroke="#536d76" stroke-width="1.6"><path d="M320 81q7-5 14 0 7-5 14 0M333 62q4-3 8 0 4-3 8 0"/></g>
     </svg>
-    <figcaption class="outlook__caption"><span>An architectural sketch, made with code.</span><span class="outlook__light"><button type="button" data-outlook-change aria-controls="outlook-print" hidden>Change the light <span aria-hidden="true">↗</span></button><output data-outlook-state aria-live="polite">Daylight</output></span></figcaption>
+    <figcaption class="outlook__caption"><span>An architectural sketch, made with code.</span><span class="outlook__light"><button type="button" data-outlook-change aria-controls="outlook-print" hidden>Change the light <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></button><output data-outlook-state aria-live="polite">Daylight</output></span></figcaption>
 </figure>
 <script>
     import { autoInit } from "../../utils/spaLifecycle";

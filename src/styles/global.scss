@@ -9,6 +9,14 @@
 // Base Styles
 // =============================================
 
+.link-arrow {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
 :root {
   accent-color: var(--color-accent);
   --vh: 1vh; // Fallback, overridden by JS for iOS Safari support

@@ -84,6 +84,7 @@ export default defineConfig({
                     "rss-fill",
                     "link",
                     "share-line",
+                    "arrow-right-up-line",
                     "check-line",
                     "heart-line",
                     "heart-fill",

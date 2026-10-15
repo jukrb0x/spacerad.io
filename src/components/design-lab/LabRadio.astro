@@ -1,5 +1,6 @@
 ---
-import radioPreview from "../../assets/design-lab/radio-preview.json";
+import { Icon } from "astro-icon/components";
+import { radioPreview } from "../../utils/designLabRadioPreview";
 import { fetchTelegramChannel, type TelegramPost } from "../../utils/telegram";
 import FormattedDate from "../FormattedDate.astro";
 
@@ -17,5 +18,5 @@ Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-re
 {posts.length ? <div class="lab-radio-feed">{posts.map(post => <article>
     <time datetime={post.datetime}><FormattedDate date={new Date(post.datetime)} /></time>
     <p><a href={`/channel#${post.id}`}>{(post.text || post.title).replace(/https?:\/\/\S+/g, "").trim().slice(0, 180)}{(post.text || post.title).length > 180 ? "…" : ""}</a></p>
-    <a class="lab-radio-open" href={`/channel#${post.id}`} aria-label={`Read note from ${new Date(post.datetime).toLocaleDateString("en-US")}`}>Read note <span aria-hidden="true">↗</span></a>
+    <a class="lab-radio-open" href={`/channel#${post.id}`} aria-label={`Read note from ${new Date(post.datetime).toLocaleDateString("en-US")}`}>Read note <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a>
 </article>)}</div> : <Fragment set:html={radioPreview.html} />}
