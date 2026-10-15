@@ -26,8 +26,8 @@ test("desktop archive columns, hover, language labels and counterpart text remai
         row,
         /<a href=\{`\/posts\/\$\{post.id\}`\} class="post-item"[\s\S]*<time[\s\S]*<span class="language-label">[\s\S]*<span class="post-item__title">/,
     );
-    assert.match(row, /class="post-item__translation"[^>]*>\{translation.data.lang === "en" \? "English" : "中文"\} ↗<\/a>/);
-    assert.match(home, /class="translation-label--desktop">English ↗/);
+    assert.match(row, /class="post-item__translation"[^>]*>\{translation.data.lang === "en" \? "English" : "中文"\}/);
+    assert.match(home, /class="translation-label--desktop">English /);
 });
 
 test("mobile metadata groups quiet counterpart links alongside the current red label", () => {

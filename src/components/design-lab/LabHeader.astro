@@ -1,10 +1,11 @@
 ---
+import { Icon } from "astro-icon/components";
 import SearchModal from "../SearchModal.astro";
 import SearchOverlay from "../SearchOverlay.astro";
 ---
 <a class="lab-skip" href="#lab-main">Skip to content</a>
 <header class="lab-header" data-pagefind-ignore>
-    <a href="/design-lab" class="lab-wordmark">Space Radio<span aria-hidden="true">↗</span></a>
+    <a href="/design-lab" class="lab-wordmark">Space Radio<span aria-hidden="true"><Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></span></a>
     <nav aria-label="Art study navigation"><a href="/design-lab#writing">Writing</a><a href="/design-lab#radio">Radio</a><a href="/me">About</a><SearchModal /></nav>
 </header>
 <SearchOverlay />

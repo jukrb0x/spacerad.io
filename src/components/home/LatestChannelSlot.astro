@@ -1,5 +1,8 @@
+---
+import { Icon } from "astro-icon/components";
+---
 <div class="home-channel__content" data-latest-channel>
-    <div class="channel-fallback">Loading the latest channel notes… <a href="/channel">Read the Channel ↗</a></div>
+    <div class="channel-fallback">Loading the latest channel notes… <a href="/channel">Read the Channel <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
 </div>
 <script>
     let request: AbortController | undefined;

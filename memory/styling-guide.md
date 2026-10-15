@@ -125,6 +125,9 @@ transition($key)  // -> var(--transition-#{$key})
 
 ## Component Patterns
 
+### Link Arrows
+UI link arrows use Astro Icon's `ri:arrow-right-up-line` with `.link-arrow` (1em, inline baseline alignment), `aria-hidden="true"`, and `focusable="false"`. The installed Remix SVG inherits the link's `currentColor`; use `is:inline` so fragment responses do not depend on another document's symbol definitions. Keep authored content symbols unchanged.
+
 ### Surface Card
 The standard card pattern used across the site:
 ```scss
