@@ -11,11 +11,15 @@ async function head(path) {
 
 test("home advertises the default large sharing card with its image metadata", async () => {
     const meta = await head("");
+    const title = "Space Radio / On my wavelength @Jabriel";
+    const $ = load(await readFile("dist/index.html", "utf8"));
+    assert.equal($("title").text(), title);
+    assert.equal(meta("title"), title);
     for (const prefix of ["og", "twitter"]) {
-        assert.equal(meta(`${prefix}:title`), "Space Radio — On my wavelength @Jabriel");
+        assert.equal(meta(`${prefix}:title`), title);
         assert.equal(meta(`${prefix}:description`), "Notes, experiments, and observations from a life in progress.");
         assert.equal(meta(`${prefix}:image`), "https://spacerad.io/og-image.png");
-        assert.ok(meta(`${prefix}:image:alt`));
+        assert.equal(meta(`${prefix}:image:alt`), title);
     }
     assert.equal(meta("twitter:card"), "summary_large_image");
     assert.equal(meta("og:image:width"), "1200");
