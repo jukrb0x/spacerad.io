@@ -118,7 +118,7 @@ function fixture(pagefind = { init: async () => {}, search: async () => ({ resul
             }
             for (let i = 0; i < 12; i++) await Promise.resolve();
         },
-        key: (key) => document.dispatch("keydown", { key, ctrlKey: key === "k" }),
+        key: (key) => (key === "Escape" ? nodes.overlay.dispatch("cancel") : document.dispatch("keydown", { key, ctrlKey: key === "k" })),
     };
 }
 function deferred() {

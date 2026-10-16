@@ -123,6 +123,8 @@
         const searchList = document.querySelector<HTMLElement>("[data-search-list]");
 
         let lastFocusedElement: Element | null = null;
+        let lowerDialog: HTMLDialogElement | null = null;
+        let lowerWasInert = false;
         const controller = new AbortController();
         const options = { signal: controller.signal };
         let locked = false;
@@ -265,8 +267,16 @@
             clearTimeout(closeTimer);
             if (open) {
                 if (locked) return;
-                lastFocusedElement = document.activeElement;
-                if (!searchDialog.open) searchDialog.showModal();
+                if (!searchDialog.open) {
+                    lastFocusedElement = document.activeElement;
+                    lowerDialog = lastFocusedElement?.closest("dialog") ?? null;
+                    searchDialog.showModal();
+                    // WebKit can Tab to a lower modal's root despite native modal inertness.
+                    if (lowerDialog) {
+                        lowerWasInert = lowerDialog.inert;
+                        lowerDialog.inert = true;
+                    }
+                }
                 locked = true;
                 lockScrollForDialog();
                 nextFrame(() => {
@@ -285,13 +295,20 @@
                 locked = false;
                 unlockScrollForDialog();
             }
-            if (immediate) searchDialog.close();
+            const finishClose = () => {
+                if (lowerDialog) {
+                    lowerDialog.inert = lowerWasInert;
+                    lowerDialog = null;
+                }
+                searchDialog.close();
+                if (restoreFocus && lastFocusedElement?.isConnected && lastFocusedElement instanceof HTMLElement) {
+                    lastFocusedElement.focus({ preventScroll: true });
+                }
+            };
+            if (immediate) finishClose();
             else closeTimer = setTimeout(() => {
-                if (!locked && searchDialog.isConnected) searchDialog.close();
+                if (!locked && searchDialog.isConnected) finishClose();
             }, 200);
-            if (restoreFocus && lastFocusedElement?.isConnected && lastFocusedElement instanceof HTMLElement) {
-                lastFocusedElement.focus({ preventScroll: true });
-            }
             if (searchInput) searchInput.value = "";
             searchList?.replaceChildren();
             showEmpty();
@@ -318,18 +335,20 @@
             if ((event.target as Element).closest("a")) setSearchOpen(false, true, false);
         }, options);
         searchDialog?.addEventListener("close", () => {
-            if (!searchDialog.open && locked) setSearchOpen(false, true, false);
+            if (!searchDialog.open && (locked || lowerDialog)) setSearchOpen(false, true);
         }, options);
 
         document.addEventListener("keydown", (e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {
                 e.preventDefault();
                 setSearchOpen(true);
-                return;
             }
+        }, options);
 
+        searchDialog?.addEventListener("keydown", (e) => {
             if (!searchDialog?.open) return;
 
+            // Search inputs can consume Escape before the native dialog cancel event.
             if (e.key === "Escape") {
                 e.preventDefault();
                 setSearchOpen(false);

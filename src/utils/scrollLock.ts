@@ -70,6 +70,9 @@ export function lockScrollForDialog(): void {
             const target = e.target as Element;
             const dialog = target.closest("dialog");
             if (dialog) {
+                // Scroll keys also edit text/select values or activate native controls.
+                if (target.closest("input, textarea, select") || (target as HTMLElement).isContentEditable) return;
+                if (e.key === " " && target.closest("button, summary")) return;
                 const scrollContainer = target.closest("[data-scroll-container]");
                 if (scrollContainer) return;
             }

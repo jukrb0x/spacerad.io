@@ -59,7 +59,8 @@ test("real Pagefind result navigation closes search and releases body scroll", a
     const { context, page } = await open();
     try {
         await page.locator("[data-search-trigger]").click();
-        await page.locator("[data-search-input]").fill("Landscape");
+        await page.locator("[data-search-input]").pressSequentially("Landscape Grass");
+        assert.equal(await page.locator("[data-search-input]").inputValue(), "Landscape Grass");
         await page.locator('[data-search-list] a[href^="/posts/"]').first().waitFor({ state: "visible" });
         await routeClick(page, '[data-search-list] a[href^="/posts/"]');
         assert.match(new URL(page.url()).pathname, /\/posts\/.+/);
