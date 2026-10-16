@@ -110,6 +110,7 @@ Generic layout for static MDX pages. Structure:
 Specialized blog layout. Additional features on top of Page:
 - Article header with title, date, reading time, update info
 - Tag pills linking to `/tags/[tag]`
+- Article language entrance uses the shared verified `getPostTranslation()` mapping and existing responsive language controls. `/posts/[...slug]` resolves counterparts from the renderable collection used for route generation; unpaired or unavailable counterparts render no control. Authored article links use absolute `/posts/<id>` paths so they work with or without a trailing slash.
 - **Table of Contents** — fixed sidebar on desktop (1400px+), floating drawer on mobile
 - **Share sidebar** — sticky left sidebar (desktop), floating FAB (mobile)
 - Social sharing (Twitter, Telegram, WeChat, etc.)

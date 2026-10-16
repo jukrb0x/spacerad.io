@@ -10,3 +10,19 @@ test("translation lookup requires both verified entries, never infers from a suf
     assert.equal(getPostTranslation(original.id, [original]), undefined);
     assert.equal(getPostTranslation("xcode", [{ id: "xcode-en" }]), undefined);
 });
+
+for (const [originalId, translatedId] of [
+    ["ue5-landscape-grass", "ue5-landscape-grass-en"],
+    ["ue5-landscape-grass-memory-optimization-visibility-culling", "ue5-landscape-grass-memory-optimization-visibility-culling-en"],
+]) {
+    test(`verified pair ${originalId} resolves bidirectionally and omits missing counterparts`, () => {
+        const original = { id: originalId, data: { lang: "zh" } };
+        const translated = { id: translatedId, data: { lang: "en" } };
+        assert.equal(getPostTranslation(originalId, [original, translated]), translated);
+        assert.equal(getPostTranslation(translatedId, [original, translated]), original);
+        assert.equal(getPostTranslation(originalId, [original]), undefined);
+        assert.equal(getPostTranslation(translatedId, [translated]), undefined);
+        assert.equal(getPostTranslation(originalId, []), undefined);
+        assert.equal(getPostTranslation(translatedId, []), undefined);
+    });
+}
