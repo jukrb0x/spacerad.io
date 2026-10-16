@@ -12,7 +12,7 @@ socialImage: '../ue5-landscape-grass-en/a-look-under-the-hood-at-unreal-engine-l
 
 This article presents a method to reduce the memory footprint of Landscape Grass. By analyzing Landscape Grass as an excellent scene vegetation rendering solution, we can modify its planting pipeline to further optimize memory usage. This optimization has particularly significant effects on mobile devices, where it can save around 40% to 50% of Landscape Grass memory usage.
 
-> For a detailed analysis of Landscape Grass principles, please refer to previous blog: [UE5 Landscape Grass Source Analysis: A Look Under the Hood](../ue5-landscape-grass-en/)
+> For a detailed analysis of Landscape Grass principles, please refer to previous blog: [UE5 Landscape Grass Source Analysis: A Look Under the Hood](/posts/ue5-landscape-grass-en)
 
 ## Optimization Approach: Visibility Culling
 
@@ -76,7 +76,7 @@ Assuming Distance Vector from Camera to any vertex of subsection is $V_d$, when 
 
 If you think this is end of optimization solution, then you are _too young too simple_. Through source code, we find that we have another variable called `GMaxInstancesPerComponent`, which is used to control maximum number of instances per **subsection** (not semantically landscape component...). The engine's default value is 65536 ($2^{16}$), with a lower limit of 1024 ($2^{10}$), and no upper limit.
 
-> See previous article: [UE5 Landscape Grass Source Analysis: A Look Under the Hood](../ue5-landscape-grass-en/)
+> See previous article: [UE5 Landscape Grass Source Analysis: A Look Under the Hood](/posts/ue5-landscape-grass-en)
 
 Therefore, smaller `GMaxInstancesPerComponent`, more subsections there will be, and grass density in scene will appear slightly sparser. This also means that granularity of culling is smaller, which benefits memory optimization.
 
@@ -140,7 +140,7 @@ The results are quite significant.
 
 ## Reference
 
-1. [UE5 Landscape Grass Source Analysis: A Look Under the Hood](../ue5-landscape-grass-en/)
+1. [UE5 Landscape Grass Source Analysis: A Look Under the Hood](/posts/ue5-landscape-grass-en)
 2. [《InsideUE4》GamePlay 架构（十一）Subsystems](https://zhuanlan.zhihu.com/p/158717151)
 3. [UE4 Mobile Landscape 总览及源码解析](https://zhuanlan.zhihu.com/p/144031549)
 4. [UE4 中的植被工具](https://zhuanlan.zhihu.com/p/389430858)

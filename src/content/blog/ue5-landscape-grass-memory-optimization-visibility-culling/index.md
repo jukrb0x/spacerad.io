@@ -12,7 +12,7 @@ socialImage: '../ue5-landscape-grass/a-look-under-the-hood-at-unreal-engine-land
 
 本文提供一种降低 Landscape Grass 内存占用的方式，分析 Landscape Grass 作为优秀的场景植被渲染方案，我们可以尝试修改其种植流程管线来进一步优化内存，尤其是在移动端设备上可以有比较客观的效果，可以节省 40%～ 50% 的 Landscape Grass 内存占用。
 
-> Landscape Grass 原理分析详见前文：[UE5 Landscape Grass 地形草原理分析](../ue5-landscape-grass/)
+> Landscape Grass 原理分析详见前文：[UE5 Landscape Grass 地形草原理分析](/posts/ue5-landscape-grass)
 
 ## 优化方案：Visibility Culling
 
@@ -78,7 +78,7 @@ $$
 
 如果以为这就是优化方案的结束，那你就 too young too simple 了，由源码分析可得我们还有一个变量 `GMaxInstancesPerComponent` 用于控制每个 **subsection** 上的最多 instance 数量（并不是语义上的 landscape component... ），引擎默认设置为 65536 ($2^{16}$），下限为 1024 ($2^{10}$），没有上限。
 
-> 详见前文：[UE5 Landscape Grass 地形草原理分析](../ue5-landscape-grass/)
+> 详见前文：[UE5 Landscape Grass 地形草原理分析](/posts/ue5-landscape-grass)
 
 所以 GMaxInstancesPerComponent 越小，subsection 数量越多，草的场景密度看起来更略微稀疏，剔除的粒度也就越小，利好内存优化。
 
@@ -142,7 +142,7 @@ else
 
 ## 参见
 
-1. [UE5 Landscape Grass 地形草原理分析](../ue5-landscape-grass/)
+1. [UE5 Landscape Grass 地形草原理分析](/posts/ue5-landscape-grass)
 2. [《InsideUE4》GamePlay 架构（十一）Subsystems](https://zhuanlan.zhihu.com/p/158717151)
 3. [UE4 Mobile Landscape 总览及源码解析](https://zhuanlan.zhihu.com/p/144031549)
 4. [UE4 中的植被工具](https://zhuanlan.zhihu.com/p/389430858)

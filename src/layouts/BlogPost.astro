@@ -12,6 +12,7 @@ import Prose from "@components/Prose.astro";
 import ShareSidebar from "@components/ShareSidebar.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import type { MarkdownHeading } from "astro";
+import { Icon } from "astro-icon/components";
 import { DEFAULT_POST_SOCIAL_IMAGE, SITE_TITLE } from "../consts";
 import { extractDescription } from "../utils/extractDescription";
 import { getImageUrl } from "../utils/imageUrl";
@@ -20,6 +21,7 @@ import { calculateReadingTime } from "../utils/readingTime";
 type EntryData = CollectionEntry<"blog">["data"];
 
 type Props = EntryData & {
+    translation?: CollectionEntry<"blog">;
     body?: string;
     headings?: MarkdownHeading[];
     lastModified?: string;
@@ -36,6 +38,7 @@ const props = {
 
 const {
     title,
+    translation,
     description: providedDescription,
     published,
     updatedDate,
@@ -108,6 +111,17 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 							)
 						}
 					</div>
+					{translation && (
+						<div class="post-meta">
+							<span class="mobile-post-languages">
+								<span class="language-label">{props.lang === "zh" ? "中文" : "English"}</span>
+								<a class="mobile-translation" href={`/posts/${translation.id}`} hreflang={translation.data.lang} lang={translation.data.lang} aria-label={`${translation.data.lang === "en" ? "EN — English translation" : "中文 — 中文版"}: ${translation.data.title}`} data-preview="off">
+									<span class="translation-label--desktop">{translation.data.lang === "en" ? "English" : "中文"} <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></span>
+									<span class="translation-label--mobile">{translation.data.lang === "en" ? "EN" : "中文"}</span>
+								</a>
+							</span>
+						</div>
+					)}
 					{tags && tags.length > 0 && (
 						<div class="flex flex-wrap gap-2">
 							{tags.map((tag: string) => (
