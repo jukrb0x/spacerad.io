@@ -2,8 +2,10 @@
 const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performance"].map((word) => `${word}.`);
 ---
 <div class="home-profile">
-    <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance.">I build <span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
-    <a href="/me" class="home-profile__name">Jabriel</a>
+    <a href="/me" class="home-profile__about" aria-label="About Jabriel">
+        <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance."><span class="home-profile__lead">I build </span><span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
+        <span class="home-profile__name">Jabriel</span>
+    </a>
 </div>
 <script is:inline data-astro-rerun>
     // Select before first paint; the server-rendered phrase remains the no-JS fallback.

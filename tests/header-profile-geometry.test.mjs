@@ -8,7 +8,7 @@ const source = readFileSync(new URL("../src/scripts/header-scroll.ts", import.me
 const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022 } });
 
 // Execute the real controller; the doubles provide layout snapshots without a browser.
-function fixture(navigationHeight = 70, profileHeight = 90) {
+function fixture(navigationHeight = 70, profileHeight = 90, headerInset = 0) {
     const origin = 28;
     const attributes = new Set();
     const values = new Map();
@@ -18,17 +18,23 @@ function fixture(navigationHeight = 70, profileHeight = 90) {
     let dialogOpen = false;
     const style = { setProperty: (key, value) => values.set(key, value) };
     const window = Object.assign(new EventTarget(), { scrollY: 0, innerHeight: 800 });
-    const profileLink = { offsetHeight: 40, inert: false, getBoundingClientRect: () => ({ top: origin + navigationHeight + 16 - window.scrollY }) };
+    const profileLink = {
+        offsetHeight: 40,
+        inert: false,
+        getBoundingClientRect: () => ({ top: origin + headerInset + navigationHeight + 16 - window.scrollY }),
+    };
     const profile = {
         offsetHeight: profileHeight,
         querySelector: () => profileLink,
-        getBoundingClientRect: () => ({ top: origin + navigationHeight - window.scrollY }),
+        getBoundingClientRect: () => ({ top: origin + headerInset + navigationHeight - window.scrollY }),
     };
     const navigation = {
         offsetHeight: navigationHeight,
         contains: (element) => element === navigation,
         getAnimations: () => [],
-        getBoundingClientRect: () => ({ bottom: attributes.has("data-nav-floating") ? paintedBottom : origin - window.scrollY + navigationHeight }),
+        getBoundingClientRect: () => ({
+            bottom: attributes.has("data-nav-floating") ? paintedBottom : origin + headerInset - window.scrollY + navigationHeight,
+        }),
         inert: false,
     };
     const header = {
@@ -50,6 +56,7 @@ function fixture(navigationHeight = 70, profileHeight = 90) {
     const context = createContext({
         window,
         document,
+        getComputedStyle: () => ({ paddingTop: `${headerInset}px` }),
         requestAnimationFrame(callback) {
             frames.set(++frameId, callback);
             return frameId;
@@ -67,7 +74,7 @@ function fixture(navigationHeight = 70, profileHeight = 90) {
         },
         scroll(distance, bottom) {
             paintedBottom = bottom;
-            window.scrollY = origin + distance;
+            window.scrollY = origin + headerInset + distance;
             window.dispatchEvent(new Event("scroll"));
             for (const [id, callback] of [...frames]) {
                 frames.delete(id);
@@ -75,7 +82,7 @@ function fixture(navigationHeight = 70, profileHeight = 90) {
             }
         },
         sample() {
-            const distance = window.scrollY - origin;
+            const distance = window.scrollY - origin - headerInset;
             const active = attributes.has("data-profile-return");
             const number = (name) => Number.parseFloat(values.get(name)) || 0;
             const shift = active ? number("--profile-return-shift") : 0;
@@ -104,6 +111,20 @@ function reveal(f, distance, bottom) {
     f.scroll(distance, bottom);
 }
 const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} != ${expected}`);
+
+test("mobile top spacing uses the navigation origin for floating and the natural handoff", () => {
+    const f = fixture(60, 62, 16);
+    f.scroll(59, 0);
+    assert.equal(f.sample().floating, false, "the last pixel of normal navigation remains visible");
+    f.scroll(60, 0);
+    assert.equal(f.sample().floating, true);
+    reveal(f, 2, 60);
+    f.scroll(0, 60);
+    const natural = f.sample();
+    assert.equal(natural.floating, false, "return to flow at the navigation's original top");
+    assert.equal(natural.active, false);
+    near(natural.contentTop, 76);
+});
 
 // At a fixed scroll position, only the drawer and its occlusion boundary may move.
 for (const height of [70, 64]) {

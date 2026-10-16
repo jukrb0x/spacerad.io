@@ -67,8 +67,8 @@ async function sample(page) {
 }
 function atNavigation(sample) {
     assert.ok(
-        sample.top >= 0 && Math.abs(sample.bottom - sample.nav.bottom) < 1,
-        `progress is left offscreen instead of following navigation: ${JSON.stringify(sample)}`,
+        sample.top >= 0 && Math.abs(sample.nav.bottom - sample.bottom - 8) < 1,
+        `progress must follow navigation with its 8px opaque buffer: ${JSON.stringify(sample)}`,
     );
     assert.ok(sample.height >= 2 && sample.height <= 3);
     assert.ok(Math.abs(sample.width - sample.nav.width * sample.scale) < 2);

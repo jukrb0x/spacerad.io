@@ -43,6 +43,7 @@ function fixture() {
         createContext({
             window,
             document,
+            getComputedStyle: () => ({ paddingTop: "0px" }),
             requestAnimationFrame: (callback) => {
                 frames.set(++frameId, callback);
                 return frameId;

@@ -113,7 +113,7 @@ for (const width of [1440, 390])
             try {
                 await go(page);
                 const before = await geometry(page);
-                const flowOrigin = (await page.locator("[data-header]").boundingBox()).y;
+                const flowOrigin = (await navBox(page)).y;
                 const y = await scroll(page, 700);
                 const hidden = await navBox(page);
                 assert.ok(hidden.y + hidden.height <= 1, "navigation should hide after scrolling down");
@@ -140,7 +140,7 @@ for (const width of [1440, 390])
                 // Floating-to-flow handoff near the top must tolerate a few pixels of reversal.
                 await page.mouse.click(1, 400);
                 let returnedToFlow = false;
-                for (const top of [45, 47, 43, 30, 32, 25, 27, 0, 2, 0]) {
+                for (const top of [45, 47, 43, 30, 32, 25, 27, 17, 16, 15, 1, 0, 2, 0]) {
                     await scroll(page, top);
                     const box = await navBox(page);
                     if (top <= flowOrigin) returnedToFlow = true;
