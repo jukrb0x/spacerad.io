@@ -4,6 +4,7 @@ published: 2026-02-02
 tags: ["Astro", "Vibe Coding", "Web", "Blog"]
 socialImage: "./image.png"
 lang: zh
+draft: true
 ---
 
 ![Half-Life](./image.png)
