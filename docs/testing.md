@@ -56,6 +56,12 @@ including focus protection before wheel input and stable document geometry.
 
 `pnpm test:release` inspects the fresh production route manifest, emitted page files and sitemap. Run it after `pnpm build`; it rejects any design-lab route. The development suite separately verifies `/design-lab` and both reading studies remain available locally. Their templates live under Astro’s excluded `src/pages/_design-lab/` directory and are injected only for the `dev` command.
 
+## Imported content and image boundaries
+
+The unit suite includes `telegram.test.mjs`, `rss.test.mjs`, and `image-proxy.test.mjs`. They use mocked upstream responses, the real Telegram parser/RSS serializer, and generated raster fixtures. Negative cases never contact live hosts. They cover escaped captions/descriptions, supported passive formatting, normalized Telegram links, emitted publication dates, CJK titles, absolute feed media, redirects, MIME/signature checks, cancellation, and cache/error behavior.
+
+The image proxy retains its existing host allowlist. Successful responses require JPEG, PNG, GIF, WebP, or AVIF with a matching signature; redirects are validated at every hop (at most three), the complete fetch has a ten-second deadline, and decoded response bytes are bounded at 10 MiB. Successful cache/CORS behavior remains unchanged; rejected/error responses are not cached. The Telegram sanitizer policy excludes active/raw-text/foreign content and preserves supported text formatting and media. Dependency upgrades remain a separate maintenance task.
+
 ## Canonical local review
 
 Use `http://127.0.0.1:4322/` for the compiled Cloudflare-worker review and `http://127.0.0.1:4321/` for Astro development. Build before reviewing compiled output. The existing Wrangler config uses local assets and KV when launched with `pnpm exec wrangler dev --local --ip 127.0.0.1 --port 4322`; do not start a second worker on an occupied port or silently switch ports. The strict-port development entry is `node scripts/test-browser-server.mjs`. Inspect checkout/process ownership before restarting an existing listener.

@@ -1,4 +1,5 @@
 import rss from "@astrojs/rss";
+import * as cheerio from "cheerio";
 import sanitizeHtml from "sanitize-html";
 import { SITE_TITLE } from "../consts";
 import { fetchTelegramChannel } from "../utils/telegram";
@@ -106,7 +107,8 @@ function generateTitle(content, maxLength = 80) {
     // Limit length and add ellipsis if needed
     if (title.length > maxLength) {
         // Try to cut at a natural boundary (space, comma, etc.)
-        const cutPoint = title.lastIndexOf(" ", maxLength) || title.lastIndexOf("，", maxLength) || maxLength;
+        const boundary = Math.max(title.lastIndexOf(" ", maxLength), title.lastIndexOf("，", maxLength));
+        const cutPoint = boundary > 0 ? boundary : maxLength;
         title = `${title.substring(0, cutPoint).trim()}...`;
     }
 
@@ -137,18 +139,6 @@ function generateDescription(html, maxLength = 200) {
     return text;
 }
 
-/**
- * Fix hashtag links to point to Telegram search
- */
-function fixHashtagLinks(html, channelUsername) {
-    if (!html) return html;
-
-    return html.replace(/<a href="\?q=([^"]+)" target="_blank">(#[^<]+)<\/a>/g, (_match, _query, hashtag) => {
-        const tag = hashtag.replace("#", "");
-        return `<a href="https://t.me/s/${channelUsername}?q=%23${encodeURIComponent(tag)}" target="_blank" rel="noopener noreferrer">${hashtag}</a>`;
-    });
-}
-
 export async function GET(context) {
     const CHANNEL_USERNAME = "SpaceRad_io";
 
@@ -162,14 +152,19 @@ export async function GET(context) {
             site: context.site,
             trailingSlash: false,
             items: channelData.posts.map((post) => {
-                const fixedContent = fixHashtagLinks(post.content, CHANNEL_USERNAME);
+                const $content = cheerio.load(post.content, {}, false);
+                $content("img[src]").each((_, image) => {
+                    const $image = $content(image);
+                    $image.attr("src", new URL($image.attr("src"), context.site).href);
+                });
+                const fixedContent = $content.html();
                 const cleanTitle = generateTitle(fixedContent);
                 const description = generateDescription(post.text);
 
                 return {
                     title: cleanTitle,
                     description: description,
-                    published: new Date(post.datetime),
+                    pubDate: new Date(post.datetime),
                     link: `https://t.me/${CHANNEL_USERNAME}/${post.id}`,
                     content: sanitizeHtml(fixedContent, {
                         allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
