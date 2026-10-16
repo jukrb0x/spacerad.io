@@ -1,4 +1,56 @@
 import * as cheerio from "cheerio";
+import sanitizeHtml from "sanitize-html";
+
+// Keep imported HTML passive. Raw-text/foreign nodes are removed before this
+// policy because the pinned sanitizer predates its raw-text parser fixes.
+const importedHtmlPolicy = {
+    allowedTags: [
+        "a",
+        "b",
+        "strong",
+        "i",
+        "em",
+        "u",
+        "s",
+        "del",
+        "strike",
+        "span",
+        "tg-spoiler",
+        "code",
+        "pre",
+        "blockquote",
+        "br",
+        "p",
+        "div",
+        "ol",
+        "ul",
+        "li",
+        "img",
+    ],
+    allowedAttributes: {
+        "*": ["dir"],
+        blockquote: ["expandable"],
+        a: ["href", "target", "rel"],
+        img: ["src", "alt", "loading", "class", "width", "height"],
+        div: ["class"],
+        span: ["class"],
+        i: ["class"],
+        code: ["class"],
+    },
+    allowedSchemes: ["http", "https", "mailto", "tel", "tg"],
+    allowedSchemesByTag: { img: ["https"] },
+    allowProtocolRelative: false,
+};
+
+function telegramLink(value: string, channelUsername: string): string {
+    if (!value) return "";
+    try {
+        const url = new URL(value, `https://t.me/s/${channelUsername}`);
+        return ["https:", "http:", "mailto:", "tel:", "tg:"].includes(url.protocol) ? url.href : "";
+    } catch {
+        return "";
+    }
+}
 
 export interface LinkPreview {
     url: string;
@@ -78,7 +130,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
         $description.find("br").replaceWith("\n");
 
         // Convert numbered lists in description
-        let description = $description.text().trim();
+        let description = $("<div>").text($description.text().trim()).html() || "";
         // Replace numbered lists with HTML
         description = description.replace(/(?:^|\n)(\d+)\.\s+(.+?)(?=\n\d+\.\s+|\n\n|$)/gs, (_match, num, text) => {
             if (num === "1") {
@@ -112,7 +164,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
             // Check if message is forwarded
             const $forwardedFromElem = $message.find(".tgme_widget_message_forwarded_from_name");
             const forwardedFrom = $forwardedFromElem.text().trim();
-            const forwardedFromLink = $forwardedFromElem.attr("href") || undefined;
+            const forwardedFromLink = telegramLink($forwardedFromElem.attr("href") || "", channelUsername) || undefined;
 
             // Get text content (use .js-message_text to avoid matching reply/quote text)
             const $text = $message.find(".tgme_widget_message_text.js-message_text");
@@ -123,6 +175,9 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
 
             // Process content HTML
             const $content = $text.clone();
+            $content
+                .find("script, style, xmp, textarea, title, plaintext, svg, math, iframe, object, embed, noscript, noembed, noframes, template")
+                .remove();
 
             // Convert <br> to newlines for better text formatting
             $content.find("br").replaceWith("\n");
@@ -132,7 +187,11 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
 
             // Add target and rel to links
             $content.find("a").each((_, link) => {
-                $(link).attr("target", "_blank").attr("rel", "noopener noreferrer");
+                const $link = $(link);
+                const href = telegramLink($link.attr("href") || "", channelUsername);
+                if (href) $link.attr("href", href);
+                else $link.removeAttr("href");
+                $link.attr("target", "_blank").attr("rel", "noopener noreferrer");
             });
 
             // Get images
@@ -162,7 +221,9 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
 
             // Add images if any
             if (images.length > 0) {
-                const imagesHtml = images.map((img) => `<img src="${img}" alt="${title}" loading="lazy" class="telegram-post-image" />`).join("");
+                const imagesHtml = images
+                    .map((img) => $("<img>").attr({ src: img, alt: title, loading: "lazy", class: "telegram-post-image" }).toString())
+                    .join("");
                 contentHtml = `<div class="telegram-images">${imagesHtml}</div>${contentHtml}`;
             }
 
@@ -170,7 +231,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
             let linkPreview: LinkPreview | undefined;
             const $linkPreview = $message.find(".tgme_widget_message_link_preview");
             if ($linkPreview.length) {
-                const previewUrl = $linkPreview.attr("href") || "";
+                const previewUrl = telegramLink($linkPreview.attr("href") || "", channelUsername);
                 const siteName = $linkPreview.find(".link_preview_site_name").text().trim();
                 const previewTitle = $linkPreview.find(".link_preview_title").text().trim();
                 const previewDescription = $linkPreview.find(".link_preview_description").text().trim();
@@ -208,7 +269,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
             if ($reply.length) {
                 const replyToAuthor = $reply.find(".tgme_widget_message_author_name").text().trim();
                 const replyToText = $reply.find(".tgme_widget_message_metatext, .tgme_widget_message_text").text().trim();
-                const replyToLink = $reply.attr("href") || undefined;
+                const replyToLink = telegramLink($reply.attr("href") || "", channelUsername) || undefined;
 
                 if (replyToAuthor || replyToText) {
                     replyInfo = {
@@ -233,7 +294,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
                 id,
                 datetime,
                 title,
-                content: contentHtml,
+                content: sanitizeHtml(contentHtml, importedHtmlPolicy),
                 text,
                 ...(forwardedFrom && { forwardedFrom }),
                 ...(forwardedFromLink && { forwardedFromLink }),
