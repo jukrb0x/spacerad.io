@@ -1,0 +1,15 @@
+{
+    "pages": {
+        "/posts/original/": "<html lang='en'><article><div data-article-header><a href='/tags/web'>web</a></div><a href='/posts/draft'>absent published route</a><a href='/posts/translated#missing'>bad anchor</a><a href='/p/absent'>bad redirected route</a><a href='/loop'>redirect loop</a><a href='/channel#missing'>dynamic anchor</a></article></html>",
+        "/posts/translated/": "<html lang='en'><article><div data-article-header><a href='/tags/Web'>Web</a></div><h2 id='hello'>Hello</h2></article></html>",
+        "/tags/web/": "<html></html>",
+        "/tags/Web/": "<html></html>"
+    },
+    "files": [],
+    "routes": [
+        { "routeData": { "route": "/channel/[...cursor]", "prerender": false, "pattern": "^/channel(?:/.*)?/?$" } },
+        { "routeData": { "route": "/posts/[...slug]", "prerender": true, "pattern": "^/posts/.*$" } }
+    ],
+    "redirects": "/p/* /posts/:splat 301\n/loop /loop 301",
+    "pairs": [["original", "translated"], ["original", "missing"]]
+}
