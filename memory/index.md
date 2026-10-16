@@ -313,3 +313,7 @@ This index reflects the current state of memory documents. Update when:
 - SPA patterns evolve
 - New dependencies are added
 - State management patterns change (e.g., nanostores adoption)
+
+### Publishing checks
+
+- Offline rendered-article links, anchors, translation pairs and tag-case diagnostics → `docs/testing.md#publishing-preflight` (`pnpm build && pnpm check:publishing`). CI starts in report-only mode; fixture tests are part of `pnpm test:unit`.

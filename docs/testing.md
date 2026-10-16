@@ -69,3 +69,56 @@ Use `http://127.0.0.1:4322/` for the compiled Cloudflare-worker review and `http
 `pnpm preview:verify` is a local-only CLI check, outside the production frontend. It reports the exact checkout/branch and build generation, checks served Home/Channel content on both URLs, and compares the compiled Home response with `dist/index.html`. A passing server check does not prove an already-open browser tab is current. If a tab differs, verify its exact origin, open the canonical URL in a fresh tab, and fully reload before attributing a cause to caching or HMR. No development version label is added to production branding.
 
 Home's latest notes use a cached HTML fragment at `/api/latest-channel`, with a reserved fallback and abortable route-owned request. The internal page is noindex and excluded from the sitemap. Remark42's fixed configured host is read through `/api/remark42-script` because its script does not expose CORS; the browser loads text with an AbortController and executes it synchronously only while its article root remains connected. No vendor source or CSP is modified. Delayed-navigation browser fixtures cover both cancellation boundaries and never submit comments.
+
+## Publishing preflight
+
+Run `pnpm build && pnpm check:publishing` before publishing. The command reads the
+fresh `dist` output and Cloudflare route manifest, uses the existing translation
+registry (`src/utils/postTranslations.ts`), and makes no network requests. Rebuild
+after content or registry edits: old output cannot validate new source. Markdown
+and MDX authoring, draft filtering, hidden-post routing and public URLs are unchanged.
+
+Errors (exit 1) identify the source article URL, exact href and missing target or
+anchor. Edit that article under `src/content/blog/` or its intended redirect; the
+check never edits posts. Published translation pairs must both exist, belong to
+one distinct pair and use opposite `zh`/`en` languages. Pairs with neither side
+published are outside this production check (for example, two drafts). No suffix
+or title matching invents translation relationships.
+
+Warnings (exit 0 without errors) report case-only tag spellings with their article
+URLs, and anchors on server-rendered routes that cannot be checked offline. Tag
+spellings and public tag URLs are never normalized. Only links inside rendered
+`/posts/` articles are checked; article header links are included. Drafts absent
+from production output are not scanned, but a published link to an absent draft
+is correctly an error. Anchors use emitted IDs and legacy named anchors, including
+encoded Unicode, so MDX/Markdown rendering and duplicate-heading IDs are respected.
+Queries do not change route existence. Browser text fragments are ignored while
+any preceding element fragment is checked. Existing assets and configured exact
+and single-wildcard `_redirects` rules are resolved before checking routes and
+anchors. Supported statuses are 301, 302 (also the default), 303, 307 and 308.
+Named placeholders and 200 proxy rules are outside the current configuration;
+extend the checker before adding them. Malformed/unsupported redirect rules are
+fatal configuration errors. See [Cloudflare's rule format](https://developers.cloudflare.com/pages/configuration/redirects/).
+External URLs, mail links and external redirect destinations are not crawled.
+Server route matches prove route coverage, not successful runtime responses.
+
+The existing `checks` CI job runs `pnpm check:publishing --report-only` after its
+production build/release checks. This prints all errors and warnings while exiting
+0 for content defects during rollout; missing build output, invalid configuration
+and checker failures still fail the job. Fixture regressions run in the existing
+unit suite and block normally. After the separate content repair task clears the
+baseline and a Linux CI run confirms the output, remove **only** `--report-only`
+to make publishing errors blocking. Warnings remain advisory. No additional
+build, browser, dependency, service or deployment is required.
+
+At baseline `be1596449517b1438c62818b6b6becee8fec9579`, the local macOS build reports:
+
+- Error: `/posts/the-evolution-of-my-website-how-i-rebuilt-it-with-nextjs/` links to absent `/roadmap`.
+- Error: `/posts/just-bought-a-new-domain-name-xcode-zip/` links to absent emitted `/tags/web`.
+- Warning: `Web` on `/posts/introducing-space-radio/` collides with `web` on the xcode article.
+
+The case-insensitive local filesystem emitted only `dist/tags/Web/`; Linux can
+emit both spellings and may therefore report only the `/roadmap` error. The tag
+collision warning is independent of filesystem case sensitivity. Existing verified
+translation pairs pass. These are reports of existing defects, not a reason to
+rewrite public routes automatically.

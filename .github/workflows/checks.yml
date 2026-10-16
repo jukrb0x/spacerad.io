@@ -24,6 +24,8 @@ jobs:
       - run: pnpm test:unit
       - run: pnpm build
       - run: pnpm test:release
+      - name: Report publishing preflight (rollout)
+        run: pnpm check:publishing --report-only
 
   browser:
     runs-on: ubuntu-latest

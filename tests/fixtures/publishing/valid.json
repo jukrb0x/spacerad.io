@@ -1,0 +1,27 @@
+{
+    "pages": {
+        "/posts/original/": "<html lang='zh-CN'><article><div data-article-header><a href='/tags/Web'>Web</a></div><h2 id='中文'>中文</h2><a href='../translated?view=full#hello'>relative</a><a href='/p/translated#hello'>legacy wildcard</a><a href='/old#hello'>legacy exact</a><a href='/asset.pdf?download=1#page=2'>asset</a><a href='#%E4%B8%AD%E6%96%87'>encoded</a><a href='#'>empty fragment</a><a href='#top'>document top</a><a href='?view=full#中文'>query</a><a href='//spacerad.io/posts/translated#hello'>protocol relative</a><a href='https://spacerad.io/posts/translated/#hello'>same origin</a><a href='https://example.invalid/absent'>external</a><a href='mailto:writer@example.invalid'>mail</a><a href='/channel/next?cursor=x'>SSR</a><a href='/outbound#remote'>external redirect</a><a href='/posts/hidden'>hidden article</a><a href='/file%231%3F.pdf'>encoded asset</a></article></html>",
+        "/posts/translated/": "<html lang='en'><article><div data-article-header><a href='/tags/Web'>Web</a></div><h2 id='hello'>Hello</h2><a name='old-anchor'></a><a href='#old-anchor'>legacy anchor</a><a href='#hello:~:text=Hello'>text fragment</a></article></html>",
+        "/posts/hidden/": "<html lang='en'><article><h2 id='hidden'>Hidden but published</h2></article></html>",
+        "/tags/Web/": "<html lang='en'></html>"
+    },
+    "files": ["/asset.pdf", "/file#1?.pdf"],
+    "routes": [
+        {
+            "routeData": {
+                "route": "/channel/[...cursor]",
+                "prerender": false,
+                "pattern": "^/channel(?:/.*)?/?$"
+            }
+        },
+        {
+            "routeData": {
+                "route": "/posts/[...slug]",
+                "prerender": true,
+                "pattern": "^/posts/.*$"
+            }
+        }
+    ],
+    "redirects": "/p/* /posts/:splat 301\n/old /posts/translated 301\n/outbound https://example.invalid/remote 302",
+    "pairs": [["original", "translated"]]
+}
