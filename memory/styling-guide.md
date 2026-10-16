@@ -193,6 +193,7 @@ Comprehensive markdown styling scoped to `.prose`:
 - Anchor links in headings
 - Blockquotes with left border + accent background
 - Code blocks: Shiki dual-theme, line numbers, line/char highlighting
+- Article code presentation: `src/styles/code-blocks.css` adds thin horizontal rules, a subtle light/dark surface, horizontal scrolling and keyboard focus. `scripts/code-themes.mjs` defines grammar-scoped syntax palettes. Inline code and the copy/SPA initialization logic are unchanged; named character-highlight groups retain their existing colors.
 - Highlighted char IDs: `v` = green, `s` = blue, `i` = amber
 - Tables: striped rows, sticky header, responsive card mode below 48rem
 - Details/summary: collapsible with chevron animation

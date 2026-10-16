@@ -1,0 +1,115 @@
+/* Article code: light rules and a subtle reading surface, at every block length. */
+.article-page {
+    --code-paper: #f5f7f9;
+    --code-rule: #d5d7d5;
+    --code-muted: #59616b;
+    --code-focus: #2454a4;
+}
+html[data-theme="dark"] .article-page {
+    --code-paper: #1b1e22;
+    --code-rule: #454b50;
+    --code-muted: #abb3bc;
+    --code-focus: #a7c8ff;
+}
+.article-page .code-block-wrapper {
+    width: 100%;
+    min-width: 0;
+    border-block: 1px solid var(--code-rule);
+    border-radius: 0;
+    background: var(--code-paper);
+    margin: 1.5rem 0;
+}
+.article-page .code-block-header {
+    min-height: 44px;
+    gap: 12px;
+    padding: 0 12px 0 16px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--code-muted);
+}
+.article-page .code-block-lang {
+    color: var(--code-muted);
+    font-size: 12px;
+    letter-spacing: 0.035em;
+}
+.article-page .code-copy-button {
+    min-height: 36px;
+    padding: 6px 8px;
+    border-color: transparent;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--code-muted);
+    font-size: 13px;
+}
+.article-page .code-copy-button:hover {
+    background: color-mix(in srgb, var(--code-muted) 10%, transparent);
+    color: var(--color-text-primary);
+}
+/* Keep the existing success feedback above the neutral/hover treatments. */
+.article-page .code-copy-button.copied {
+    border-color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 15%, var(--color-bg-surface));
+    color: var(--color-success);
+}
+.article-page .code-copy-button:focus-visible {
+    outline: 2px solid var(--code-focus);
+    outline-offset: 1px;
+}
+.article-page .prose pre {
+    padding: 8px 0 16px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    tab-size: 4;
+}
+.article-page .prose pre:focus-visible {
+    outline: 2px solid var(--code-focus);
+    outline-offset: -3px;
+}
+.article-page .prose pre code {
+    font-size: 14px;
+    line-height: 1.7;
+    word-break: normal;
+    font-variant-ligatures: none;
+}
+.article-page .prose pre code [data-line]::before {
+    color: var(--code-muted);
+    user-select: none;
+}
+.article-page .prose pre code ::selection {
+    background: #c6ddff;
+    color: #162942;
+}
+@media (max-width: 480px) {
+    .article-page .code-copy-button {
+        min-height: 44px;
+    }
+    .article-page .prose pre code {
+        font-size: 13px;
+    }
+}
+.article-page {
+    --code-highlight: #e9edf1;
+}
+html[data-theme="dark"] .article-page {
+    --code-highlight: #303943;
+}
+.article-page .prose pre code [data-highlighted-line],
+.article-page .prose pre code [data-highlighted-chars]:not([data-highlighted-chars-id]) {
+    background: var(--code-highlight);
+}
+
+/* Semantic Shiki palettes, not color-value substitutions. */
+.article-page .prose pre code span {
+    color: var(--shiki-light);
+    font-style: var(--shiki-light-font-style, normal);
+    font-weight: var(--shiki-light-font-weight, normal);
+    text-decoration: var(--shiki-light-text-decoration, none);
+}
+html[data-theme="dark"] .article-page .prose pre code span {
+    color: var(--shiki-dark);
+    font-style: var(--shiki-dark-font-style, normal);
+    font-weight: var(--shiki-dark-font-weight, normal);
+    text-decoration: var(--shiki-dark-text-decoration, none);
+}

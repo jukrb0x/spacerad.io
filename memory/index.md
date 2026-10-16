@@ -212,7 +212,7 @@
 
 | Feature | Implementation |
 |---------|---------------|
-| Syntax highlighting | rehype-pretty-code + Shiki (github-light / github-dark) |
+| Syntax highlighting | rehype-pretty-code + Shiki (radio-light / radio-dark (`scripts/code-themes.mjs`)) |
 | Math | remark-math + rehype-katex |
 | Diagrams | Mermaid via rehype-mermaid |
 | Alerts | remark-github-blockquote-alert (NOTE, TIP, WARNING, CAUTION) |

@@ -78,7 +78,7 @@
 
 - **Site:** `https://spacerad.io`
 - **Adapter:** Cloudflare Pages with image compilation service
-- **Syntax highlighting:** Disabled built-in Shiki; using rehype-pretty-code with dual themes (github-light / github-dark)
+- **Syntax highlighting:** Disabled built-in Shiki; using rehype-pretty-code with dual themes (radio-light / radio-dark (`scripts/code-themes.mjs`))
 
 ### Integrations
 1. MDX
@@ -119,7 +119,7 @@
 ### Rehype Plugins (in order)
 1. `rehypeMermaidPre` — preprocess Mermaid blocks
 2. `rehypePrettyCode` — Shiki syntax highlighting with:
-   - Dual themes: github-light / github-dark
+   - Dual themes: radio-light / radio-dark (`scripts/code-themes.mjs`)
    - Grid layout for line highlighting
    - onVisitLine / onVisitHighlightedLine / onVisitHighlightedChars callbacks
 3. `rehypeKatex` — render KaTeX to HTML
