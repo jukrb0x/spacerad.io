@@ -7,12 +7,16 @@ const tokens = await readFile(new URL("../src/styles/_tokens.scss", import.meta.
 const theme = await readFile(new URL("../src/components/ThemeToggle.astro", import.meta.url), "utf8");
 const mobile = css.slice(css.indexOf("@media (max-width: 767px)"));
 
-test("mobile masthead bleeds while reading gutter stays 24px", () => {
+test("mobile navigation fills the viewport while the reading gutter stays 24px", () => {
+    assert.match(tokens, /--layout-max-width: 860px/);
     assert.match(tokens, /@media \(max-width: 767px\)[\s\S]*--page-gutter: 24px/);
-    assert.match(mobile, /header\.site-header\[data-header\]\.is-scrolled\s*\{\s*width: 100%;\s*max-width: none;\s*margin-top: 0;/);
-    assert.match(mobile, /\.site-header\[data-nav-floating\] \.site-header__inner\s*\{\s*width: 100%;\s*max-width: none;/);
-    assert.match(mobile, /padding-inline: max\(var\(--page-gutter\), env\(safe-area-inset-left\)\)/);
-    assert.match(mobile, /\.home-profile\s*\{[^}]*padding: 12px max\(var\(--page-gutter\)/);
+    assert.match(
+        mobile,
+        /\.site-header \.site-header__inner\s*\{[^}]*width: calc\(100% \+ 48px\);[^}]*margin-inline: -24px;[^}]*padding-inline: 24px;/,
+    );
+    assert.match(mobile, /\.site-header\[data-nav-floating\] \.site-header__inner\s*\{[^}]*width: 100%;[^}]*max-width: none;/);
+    assert.match(mobile, /\.site-header__inner\s*\{[^}]*height: 60px;/);
+    assert.match(mobile, /\.home-profile\s*\{[^}]*padding: 20px 0 0;/);
 });
 
 test("mobile share actions and both triggers use one 44px rail", () => {

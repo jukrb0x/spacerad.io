@@ -33,11 +33,11 @@ for (const width of [320, 390, 430, 768, 1440]) {
                     const section = await page.locator(".home-channel").boundingBox();
                     const identity = await page.locator(".home-channel__identity").boundingBox();
                     assert.ok(Math.abs(section.x - identity.x) < 1);
-                    assert.ok(identity.width <= section.width * 0.81);
-                    assert.ok(identity.width >= section.width * 0.4);
+                    assert.ok(Math.abs(identity.width - section.width) < 1, "Channel identity spans the reading column");
                     const heading = await page.locator(".home-channel__identity h2").boundingBox();
                     const entry = await page.locator(".home-channel__identity > span").boundingBox();
-                    assert.ok(entry.y >= heading.y + heading.height);
+                    assert.ok(entry.x > heading.x + heading.width, "Channel action sits beside its heading");
+                    assert.ok(Math.abs(entry.y + entry.height - heading.y - heading.height) < 8, "identity keeps a shared text baseline");
                     const first = await page.locator(".channel-entry").nth(0).boundingBox();
                     const second = await page.locator(".channel-entry").nth(1).boundingBox();
                     assert.ok(second.y - first.y - first.height <= 29, "notes retain a compact fixed gap");

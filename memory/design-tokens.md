@@ -108,11 +108,18 @@ The site uses a **monochrome gray accent** palette. All tokens are CSS custom pr
 
 | Token | Value |
 |-------|-------|
-| `--layout-max-width` | 72rem (1152px) |
+| `--layout-max-width` | 860px |
+| `--page-gutter` | 24px |
 | `--measure` | 68ch |
 | `--measure-wide` | 72ch |
 
 ---
+
+## Reading header and homepage
+
+The navigation is 64px high on desktop and 60px below 768px. Its opaque floating surface extends around the reading grid, with an 8px buffer below the progress line. The brand reveal stays inside that surface; the wordmark and controls retain their reading-grid alignment.
+
+Home uses one reading column with a 520px lead image (up to 300px on mobile), followed by four article rows and three Channel notes. The introduction and author form one About link; a fixed-width carousel preserves all six phrase baselines while the yellow backing follows only the visible text. Hover and keyboard focus reveal it, reduced motion removes transitions, and touch exposes the backing at rest.
 
 ## Breakpoints
 
@@ -131,9 +138,9 @@ The site uses a **monochrome gray accent** palette. All tokens are CSS custom pr
 
 | Token | Value |
 |-------|-------|
-| `--color-bg-page` | `#fafbfc` |
+| `--color-bg-page` | `#fdfdfe` |
 | `--color-bg-surface` | `#ffffff` |
-| `--color-bg-muted` | `#f6f8fa` |
+| `--color-bg-muted` | `#f3f4f6` |
 | `--color-bg-elevated` | `#ffffff` |
 
 ### Text (WCAG AA compliant)
@@ -272,7 +279,7 @@ The site uses a **monochrome gray accent** palette. All tokens are CSS custom pr
 
 | Token | Value |
 |-------|-------|
-| `--color-bg-page` | `#0d1117` |
+| `--color-bg-page` | `#131315` |
 | `--color-bg-surface` | `#161b22` |
 | `--color-bg-muted` | `#21262d` |
 | `--color-bg-elevated` | `#1c2128` |

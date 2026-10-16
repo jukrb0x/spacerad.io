@@ -9,12 +9,15 @@ const desktop = css.slice(0, css.indexOf("@media (max-width: 767px)"));
 const row = await read("../src/components/PostItem.astro");
 const home = await read("../src/components/home/LatestPosts.astro");
 
-test("mobile lead uses natural lines and Channel retains a left-aligned two-level sign", () => {
-    assert.match(mobile, /\.lead-post h3\s*\{[^}]*text-wrap: wrap;/);
-    assert.match(mobile, /\.home-channel__identity\s*\{[^}]*width: 80%;[^}]*max-width: 320px;[^}]*justify-self: start;/);
-    assert.match(desktop, /\.home-channel__identity\s*\{[^}]*flex-direction: column;/);
+test("home uses a reading stream and a compact horizontal Channel identity", () => {
+    assert.match(desktop, /\.lead-post h3\s*\{[^}]*text-wrap: wrap;/);
+    assert.match(desktop, /\.home-writing__grid\s*\{[^}]*display: block;/);
+    assert.match(desktop, /\.home-writing__more\s*>\s*\.home-post\s*\{[^}]*grid-template-columns: 96px minmax\(0, 1fr\);/);
+    assert.match(desktop, /\.home-channel__identity\s*\{[^}]*flex-direction: row;/);
+    assert.match(mobile, /\.home-channel__identity\s*\{[^}]*width: 100%;[^}]*max-width: none;/);
     assert.match(mobile, /\.channel-index\s*\{[^}]*align-content: start;/);
     assert.match(mobile, /\.home-channel__content,\s*\.channel-fallback\s*\{\s*min-height: 0;/);
+    assert.match(mobile, /\.home-writing \.post-meta \.mobile-translation\s*\{[^}]*min-height: 32px;/);
 });
 
 test("desktop archive columns, hover, language labels and counterpart text remain intact", () => {

@@ -19,7 +19,8 @@ const MIN_SCROLL_DISTANCE_VH = 1.5;
 
 function measureNavigation() {
     if (!header || !navigation) return;
-    headerTop = header.getBoundingClientRect().top + window.scrollY;
+    // Include the header's top spacing even while navigation is fixed.
+    headerTop = header.getBoundingClientRect().top + window.scrollY + (Number.parseFloat(getComputedStyle(header).paddingTop) || 0);
     navigationHeight = navigation.offsetHeight;
     profileHeight = profile?.offsetHeight ?? 0;
     profileLinkTop = profile && profileLink ? profileLink.getBoundingClientRect().top - profile.getBoundingClientRect().top : 0;
@@ -113,7 +114,7 @@ function initHeader() {
     header = document.querySelector<HTMLElement>("[data-header]");
     navigation = header?.querySelector<HTMLElement>(".site-header__inner") ?? null;
     profile = header?.querySelector<HTMLElement>(".home-profile") ?? null;
-    profileLink = profile?.querySelector<HTMLElement>(".home-profile__name") ?? null;
+    profileLink = profile?.querySelector<HTMLElement>(".home-profile__about") ?? null;
     progressBar = document.querySelector<HTMLElement>("[data-reading-progress]");
     floating = false;
     hidden = false;

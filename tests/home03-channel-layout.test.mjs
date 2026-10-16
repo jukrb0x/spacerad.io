@@ -96,8 +96,8 @@ for (const theme of ["light", "dark"]) {
             await waitForPageAnimations(page);
             assert.equal(await page.locator("[data-header]").getAttribute("data-nav-hidden"), null);
             const shown = await geometry(page);
-            near(hidden.cutTop, 98, "hidden navigation sticky position");
-            near(shown.cutTop, 98, "shown navigation sticky position");
+            near(hidden.cutTop, hidden.nav.height + 28, "hidden navigation sticky position");
+            near(shown.cutTop, shown.nav.height + 28, "shown navigation sticky position");
             near(shown.cutTop - shown.nav.y - shown.nav.height, 28, "revealed navigation clearance");
             near(shown.main.documentY, hidden.main.documentY, "main document position stays fixed");
             near(shown.image.documentY, hidden.image.documentY, "feed document position stays fixed");
