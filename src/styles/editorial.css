@@ -437,7 +437,7 @@ header.site-header[data-header].is-scrolled {
     min-height: 0;
     max-width: none;
 }
-.home-channel__identity > span {
+.home-channel__identity > .home-channel__more {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -445,11 +445,11 @@ header.site-header[data-header].is-scrolled {
     color: var(--color-link);
     gap: 10px;
 }
-.home-channel__identity > span > span {
+.home-channel__identity > .home-channel__more > span {
     line-height: 1;
     font-size: 20px;
 }
-.home-channel__identity:hover {
+.home-channel__more:hover {
     text-decoration: underline;
 }
 .channel-index {
@@ -1101,12 +1101,14 @@ header.site-header[data-header] {
     max-width: 100%;
     min-height: 48px;
     padding: 4px 0;
-    font-size: 28px;
-    line-height: 1.4;
+    font-size: 24px;
+    font-weight: 400;
+    --intro-line-height: 39.2px;
+    line-height: var(--intro-line-height);
     color: var(--color-text-primary);
     text-decoration: none;
 }
-.home-profile__about h1 {
+.home-profile .home-profile__about h1 {
     margin: 0;
     font: inherit;
     letter-spacing: -0.02em;
@@ -1131,8 +1133,8 @@ header.site-header[data-header] {
     position: absolute;
     z-index: -1;
     inset-inline: 0;
-    top: 0.97em;
-    height: 0.43em;
+    top: calc(var(--intro-line-height) * 0.7);
+    height: calc(var(--intro-line-height) * 0.3);
     background: var(--color-channel);
     pointer-events: none;
     clip-path: inset(0 100% 0 0);
@@ -1157,19 +1159,8 @@ header.site-header[data-header] {
 .home-profile__about:focus-visible .home-profile__name {
     color: var(--color-text-primary);
 }
-.home-channel h2::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset-inline: 0;
-    top: 0.63em;
-    height: 0.36em;
-    background: var(--color-channel);
-    pointer-events: none;
-}
 html[data-theme="dark"] .home-profile__lead::before,
-html[data-theme="dark"] .home-profile__word::before,
-html[data-theme="dark"] .home-channel h2::before {
+html[data-theme="dark"] .home-profile__word::before {
     opacity: 0.42;
 }
 .site-header__inner [data-reading-progress] {
@@ -1405,7 +1396,7 @@ html {
         min-height: 32px;
         min-width: 32px;
     }
-    .home-channel__identity > span {
+    .home-channel__identity > .home-channel__more {
         font-size: 13px;
     }
     .channel-entry p {
@@ -1438,7 +1429,8 @@ html {
         padding: 4px 8px;
     }
     .home-profile__about {
-        font-size: 23px;
+        font-size: 20px;
+        --intro-line-height: 32.2px;
         gap: 10px;
         min-height: 42px;
     }
@@ -1512,4 +1504,77 @@ html {
         max-width: calc(var(--layout-max-width) + 40px);
         margin-inline: auto;
     }
+}
+
+/* Homepage media hint: same direct link on touch, pointer and keyboard. */
+.channel-entry__thumbnail {
+    float: right;
+    width: 64px;
+    height: 48px;
+    margin: 2px 0 6px 16px;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-muted);
+}
+.channel-entry__thumbnail[hidden] {
+    display: none;
+}
+.channel-entry a:focus-visible {
+    outline: 2px solid var(--color-structure);
+    outline-offset: 4px;
+}
+.channel-entry a[data-channel-preview] {
+    display: flow-root;
+}
+
+/* Shared section links: the clipped overlay carries ink and yellow together,
+   so no animation frame places red lettering on the yellow highlight. */
+.section-heading-link {
+    position: relative;
+    display: inline-block;
+    color: var(--color-language);
+    text-decoration: none;
+}
+[data-theme="dark"] .section-heading-link {
+    color: color-mix(in srgb, var(--color-language) 78%, var(--color-text-primary));
+}
+.section-heading-link__wipe {
+    position: absolute;
+    inset: -2px -3px;
+    padding: 2px 3px;
+    color: #171717;
+    background: var(--color-channel);
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 180ms ease;
+    pointer-events: none;
+}
+.section-heading-link:focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: 6px;
+}
+.section-heading-link:focus-visible .section-heading-link__wipe {
+    clip-path: inset(0);
+}
+@media (hover: hover) and (pointer: fine) {
+    .section-heading-link:hover .section-heading-link__wipe {
+        clip-path: inset(0);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .section-heading-link__wipe {
+        transition: none;
+    }
+}
+
+/* The whole introduction begins on the reading grid, with a natural inline greeting. */
+.home-profile__greeting {
+    flex: 0 0 auto;
+    align-self: center;
+    font-size: 0.78em;
+    line-height: 1;
+}
+
+.home-profile__about .home-profile__carousel {
+    height: var(--intro-line-height);
+    line-height: var(--intro-line-height);
 }

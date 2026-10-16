@@ -3,6 +3,7 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
 ---
 <div class="home-profile">
     <a href="/me" class="home-profile__about" aria-label="About Jabriel">
+        <span class="home-profile__greeting" aria-hidden="true">👋</span>
         <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance."><span class="home-profile__lead">I build </span><span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
         <span class="home-profile__name">Jabriel</span>
     </a>

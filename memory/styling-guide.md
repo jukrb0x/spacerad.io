@@ -227,3 +227,21 @@ Custom 6px width, rounded, themed colors (`--c-scrollbar` / `--c-scrollbar-hover
 - 280px width, scale + opacity transition
 - Image container 140px height
 - Title: 2-line clamp, Description: 3-line clamp
+
+### Homepage section links and Channel photos
+
+Blog and Channel headings share red resting links with an ink-on-yellow clipped
+wipe on fine-pointer hover and keyboard focus. The overlay is aria-hidden and
+carries ink and background together; reduced motion makes it immediate. The
+static decorative greeting starts the inline About row on the reading grid.
+The intro text follows with the normal flex gap and shares its baseline with
+the rotating phrase.
+
+Home shows five Channel notes. Only the first posted photo receives a small
+thumbnail, loaded when visible; pointer/focus enlargement reuses the article
+preview controller. Async Channel insertion registers new links without resetting
+an active Blog preview.
+
+The home About intro uses Cabin 400 at 24px on desktop and 20px on mobile.
+The bundled font supports weights 400–700. Preserve the 39.2px/32.2px line boxes
+and 48px/42px minimum row heights; the inline greeting scales at 0.78em.
