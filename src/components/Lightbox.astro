@@ -266,10 +266,12 @@ const { id = "lightbox", selector, showCounter = true } = Astro.props;
 				if (target) { event.preventDefault(); openTarget(target); }
 				return;
 			}
+		}, { signal });
+
+		dialog.addEventListener("keydown", (event) => {
 			if (!dialog.open) return;
-			if (["Escape", "ArrowLeft", "ArrowRight"].includes(event.key)) event.preventDefault();
+			if (["ArrowLeft", "ArrowRight"].includes(event.key)) event.preventDefault();
 			switch (event.key) {
-				case "Escape": close(); break;
 				case "ArrowLeft": step(-1); break;
 				case "ArrowRight": step(1); break;
 			}

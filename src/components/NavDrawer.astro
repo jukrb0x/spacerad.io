@@ -184,12 +184,8 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             setNavOpen(false);
         });
 
-        // Document-level listeners (cleaned via AbortController)
-        document.addEventListener("keydown", (e) => {
+        overlay.addEventListener("keydown", () => {
             if (overlay.open) overlay.setAttribute("data-nav-input", "keyboard");
-            if (e.key === "Escape" && overlay.open) {
-                setNavOpen(false);
-            }
         }, { signal });
 
         // Close drawer instantly before page swap to prevent flash
