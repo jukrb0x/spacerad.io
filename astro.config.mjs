@@ -16,6 +16,7 @@ import rehypeSlug from "rehype-slug";
 import { remarkAlert } from "remark-github-blockquote-alert";
 import remarkMath from "remark-math";
 import UnoCSS from "unocss/astro";
+import { codeDark, codeLight } from "./scripts/code-themes.mjs";
 import { rehypeMermaidPre } from "./scripts/rehype-mermaid-pre.mjs";
 import { remarkModifiedTime } from "./scripts/remark-modified-time.mjs";
 
@@ -23,8 +24,8 @@ import { remarkModifiedTime } from "./scripts/remark-modified-time.mjs";
 const rehypePrettyCodeOptions = {
     // Use dual themes for light/dark mode support
     theme: {
-        light: "github-light",
-        dark: "github-dark",
+        light: codeLight,
+        dark: codeDark,
     },
     // Keep the background from the theme
     keepBackground: false,
