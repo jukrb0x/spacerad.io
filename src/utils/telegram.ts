@@ -71,6 +71,8 @@ export interface TelegramPost {
     datetime: string;
     title: string;
     content: string;
+    /** First posted photo, exposed for the homepage without parsing content HTML. */
+    previewImage?: string;
     text: string;
     forwardedFrom?: string;
     forwardedFromLink?: string;
@@ -296,6 +298,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
                 title,
                 content: sanitizeHtml(contentHtml, importedHtmlPolicy),
                 text,
+                ...(images[0] && { previewImage: images[0] }),
                 ...(forwardedFrom && { forwardedFrom }),
                 ...(forwardedFromLink && { forwardedFromLink }),
                 ...(linkPreview && { linkPreview }),

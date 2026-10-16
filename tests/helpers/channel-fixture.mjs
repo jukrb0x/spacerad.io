@@ -4,6 +4,7 @@ const channel = {
     avatar: "/favicon.svg",
     posts: Array.from({ length: 8 }, (_, index) => ({
         id: String(100 - index),
+        ...(index === 0 ? { previewImage: "/og-image.png" } : {}),
         datetime: "2026-10-01T12:00:00Z",
         title: "Channel layout fixture",
         text: "A channel post with a local image and reading content.",

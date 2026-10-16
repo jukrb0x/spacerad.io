@@ -5,9 +5,12 @@ import { Icon } from "astro-icon/components";
     <div class="channel-fallback">Loading the latest channel notes… <a href="/channel">Read the Channel <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
 </div>
 <script>
+    import { registerPostPreviewLinks } from "../../scripts/post-preview";
+    let thumbnails: IntersectionObserver | undefined;
     let request: AbortController | undefined;
     async function initChannelSlot() {
         request?.abort();
+        thumbnails?.disconnect();
         const element = document.querySelector<HTMLElement>("[data-latest-channel]");
         if (!element) return;
         const controller = new AbortController();
@@ -16,7 +19,21 @@ import { Icon } from "astro-icon/components";
             const response = await fetch("/api/latest-channel", { signal: controller.signal });
             if (!response.ok) throw new Error("Channel unavailable");
             const html = await response.text();
-            if (!controller.signal.aborted && element.isConnected) element.innerHTML = html;
+            if (!controller.signal.aborted && element.isConnected) {
+                element.innerHTML = html;
+                registerPostPreviewLinks(element);
+                // Load only visible first-photo thumbnails; hovering can load the same URL.
+                thumbnails = new IntersectionObserver((entries) => {
+                    for (const entry of entries) {
+                        if (!entry.isIntersecting) continue;
+                        const image = entry.target as HTMLImageElement;
+                        image.addEventListener("error", () => { image.hidden = true; }, { once: true });
+                        image.src = image.dataset.channelThumbnail || "";
+                        thumbnails?.unobserve(image);
+                    }
+                });
+                element.querySelectorAll("[data-channel-thumbnail]").forEach(image => thumbnails?.observe(image));
+            }
         } catch {
             if (controller.signal.aborted || !element.isConnected) return;
             const fallback = element.querySelector(".channel-fallback");
@@ -24,5 +41,5 @@ import { Icon } from "astro-icon/components";
         }
     }
     document.addEventListener("astro:page-load", initChannelSlot);
-    document.addEventListener("astro:before-swap", () => request?.abort());
+    document.addEventListener("astro:before-swap", () => { request?.abort(); thumbnails?.disconnect(); });
 </script>

@@ -35,7 +35,7 @@ for (const width of [320, 390, 430, 768, 1440]) {
                     assert.ok(Math.abs(section.x - identity.x) < 1);
                     assert.ok(Math.abs(identity.width - section.width) < 1, "Channel identity spans the reading column");
                     const heading = await page.locator(".home-channel__identity h2").boundingBox();
-                    const entry = await page.locator(".home-channel__identity > span").boundingBox();
+                    const entry = await page.locator(".home-channel__more").boundingBox();
                     assert.ok(entry.x > heading.x + heading.width, "Channel action sits beside its heading");
                     assert.ok(Math.abs(entry.y + entry.height - heading.y - heading.height) < 8, "identity keeps a shared text baseline");
                     const first = await page.locator(".channel-entry").nth(0).boundingBox();

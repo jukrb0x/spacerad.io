@@ -122,3 +122,8 @@ emit both spellings and may therefore report only the `/roadmap` error. The tag
 collision warning is independent of filesystem case sensitivity. Existing verified
 translation pairs pass. These are reports of existing defects, not a reason to
 rewrite public routes automatically.
+
+Homepage Channel media checks use a first-photo fixture and cover five entries,
+viewport-triggered thumbnail loading, shared preview dismissal, missing-image
+navigation, and one-tap touch links. The shared Blog/Channel heading links are
+checked in both themes for pointer/focus wipes and reduced motion.

@@ -15,7 +15,7 @@ export const prerender = true;
         <main id="main-content" tabindex="-1" class="editorial-shell" transition:animate="fade">
             <LatestPosts />
             <section class="home-channel" aria-labelledby="channel-title">
-                <a class="home-channel__identity" href="/channel"><h2 id="channel-title">Channel</h2><span>进入电台 <span aria-hidden="true">→</span></span></a>
+                <div class="home-channel__identity"><h2 id="channel-title"><a class="section-heading-link" href="/channel">Channel<span class="section-heading-link__wipe" aria-hidden="true">Channel</span></a></h2><a class="home-channel__more" href="/channel">进入电台 <span aria-hidden="true">→</span></a></div>
                 <LatestChannelSlot />
             </section>
         </main>

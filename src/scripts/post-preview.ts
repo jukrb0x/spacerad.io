@@ -11,6 +11,8 @@ type PostMetaMap = Record<string, PostMeta>;
 
 function postId(link: HTMLAnchorElement): string | null {
     const url = new URL(link.href, window.location.origin);
+    if (url.origin === window.location.origin && url.pathname === "/channel" && link.dataset.channelPreview)
+        return `channel:${link.dataset.channelPreview}`;
     return url.origin === window.location.origin && url.pathname.startsWith("/posts/")
         ? link.dataset.postId || url.pathname.slice(7).replace(/\/$/, "")
         : null;
@@ -240,9 +242,15 @@ class PreviewCard {
 }
 
 let dispose: (() => void) | undefined;
+let registerLinks: ((root: ParentNode) => void) | undefined;
+
+export function registerPostPreviewLinks(root: ParentNode): void {
+    registerLinks?.(root);
+}
 export function destroyPostPreview(): void {
     dispose?.();
     dispose = undefined;
+    registerLinks = undefined;
 }
 
 export function initPostPreview(root: ParentNode = document): void {
@@ -257,23 +265,39 @@ export function initPostPreview(root: ParentNode = document): void {
     } catch {
         return;
     }
-    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
-        if (link.closest("[data-no-preview], .toc") || link.dataset.preview === "off" || link.getAttribute("aria-hidden") === "true") return false;
-        const id = postId(link);
-        return !!id && !!metadata[id];
-    });
     const preview = new PreviewCard(metadata);
     const controller = new AbortController();
     const options = { signal: controller.signal };
-    for (const link of links) {
-        if (mouseEnabled) {
-            link.addEventListener("mouseenter", preview.enter, options);
-            link.addEventListener("mouseleave", preview.move, options);
+    const bound = new WeakSet<HTMLAnchorElement>();
+    registerLinks = (root) => {
+        for (const link of root.querySelectorAll<HTMLAnchorElement>("a[data-channel-preview]")) {
+            const id = postId(link);
+            if (id && link.dataset.channelImage)
+                metadata[id] = {
+                    title: "Channel · Photo",
+                    description: link.dataset.channelExcerpt || "",
+                    image: link.dataset.channelImage,
+                };
         }
-        link.addEventListener("focus", preview.focus, options);
-        link.addEventListener("blur", preview.hide, options);
-        link.addEventListener("click", preview.hide, options);
-    }
+        const links = Array.from(root.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
+            if (bound.has(link)) return false;
+            if (link.closest("[data-no-preview], .toc") || link.dataset.preview === "off" || link.getAttribute("aria-hidden") === "true")
+                return false;
+            const id = postId(link);
+            return !!id && !!metadata[id];
+        });
+        for (const link of links) {
+            bound.add(link);
+            if (mouseEnabled) {
+                link.addEventListener("mouseenter", preview.enter, options);
+                link.addEventListener("mouseleave", preview.move, options);
+            }
+            link.addEventListener("focus", preview.focus, options);
+            link.addEventListener("blur", preview.hide, options);
+            link.addEventListener("click", preview.hide, options);
+        }
+    };
+    registerLinks(root);
     if (mouseEnabled) {
         document.addEventListener("mousemove", preview.move, options);
         document.addEventListener("mouseleave", preview.leaveWindow, options);
