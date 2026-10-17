@@ -1288,6 +1288,30 @@ a {
   word-break: break-word;
 }
 
+// Keep desktop contents quiet until the reader engages with the region.
+@media (min-width: 1400px) and (hover: hover) and (pointer: fine) {
+  [data-toc-sidebar] .toc-title,
+  [data-toc-sidebar] .toc-link {
+    opacity: .5;
+    transition: opacity 150ms ease;
+  }
+  [data-toc-sidebar] .toc-link.active {
+    opacity: .85;
+  }
+  [data-toc-sidebar]:hover .toc-title,
+  [data-toc-sidebar]:hover .toc-link,
+  [data-toc-sidebar]:focus-within .toc-title,
+  [data-toc-sidebar]:focus-within .toc-link {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-toc-sidebar] .toc-title,
+  [data-toc-sidebar] .toc-link {
+    transition: none;
+  }
+}
+
 // Mobile TOC overrides
 .toc-mobile {
   .toc {
