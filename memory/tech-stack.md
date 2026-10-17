@@ -264,6 +264,13 @@ Check `tsconfig.json` in repo when necessary
 
 ### Journal search index boundaries
 
+The overlay renders one query state (`idle`, `loading`, `results`, `no-results`, or
+`error`). Input updates the state before debounce; async updates must still belong
+to the current query and open dialog. The live announcement sits outside the busy
+results region. Native `dialog::backdrop` owns dimming throughout the modal lifetime;
+the transparent full-screen button handles outside clicks, while `is-open` animates
+only the panel. Preserve the literal backdrop color fallback for older WebKit.
+
 `BlogPost.astro` indexes its article title, prose and own tags (weight 0.5), including
 the standalone About/Friends pages. `Prose.astro` forwards the indexing attributes
 to its existing DOM element. Archives and topic pages index their own headings at

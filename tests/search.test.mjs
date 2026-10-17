@@ -35,7 +35,10 @@ class Element extends Target {
             }),
         contains: (name) => this.classes.has(name),
     };
-    setAttribute() {}
+    attributes = {};
+    setAttribute(name, value) {
+        this.attributes[name] = value;
+    }
     showModal() {
         assert.ok(this.isConnected, "detached dialog must never reopen");
         this.open = true;
@@ -59,13 +62,13 @@ class Element extends Target {
         return null;
     }
 }
-function fixture(pagefind = { init: async () => {}, search: async () => ({ results: [] }) }) {
+function fixture(pagefind = { init: async () => {}, search: async () => ({ results: [] }) }, load = async () => pagefind) {
     const document = new Target();
     const timers = new Map();
     let timerID = 0;
     let locked = 0;
     let nodes;
-    const selectors = ["trigger", "overlay", "container", "input", "empty", "no-results", "list"];
+    const selectors = ["trigger", "overlay", "container", "input", "empty", "loading", "error", "status", "results", "no-results", "list"];
     function swap() {
         if (nodes)
             Object.values(nodes).forEach((node) => {
@@ -93,9 +96,7 @@ function fixture(pagefind = { init: async () => {}, search: async () => ({ resul
         setTimeout: schedule,
         clearTimeout: (id) => timers.delete(id),
         require: (path) =>
-            path.includes("scrollLock")
-                ? { lockScrollForDialog: () => locked++, unlockScrollForDialog: () => locked-- }
-                : { loadSearchIndex: async () => pagefind },
+            path.includes("scrollLock") ? { lockScrollForDialog: () => locked++, unlockScrollForDialog: () => locked-- } : { loadSearchIndex: load },
         exports: {},
         module: { exports: {} },
     });
@@ -126,10 +127,12 @@ function fixture(pagefind = { init: async () => {}, search: async () => ({ resul
 }
 function deferred() {
     let resolve;
-    const promise = new Promise((r) => {
+    let reject;
+    const promise = new Promise((r, j) => {
         resolve = r;
+        reject = j;
     });
-    return { promise, resolve };
+    return { promise, resolve, reject };
 }
 function results(title) {
     return { results: [{ data: async () => ({ url: "/posts/example/", meta: { title } }) }] };
@@ -205,6 +208,83 @@ test("closing invalidates an already pending search", async () => {
     pending.resolve(results("late"));
     await f.flush();
     assert.equal(f.nodes.list.children.length, 0);
+});
+
+test("query state is loading before debounce and stays owned by the latest input", async () => {
+    const old = deferred();
+    const next = deferred();
+    const f = fixture({ search: (query) => (query === "old" ? old.promise : next.promise) });
+    f.key("k");
+    await f.flush();
+    f.nodes.input.value = "old";
+    f.nodes.input.dispatch("input");
+    assert.equal(f.nodes.results.dataset.state, "loading");
+    assert.equal(f.nodes.loading.classes.has("hidden"), false);
+    assert.equal(f.nodes.empty.classes.has("hidden"), true);
+    await f.flush();
+    f.nodes.input.value = "next";
+    f.nodes.input.dispatch("input");
+    await f.flush();
+    old.resolve(results("old"));
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "loading");
+    next.resolve({ results: [] });
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "no-results");
+    assert.equal(f.nodes.results.attributes["aria-busy"], "false");
+    f.nodes.input.value = "";
+    f.nodes.input.dispatch("input");
+    assert.equal(f.nodes.results.dataset.state, "idle");
+});
+
+test("a stale error cannot replace loading or a close-and-reopen idle state", async () => {
+    const old = deferred();
+    const next = deferred();
+    const f = fixture({ search: (query) => (query === "old" ? old.promise : next.promise) });
+    f.key("k");
+    await f.flush();
+    f.nodes.input.value = "old";
+    f.nodes.input.dispatch("input");
+    await f.flush();
+    f.nodes.input.value = "next";
+    f.nodes.input.dispatch("input");
+    await f.flush();
+    old.reject(new Error("stale failure"));
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "loading");
+    f.key("Escape");
+    f.key("k");
+    await f.flush();
+    next.reject(new Error("closed query failure"));
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "idle");
+    assert.equal(f.nodes.status.textContent, "");
+    assert.equal(f.nodes.list.children.length, 0);
+});
+
+test("index loading errors become visible and a reopened query can recover", async () => {
+    let unavailable = true;
+    const f = fixture(undefined, async () => {
+        if (unavailable) throw new Error("index unavailable");
+        return { search: async () => results("recovered") };
+    });
+    f.key("k");
+    await f.flush();
+    f.nodes.input.value = "land";
+    f.nodes.input.dispatch("input");
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "error");
+    assert.equal(f.nodes.error.classes.has("hidden"), false);
+    f.key("Escape");
+    f.key("k");
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "idle");
+    unavailable = false;
+    f.nodes.input.value = "land";
+    f.nodes.input.dispatch("input");
+    await f.flush();
+    assert.equal(f.nodes.results.dataset.state, "results");
+    assert.equal(f.nodes.status.textContent, "1 result found");
 });
 
 function indexFixture() {

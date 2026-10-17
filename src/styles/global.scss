@@ -190,8 +190,9 @@ body {
   width: 100%;
   height: 100%;
 
+  // Native modal lifecycle owns the dimming layer, including interrupted open/close.
   &::backdrop {
-    background: transparent;
+    background: var(--color-overlay-dark-40, rgba(0, 0, 0, 0.4));
   }
 
   &[open] {
@@ -204,16 +205,8 @@ body {
     position: absolute;
     inset: 0;
     border: none;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    opacity: 0;
-    transition: opacity 200ms;
+    background: transparent;
     cursor: default;
-  }
-
-  &.is-open &__backdrop {
-    opacity: 1;
   }
 
   &__container {
