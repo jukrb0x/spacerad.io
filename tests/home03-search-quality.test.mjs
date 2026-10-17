@@ -247,6 +247,16 @@ test("browser-back SPA navigation cancels native initialization while it is load
         await page.locator("[data-search-input]").fill("Landscape");
         await loading;
         const stopped = new Promise((resolve) => page.workers()[0].on("close", resolve));
+        await page.evaluate(() => {
+            window.searchRouteLoaded = false;
+            document.addEventListener(
+                "astro:page-load",
+                () => {
+                    window.searchRouteLoaded = true;
+                },
+                { once: true },
+            );
+        });
         await page.goBack();
         await page.waitForURL(/\/posts\/?$/);
         await stopped;
@@ -254,7 +264,9 @@ test("browser-back SPA navigation cancels native initialization while it is load
         assert.equal(await page.locator("body").evaluate((e) => e.style.overflow), "");
         for (const release of releases) release();
         await context.unroute(pattern);
-        await page.locator("[data-search-trigger]").click();
+        await page.waitForFunction(() => window.searchRouteLoaded);
+        // History restores the archive scroll; its auto-hiding header may be offscreen.
+        await page.keyboard.press("Control+k");
         await expectHit(page, "地形草", zhMemory);
     } finally {
         for (const release of releases) release();
