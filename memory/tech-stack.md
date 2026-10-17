@@ -291,3 +291,11 @@ UTF-16 units) has zero native results, inspect at most ten unquoted candidates a
 only content containing the full literal phrase. This preserves exactness within that
 candidate window, but is not exhaustive phrase search; mixed-script/punctuated/longer
 quoted queries retain native behavior. No extra tokens or authoring schema are needed.
+
+### Deferred Remark42 startup
+
+`src/utils/deferEmbed.ts` gates the default Remark42 widget on the comments section entering the viewport or receiving pointer/focus intent. `astro:before-swap` disconnects the observer and removes intent listeners; Remark42 retains its existing abortable bootstrap and vendor destruction. No markup or CSS changes. Cusdis remains unchanged.
+
+### Channel image dimensions
+
+Telegram single-photo wrappers provide media width plus a proportional spacer. The parser accepts only positive, bounded dimensions yielding integral pixel height, and ignores album crop frames and unknown formats. Width/height hints reserve single-photo space; album thumbnails retain square cropping. No extra media fetch, image transformation or authoring field is introduced.

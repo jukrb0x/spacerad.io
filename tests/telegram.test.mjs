@@ -61,3 +61,25 @@ test("Telegram passes pagination and retains fetch timeout/error behavior", asyn
     t.mock.method(globalThis, "fetch", async () => new Response(null, { status: 503, statusText: "Unavailable" }));
     await assert.rejects(fetchTelegramChannel("SpaceRad_io"), /Failed to fetch channel/);
 });
+
+test("Telegram single photos preserve upstream intrinsic dimensions without using album crop frames", async (t) => {
+    const single = fixture
+        .replace('style="background-image:', 'style="width:800px;background-image:')
+        .replace("example.jpg')\"></a>", 'example.jpg\')"><i class="tgme_widget_message_photo" style="padding-top:60%"></i></a>');
+    const result = await channel(t, single);
+    const image = cheerio.load(result.posts[0].content)(".telegram-post-image");
+    assert.equal(image.attr("width"), "800");
+    assert.equal(image.attr("height"), "480");
+    assert.equal(result.posts[0].previewImage, image.attr("src"));
+    for (const html of [
+        fixture,
+        single.replace("width:800px", "width:0px"),
+        single.replace("padding-top:60%", "padding-top:NaN%"),
+        single.replace("padding-top:60%", "padding-top:60%;padding-top:50%"),
+        single.replace("tgme_widget_message_photo_wrap", "tgme_widget_message_photo_wrap grouped_media_wrap"),
+    ]) {
+        const missing = cheerio.load((await channel(t, html)).posts[0].content)(".telegram-post-image");
+        assert.equal(missing.attr("width"), undefined);
+        assert.equal(missing.attr("height"), undefined);
+    }
+});
