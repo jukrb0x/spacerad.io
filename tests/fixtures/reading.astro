@@ -1,0 +1,24 @@
+---
+import BaseHead from "../../src/components/BaseHead.astro";
+import Header from "../../src/components/Header.astro";
+import Footer from "../../src/components/Footer.astro";
+import LatestPosts from "../../src/components/home/LatestPosts.astro";
+import LatestChannelSlot from "../../src/components/home/LatestChannelSlot.astro";
+import { readingPosts } from "../helpers/reading-fixture.mjs";
+export function getStaticPaths() {
+    return ["with-image", "without-image"].map((kind) => ({ params: { kind } }));
+}
+const posts = readingPosts(Astro.params.kind);
+---
+<!doctype html>
+<html lang="en">
+<head><BaseHead title="Reading layout fixture" description="Browser regression fixture" /></head>
+<body class="home-page">
+<Header />
+<main id="main-content" tabindex="-1" class="editorial-shell">
+    <LatestPosts posts={posts} />
+    <section class="home-channel"><LatestChannelSlot /></section>
+</main>
+<Footer />
+</body>
+</html>

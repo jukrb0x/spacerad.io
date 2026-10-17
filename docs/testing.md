@@ -127,3 +127,13 @@ Homepage Channel media checks use a first-photo fixture and cover five entries,
 viewport-triggered thumbnail loading, shared preview dismissal, missing-image
 navigation, and one-tap touch links. The shared Blog/Channel heading links are
 checked in both themes for pointer/focus wipes and reduced motion.
+
+### Reading layout fixtures
+
+The browser test server alone injects `/__test/reading/with-image` and
+`/__test/reading/without-image`. These render the real `LatestPosts` component
+with explicit article inputs, including an excluded draft, two illustrated rows
+and two text-only rows. The two lead cases cover Chinese/English labels and
+cover geometry/absence without relying on the newest published article. Normal
+homepage checks continue to use the real collection. Production builds register
+neither fixture routes nor design-lab routes; release checks enforce that boundary.

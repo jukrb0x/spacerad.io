@@ -30,9 +30,9 @@ test("home advertises the default large sharing card with its image metadata", a
 });
 
 test("articles retain their own cover or article fallback without default-card dimensions", async () => {
-    const custom = await head("posts/introducing-space-radio/");
+    const custom = await head("posts/ue5-landscape-grass-en/");
     const fallback = await head("posts/just-bought-a-new-domain-name-xcode-zip/");
-    assert.match(custom("og:image"), /^https:\/\/spacerad\.io\/_astro\/image\./);
+    assert.match(custom("og:image"), /^https:\/\/spacerad\.io\/_astro\/a-look-under-the-hood-at-unreal-engine-landscape-grass-en\./);
     assert.equal(fallback("og:image"), "https://spacerad.io/placeholder.png");
     for (const meta of [custom, fallback]) {
         assert.equal(meta("twitter:image"), meta("og:image"));

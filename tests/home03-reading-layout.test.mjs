@@ -11,7 +11,7 @@ after(async () => {
     await browser?.close();
 });
 
-async function open(width = 1440, options = {}) {
+async function open(width = 1440, options = {}, fixture) {
     const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce", serviceWorkers: "block", ...options });
     await context.route("**/*", (route) => (["GET", "HEAD", "OPTIONS"].includes(route.request().method()) ? route.continue() : route.abort()));
     await context.route("**/api/latest-channel", (route) =>
@@ -23,7 +23,7 @@ async function open(width = 1440, options = {}) {
     const page = await context.newPage();
     page.setDefaultTimeout(5000);
     page.setDefaultNavigationTimeout(20000);
-    await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+    await page.goto(fixture ? new URL(`/__test/reading/${fixture}`, baseURL).href : baseURL, { waitUntil: "domcontentloaded" });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForFunction(() => document.querySelector("[data-theme-toggle]")?.dataset.themeBound === "true");
     return { context, page };
@@ -59,10 +59,7 @@ for (const width of [1440, 390, 320])
                 assert.equal(await page.locator(".lead-post,.home-post").count(), 5);
                 await page.locator(".channel-entry:nth-child(3)").waitFor();
                 assert.equal(await page.locator(".channel-entry").count(), 3);
-                assert.equal(await page.locator("main img").count(), 4);
                 assert.equal(await page.locator(".home-writing__grid").evaluate((el) => getComputedStyle(el).display), "block");
-                const image = await page.locator(".lead-post__image").boundingBox();
-                assert.equal(image.width, width >= 768 ? 520 : Math.min(300, (await page.locator("main").boundingBox()).width - 12));
                 let initial;
                 for (let index = 0; index < 6; index++) {
                     await settledWord(page, index);
@@ -194,3 +191,47 @@ test("About marker retracts, supports keyboard focus and keeps the touch link di
         await touch.context.close();
     }
 });
+
+for (const fixture of ["with-image", "without-image"])
+    for (const width of [1440, 390, 320])
+        for (const colorScheme of ["light", "dark"]) {
+            test(`reading cards preserve cover and text layouts (${fixture}, ${width}, ${colorScheme})`, async () => {
+                const { context, page } = await open(width, { colorScheme }, fixture);
+                try {
+                    assert.deepEqual(
+                        await page.locator(".lead-post h3 a, .home-post h3 a").evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
+                        [
+                            "/posts/fixture-lead",
+                            "/posts/fixture-image-one",
+                            "/posts/fixture-text-one",
+                            "/posts/fixture-image-two",
+                            "/posts/fixture-text-two",
+                        ],
+                    );
+                    assert.equal(await page.locator("main img").count(), fixture === "with-image" ? 3 : 2);
+                    assert.equal(await page.locator(".home-post__image").count(), 2);
+                    assert.equal(await page.locator(".home-post__body--image").count(), 2);
+                    const label = fixture === "with-image" ? "继续阅读" : "Continue reading";
+                    assert.equal(
+                        await page.locator(".lead-post").getByRole("link", { name: label, exact: true }).getAttribute("href"),
+                        "/posts/fixture-lead",
+                    );
+                    assert.equal(await page.locator(".home-writing__grid").evaluate((el) => getComputedStyle(el).display), "block");
+                    const leadImage = page.locator(".lead-post__image");
+                    assert.equal(await leadImage.count(), fixture === "with-image" ? 1 : 0);
+                    if (fixture === "with-image") {
+                        const image = await leadImage.boundingBox();
+                        assert.equal(image.width, width >= 768 ? 520 : Math.min(300, (await page.locator("main").boundingBox()).width - 12));
+                        assert.equal(await leadImage.locator("img").getAttribute("fetchpriority"), "high");
+                    } else {
+                        const title = await page.locator(".lead-post h3").boundingBox();
+                        const excerpt = await page.locator(".lead-post__excerpt").boundingBox();
+                        assert.ok(excerpt.y >= title.y + title.height);
+                        assert.ok(excerpt.y - title.y - title.height < 60, "no empty cover space before the excerpt");
+                    }
+                    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+                } finally {
+                    await context.close();
+                }
+            });
+        }

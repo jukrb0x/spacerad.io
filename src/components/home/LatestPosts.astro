@@ -3,10 +3,13 @@ import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import grassOverview from "../../content/blog/ue5-landscape-grass-memory-optimization-visibility-culling/mem-opt-overview.png";
 import { extractDescription } from "../../utils/extractDescription";
-import { getPublishedPosts } from "../../utils/posts";
+import { type BlogPost, getPublishedPosts } from "../../utils/posts";
 import { getPostTranslation } from "../../utils/postTranslations";
 
-const allPosts = (await getPublishedPosts()).filter((post) => !post.data.draft);
+interface Props {
+    posts?: BlogPost[];
+}
+const allPosts = (Astro.props.posts ?? await getPublishedPosts()).filter((post) => !post.data.draft);
 // Home leads with originals; their actual translations remain linked alongside.
 const originals = allPosts.filter((post) => post.data.lang !== "en" || !getPostTranslation(post.id, allPosts));
 const [lead, ...remaining] = originals.slice(0, 5);

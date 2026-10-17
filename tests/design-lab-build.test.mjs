@@ -11,13 +11,17 @@ test("production output has no design-lab routes or page modules", async () => {
     assert.ok(name, "run pnpm build before the release check");
     const { manifest } = await import(pathToFileURL(resolve(worker, name)));
     const leaked = manifest.routes.filter(({ routeData }) => /^\/design-lab(?:\/|$)/.test(routeData.route));
+    assert.equal(
+        manifest.routes.some(({ routeData }) => routeData.route.startsWith("/__test/")),
+        false,
+    );
     assert.deepEqual(
         leaked.map(({ routeData }) => routeData.route),
         [],
     );
     const paths = await readdir(output, { recursive: true });
     assert.deepEqual(
-        paths.filter((path) => /(?:^|\/)_?design-lab(?:\/|\.|$)/.test(path.replaceAll("\\", "/"))),
+        paths.filter((path) => /(?:^|\/)(?:_?design-lab|__test)(?:\/|\.|$)/.test(path.replaceAll("\\", "/"))),
         [],
     );
 });
@@ -30,5 +34,17 @@ test("production sitemap has no design-lab URLs", async () => {
 test("internal fragment APIs stay out of the public sitemap", async () => {
     for (const file of (await readdir(output)).filter((file) => /^sitemap.*\.xml$/.test(file))) {
         assert.doesNotMatch(await readFile(resolve(output, file), "utf8"), /<loc>[^<]*\/api\//);
+    }
+});
+
+// The curated study may render this draft locally, but never in a release.
+test("curated draft stays absent from production pages and sitemap", async () => {
+    const paths = await readdir(output, { recursive: true });
+    assert.equal(
+        paths.some((path) => path.includes("introducing-space-radio")),
+        false,
+    );
+    for (const file of (await readdir(output)).filter((file) => /^sitemap.*\.xml$/.test(file))) {
+        assert.doesNotMatch(await readFile(resolve(output, file), "utf8"), /\/posts\/introducing-space-radio(?:\/|<)/);
     }
 });

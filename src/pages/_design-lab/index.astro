@@ -11,7 +11,8 @@ import { radioPreview } from "../../utils/designLabRadioPreview";
 import { getPublishedPosts } from "../../utils/posts";
 import "../../styles/design-lab/prototype.css";
 export const prerender = true;
-const posts = (await getPublishedPosts()).filter((post) => !post.data.draft);
+// This route is injected only in dev, where curated drafts remain renderable.
+const posts = await getPublishedPosts();
 const selected = posts.find((post) => post.id === "introducing-space-radio");
 const landscape = posts.find((post) => post.id === "ue5-landscape-grass-en");
 const xcode = posts.find((post) => post.id === "just-bought-a-new-domain-name-xcode-zip");
