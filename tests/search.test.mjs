@@ -135,6 +135,19 @@ function results(title) {
     return { results: [{ data: async () => ({ url: "/posts/example/", meta: { title } }) }] };
 }
 
+test("opening frame preserves text entered before deferred focus", async () => {
+    const f = fixture();
+    let selected = false;
+    f.nodes.input.select = () => {
+        selected = true;
+    };
+    f.key("k");
+    f.nodes.input.value = "Lands";
+    await f.flush();
+    f.nodes.input.value = `${selected ? "" : f.nodes.input.value}cape Grass`;
+    assert.equal(f.nodes.input.value, "Landscape Grass");
+});
+
 test("repeated shortcut acquires one scroll lock; close releases it", async () => {
     const f = fixture();
     f.key("k");

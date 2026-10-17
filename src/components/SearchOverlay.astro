@@ -287,7 +287,8 @@
                 nextFrame(() => {
                     searchDialog.classList.add("is-open");
                     searchInput?.focus();
-                    searchInput?.select();
+                    // Do not select text entered while the opening frame was pending.
+                    if (searchInput && !searchInput.value) searchInput.select();
                 });
                 return;
             }
