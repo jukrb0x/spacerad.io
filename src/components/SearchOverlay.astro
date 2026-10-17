@@ -65,6 +65,8 @@
         <!-- Search Results -->
         <div
             data-search-results
+            data-state="idle"
+            aria-busy="false"
             data-scroll-container
             class="max-h-[60vh] overflow-y-auto py-3"
         >
@@ -73,12 +75,16 @@
                 <p>Enter keywords to search</p>
                 <p class="mt-2 text-sm">Search all posts</p>
             </div>
+            <div data-search-loading class="hidden py-8 text-center text-muted">
+                <p>Searching…</p>
+                <p class="mt-2 text-sm">Looking through all posts</p>
+            </div>
             <!-- No results state (hidden by default) -->
             <div data-search-no-results class="hidden py-8 text-center text-muted">
                 <p>No results found</p>
                 <p class="mt-2 text-sm">Try different keywords</p>
             </div>
-            <div data-search-error class="hidden py-8 text-center text-muted" role="status">
+            <div data-search-error class="hidden py-8 text-center text-muted">
                 <p>Search is unavailable</p>
                 <p class="mt-2 text-sm">Edit your search to try again</p>
             </div>
@@ -86,6 +92,8 @@
             <ul data-search-list class="hidden space-y-2" role="listbox" aria-label="Search Results">
             </ul>
         </div>
+
+        <p data-search-status class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 
         <!-- Search Footer -->
         <div class="flex items-center justify-between border-t border-subtle pt-3 text-xs text-muted">
@@ -125,6 +133,9 @@
         const searchCloseButtons = document.querySelectorAll<HTMLButtonElement>("[data-search-close]");
         const searchEmpty = document.querySelector<HTMLElement>("[data-search-empty]");
         const searchNoResults = document.querySelector<HTMLElement>("[data-search-no-results]");
+        const searchLoading = document.querySelector<HTMLElement>("[data-search-loading]");
+        const searchResults = document.querySelector<HTMLElement>("[data-search-results]");
+        const searchStatus = document.querySelector<HTMLElement>("[data-search-status]");
         const searchError = document.querySelector<HTMLElement>("[data-search-error]");
         const searchList = document.querySelector<HTMLElement>("[data-search-list]");
 
@@ -182,9 +193,10 @@
                 return;
             }
 
-            const pf = await loadSearchIndex();
-            if (!pf || !current(request)) return;
             try {
+                const pf = await loadSearchIndex();
+                if (!current(request)) return;
+                if (!pf) throw new Error("Search index is unavailable");
                 const search = await pf.search(query);
                 if (!current(request)) return;
 
@@ -199,50 +211,52 @@
 
                 if (current(request)) showResults(results);
             } catch (error) {
-                if (current(request)) {
-                    searchEmpty?.classList.add("hidden");
-                    searchNoResults?.classList.add("hidden");
-                    searchList?.classList.add("hidden");
-                    searchList?.replaceChildren();
-                    searchError?.classList.remove("hidden");
-                    selectedIndex = -1;
-                }
+                if (current(request)) setSearchState("error");
                 throw error;
             }
         }
 
-        function showEmpty() {
-            searchError?.classList.add("hidden");
-            searchEmpty?.classList.remove("hidden");
-            searchNoResults?.classList.add("hidden");
-            searchList?.classList.add("hidden");
+        type SearchState = "idle" | "loading" | "no-results" | "error" | "results";
+
+        // One renderer owns every query panel; async callers must pass the revision guard.
+        function setSearchState(state: SearchState, count = 0) {
+            const panels = { idle: searchEmpty, loading: searchLoading, "no-results": searchNoResults, error: searchError, results: searchList };
+            for (const [name, panel] of Object.entries(panels)) {
+                if (name === state) panel?.classList.remove("hidden");
+                else panel?.classList.add("hidden");
+            }
+            if (searchResults) {
+                searchResults.dataset.state = state;
+                searchResults.setAttribute("aria-busy", String(state === "loading"));
+            }
+            if (state !== "results") searchList?.replaceChildren();
+            if (searchStatus) {
+                searchStatus.textContent = {
+                    idle: "",
+                    loading: "Searching…",
+                    "no-results": "No results found",
+                    error: "Search is unavailable. Edit your search to try again.",
+                    results: `${count} ${count === 1 ? "result" : "results"} found`,
+                }[state];
+            }
             selectedIndex = -1;
+        }
+
+        function showEmpty() {
+            setSearchState("idle");
         }
 
         function showNoResults() {
-            searchError?.classList.add("hidden");
-            searchEmpty?.classList.add("hidden");
-            searchNoResults?.classList.remove("hidden");
-            searchList?.classList.add("hidden");
-            selectedIndex = -1;
+            setSearchState("no-results");
         }
 
         function showResults(results: any[]) {
-            searchError?.classList.add("hidden");
-            searchEmpty?.classList.add("hidden");
-            searchNoResults?.classList.add("hidden");
-            searchList?.classList.remove("hidden");
-
             if (!searchList) return;
-
             searchList.replaceChildren();
-
             results.forEach((result, index) => {
-                const item = createResultItem(result, index);
-                searchList.appendChild(item);
+                searchList.appendChild(createResultItem(result, index));
             });
-
-            selectedIndex = -1;
+            setSearchState("results", results.length);
         }
 
         function updateSelection(newIndex: number) {
@@ -380,6 +394,9 @@
             const query = (e.target as HTMLInputElement).value;
             const request = ++revision;
             clearTimeout(debounceTimer);
+            // Update before debounce and index loading, including cancellation by empty input.
+            setSearchState(query.trim() ? "loading" : "idle");
+            if (!query.trim()) return;
             debounceTimer = setTimeout(() => {
                 void performSearch(query, request).catch((error) => {
                     if (current(request)) console.error("Search failed:", error);
