@@ -188,3 +188,38 @@ SOCIAL_LINKS = { github, email, telegram, rss }
 ### Mobile navigation containment
 
 The navigation dialog clips overflow (`overflow: clip`) so its translated panel cannot create a horizontally scrollable outer dialog during focus/animation. Vertical menu scrolling remains on `[data-scroll-container]`. Opening resolves the initial panel geometry before adding `is-open`; opening frames and closing timers are cancelled on interruption and route swaps. `tests/nav-drawer.test.mjs` covers lifecycle races; `tests/home03-nav-drawer.test.mjs` samples animated geometry across mobile widths, themes, motion preferences, repeat opens and route changes. iOS Safari behavior still requires device verification.
+
+### Channel profile description
+
+`fetchTelegramChannel()` retains `descriptionText` as plain text with Telegram's
+line breaks and blank lines (CRLF/CR normalized to LF), before the legacy HTML
+`description` list conversion. Posts, RSS and homepage excerpts retain their
+existing paths. The Channel sidebar receives `descriptionText` and renders it
+through Astro's escaped text interpolation with `white-space: pre-wrap`.
+
+Set `CHANNEL_DESCRIPTION_MODE` in `src/consts.ts`:
+
+- `first-line` (default): first logical line only, appropriate for the compact
+  curved profile card.
+- `full`: all text, including original line and blank-line boundaries.
+- `merged`: trim each line, omit empty lines and join with one space; preserve
+  spaces within each line.
+
+`src/utils/channelDescription.ts` applies this presentation policy without
+mutating source data. The card remains a circle with an 8% top cut in every mode.
+Its height is locked to its container width; content never stretches it into a
+capsule. The original `FM 466.6\n\nWe Know Nothing. 🪐` bio fits in `full` at the
+normal 13px text size and 88px avatar size with slightly tighter internal gaps.
+
+**Capacity constraint:** `full` selects all source text; it does not guarantee
+that an arbitrarily long bio fits inside the fixed circle. `full` and `merged`
+are intended for bios that fit. Oversized text can be clipped by the shape, so
+check desktop and mobile after changing the mode, title, or upstream Telegram
+bio. If it does not fit, choose `first-line` or shorten the upstream bio; a very
+long first line also requires a fit check. Do not report an overflowing `full`
+layout as displaying the complete bio. There is no automatic truncation,
+font-size reduction, expansion control, or circle resizing fallback.
+
+The project currently uses `first-line`. No page settings UI or client-side
+state is involved. The circle-external overflow candidates were temporary
+previews only and are not part of the project.

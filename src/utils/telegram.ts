@@ -83,6 +83,8 @@ export interface TelegramPost {
 
 export interface TelegramChannel {
     title: string;
+    /** Plain upstream description, before HTML/list formatting; keep line boundaries. */
+    descriptionText: string;
     description: string;
     avatar: string;
     posts: TelegramPost[];
@@ -130,6 +132,8 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
         // Get description HTML to preserve line breaks
         const $description = $(".tgme_channel_info_description");
         $description.find("br").replaceWith("\n");
+
+        const descriptionText = $description.text().replace(/\r\n?/g, "\n");
 
         // Convert numbered lists in description
         let description = $("<div>").text($description.text().trim()).html() || "";
@@ -338,6 +342,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
         return {
             title,
             description,
+            descriptionText,
             avatar,
             posts: posts.reverse(), // Reverse to show newest first
         };

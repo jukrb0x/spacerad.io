@@ -1,5 +1,6 @@
 const channel = {
     title: "SpaceRadio FM",
+    descriptionText: "FM 466.6\n\nWe Know Nothing. 🪐",
     description: "FM 466.6 We Know Nothing. 🪐",
     avatar: "/favicon.svg",
     posts: Array.from({ length: 8 }, (_, index) => ({
