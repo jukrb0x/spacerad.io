@@ -59,7 +59,15 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 ))
             }
         </nav>
-        <p class="nav-drawer__phrase" data-nav-phrase data-nav-phrases={JSON.stringify(SITE_TITLE_ALT)} aria-hidden="true"></p>
+        <button
+            type="button"
+            class="nav-drawer__phrase"
+            data-nav-phrase
+            data-nav-phrases={JSON.stringify(SITE_TITLE_ALT)}
+            aria-describedby="nav-phrase-hint"
+        ><span data-nav-phrase-text></span></button>
+        <span id="nav-phrase-hint" class="sr-only">Show another phrase</span>
+        <span class="sr-only" data-nav-phrase-status aria-live="polite" aria-atomic="true"></span>
     </div>
 </dialog>
 
@@ -74,6 +82,18 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
     .nav-drawer__phrase {
         margin: auto 0 0;
+        align-self: flex-start;
+        display: inline-flex;
+        align-items: flex-end;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0;
+        border: 0;
+        appearance: none;
+        background: transparent;
+        font: inherit;
+        text-align: start;
+        cursor: pointer;
         color: var(--color-text-muted);
         font-size: var(--font-size-sm);
         line-height: 1.6;
@@ -98,7 +118,9 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const drawer = document.querySelector<HTMLElement>("[data-nav-drawer]");
         const closeButtons = document.querySelectorAll<HTMLButtonElement>("[data-nav-close]");
         const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
-        const phrase = document.querySelector<HTMLElement>("[data-nav-phrase]");
+        const phrase = document.querySelector<HTMLButtonElement>("[data-nav-phrase]");
+        const phraseText = document.querySelector<HTMLElement>("[data-nav-phrase-text]");
+        const phraseStatus = document.querySelector<HTMLElement>("[data-nav-phrase-status]");
         const phrases = JSON.parse(phrase?.dataset.navPhrases || "[]") as string[];
         const barTop = toggleButton?.querySelector<HTMLElement>("[data-bar-top]");
         const barMiddle = toggleButton?.querySelector<HTMLElement>("[data-bar-middle]");
@@ -113,12 +135,20 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         // Clean up previous document-level listeners
         drawerAbort?.abort();
         drawerAbort = new AbortController();
-        const { signal } = drawerAbort;
+        const controller = drawerAbort;
+        const { signal } = controller;
 
         const toggleClasses = (el: Element | null | undefined, add: string[], remove: string[]) => {
             if (!el) return;
             el.classList.remove(...remove);
             el.classList.add(...add);
+        };
+
+        const advancePhrase = () => {
+            if (!phraseText || phrases.length === 0) return;
+            const choices = phrases.filter((value) => value !== lastPhrase);
+            lastPhrase = choices[Math.floor(Math.random() * choices.length)] ?? phrases[0];
+            phraseText.textContent = lastPhrase;
         };
 
         const setNavOpen = (open: boolean, focusOrigin = document.activeElement) => {
@@ -132,11 +162,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
 
             if (open) {
-                if (!wasOpen && phrase && phrases.length > 0) {
-                    const choices = phrases.filter((value) => value !== lastPhrase);
-                    lastPhrase = choices[Math.floor(Math.random() * choices.length)] ?? phrases[0];
-                    phrase.textContent = lastPhrase;
-                }
+                if (!wasOpen) advancePhrase();
                 if (!overlay.open) {
                     lastFocusedElement = focusOrigin;
                     overlay.showModal();
@@ -153,6 +179,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                 toggleClasses(barBottom, ["-translate-y-1.5", "-rotate-45"], []);
                 toggleClasses(barMiddle, ["opacity-0"], []);
             } else {
+                if (phraseStatus) phraseStatus.textContent = "";
                 overlay.classList.remove("is-open");
                 toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
                 toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
@@ -170,45 +197,51 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             }
         };
 
-        // Element-level listeners (auto-cleaned when DOM swaps)
+        // Bind all controls to this DOM instance, including repeated page-load init.
+        phrase?.addEventListener("click", () => {
+            // The dialog stays open during its closing animation.
+            if (!overlay.open || toggleButton?.getAttribute("aria-expanded") !== "true") return;
+            advancePhrase();
+            if (phraseStatus) phraseStatus.textContent = lastPhrase;
+        }, { signal });
+
+        // Element-level listeners are removed before the DOM swaps.
         toggleButton?.addEventListener("click", (event) => {
             overlay.setAttribute("data-nav-input", event.detail > 0 ? "pointer" : "keyboard");
             setNavOpen(toggleButton.getAttribute("aria-expanded") !== "true", event.detail > 0 ? toggleButton : document.activeElement);
-        });
-        closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false)));
-        navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+        }, { signal });
+        closeButtons.forEach((btn) => btn.addEventListener("click", () => setNavOpen(false), { signal }));
+        navLinks.forEach((link) => link.addEventListener("click", () => setNavOpen(false), { signal }));
 
         // Intercept browser Escape to run animated close instead
         overlay.addEventListener("cancel", (e) => {
             e.preventDefault();
             setNavOpen(false);
-        });
+        }, { signal });
 
         overlay.addEventListener("keydown", () => {
             if (overlay.open) overlay.setAttribute("data-nav-input", "keyboard");
         }, { signal });
 
-        // Close drawer instantly before page swap to prevent flash
-        document.addEventListener("astro:before-swap", () => {
-            cancelAnimationFrame(openingFrame);
-            clearTimeout(closingTimer);
-            if (overlay.open) {
-                overlay.classList.remove("is-open");
-                toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
-                toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
-                toggleClasses(barMiddle, [], ["opacity-0"]);
-                if (locked) { locked = false; unlockScrollForDialog(); }
-                overlay.close();
-            }
-        }, { signal });
+        // Abort owns all disposal, both before a swap and on same-DOM re-init.
+        document.addEventListener("astro:before-swap", () => controller.abort(), { signal });
 
         const mdQuery = window.matchMedia("(min-width: 768px)");
         const handleMdChange = (e: MediaQueryListEvent) => e.matches && setNavOpen(false);
         mdQuery.addEventListener("change", handleMdChange);
-        // Clean up media query listener on abort too
+        // Release only this instance's resources before replacing its listeners.
         signal.addEventListener("abort", () => {
             cancelAnimationFrame(openingFrame);
             clearTimeout(closingTimer);
+            overlay.classList.remove("is-open");
+            toggleButton?.setAttribute("aria-expanded", "false");
+            toggleButton?.setAttribute("aria-label", "Open navigation menu");
+            toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
+            toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
+            toggleClasses(barMiddle, [], ["opacity-0"]);
+            if (locked) { locked = false; unlockScrollForDialog(); }
+            if (overlay.open) overlay.close();
+            if (phraseStatus) phraseStatus.textContent = "";
             mdQuery.removeEventListener("change", handleMdChange);
         });
     }
