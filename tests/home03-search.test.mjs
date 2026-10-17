@@ -3,6 +3,9 @@ import { after, before, test } from "node:test";
 import { chromium } from "playwright";
 import { baseURL, launchOptions, waitForPageAnimations } from "./helpers/browser.mjs";
 
+import { spaSwaps } from "./helpers/browser-profile.mjs";
+
+const swapCount = spaSwaps(10);
 let browser;
 before(async () => {
     browser = await chromium.launch(launchOptions);
@@ -33,10 +36,10 @@ async function routeClick(page, selector) {
     await page.waitForFunction(() => window.routeLoaded === true);
     await waitForPageAnimations(page);
 }
-test("ten SPA swaps retain one shortcut and one theme transition, without scroll-lock leaks", async () => {
+test(`${swapCount} SPA swaps retain one shortcut and one theme transition, without scroll-lock leaks`, async () => {
     const { context, page } = await open();
     try {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < swapCount; i++) {
             await routeClick(page, i % 2 ? '.site-header a[href="/posts"]' : ".site-brand");
             const preference = await page.locator("html").getAttribute("data-theme-mode");
             await page.locator("[data-theme-toggle]").first().click();
