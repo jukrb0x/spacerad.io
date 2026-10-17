@@ -230,6 +230,6 @@ Nextra didn't come with a multifaceted blogging framework, so I built (or buildi
     -   [x] Caption
     -   [x] Lightbox
 
-See [Roadmap](/roadmap) for more details.
+See [Roadmap](https://github.com/jukrb0x/wh0.is/blob/2f017fd2f2a8711863becf658d1e4f58ac857ba9/TODO.md#roadmap) for more details.
 
 Someday I will come for this section, stay tuned.
