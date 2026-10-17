@@ -122,6 +122,15 @@ Specialized blog layout. Additional features on top of Page:
 ## Key Components
 
 ### Layout Shell
+The shared `BaseHead.astro` declares the Space Radio favicon: the
+outlined SVG, a four-frame ICO (16/32/48/64), a 32px PNG fallback, and a separate
+opaque 180px Apple touch icon. These live in `public/`; the Apple image preserves
+18px canvas padding around the 144px artwork. The `v=v8-02` query changes the
+explicit icon URLs to avoid reusing the old Astro favicon cache. Root filenames
+remain available for implicit browser requests. Future artwork replacements
+must update the version in all four links; installed home-screen icons may still
+require removal and re-adding on the actual device. No PWA manifest is needed.
+
 | Component | Lines | Purpose |
 |-----------|-------|---------|
 | `BaseHead.astro` | — | SEO head (meta, OG, fonts, `<ClientRouter />`) |
