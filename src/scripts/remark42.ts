@@ -1,5 +1,6 @@
 import { createEmbedSystem, type EmbedSystemConfig } from "../lib/embedSystem";
 import { getThemeState, type ThemeName, type ThemeState } from "../lib/theme-effects";
+import { deferEmbed } from "../utils/deferEmbed";
 import { autoInit } from "../utils/spaLifecycle";
 
 type Remark42Config = {
@@ -124,7 +125,16 @@ const remark42System = createEmbedSystem(remark42Config);
 
 // Initialize using autoInit helper
 // Third-party loading must not delay the shell's initial page-load bindings.
-autoInit(() => remark42System.init(), "page-load");
+let cancelDeferred: (() => void) | undefined;
+autoInit(() => {
+    cancelDeferred?.();
+    const container = document.querySelector<HTMLElement>(CONTAINER_SELECTOR);
+    cancelDeferred = container ? deferEmbed(container, () => remark42System.init()) : undefined;
+}, "page-load");
 
 // Release the vendor instance before its article DOM is replaced.
-document.addEventListener("astro:before-swap", destroyRemark42);
+document.addEventListener("astro:before-swap", () => {
+    cancelDeferred?.();
+    cancelDeferred = undefined;
+    destroyRemark42();
+});

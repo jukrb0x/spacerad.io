@@ -198,11 +198,33 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
 
             // Get images
             const images: string[] = [];
+            let photoDimensions: { width: number; height: number } | undefined;
             $message.find(".tgme_widget_message_photo_wrap").each((_, photo) => {
                 const style = $(photo).attr("style") || "";
                 const match = style.match(/url\(['"](.+?)['"]\)/);
                 if (match?.[1]) {
                     images.push(getProxiedImageUrl(match[1]));
+                    // Telegram single-photo wrappers retain the media width and
+                    // proportional spacer. Album frames are cropped: never use them.
+                    if (!$(photo).hasClass("grouped_media_wrap")) {
+                        const widths = [...style.matchAll(/(?:^|;)\s*width\s*:\s*(\d+(?:\.\d+)?)px\s*(?=;|$)/g)];
+                        const spacer = $(photo).children(".tgme_widget_message_photo").attr("style") || "";
+                        const paddings = [...spacer.matchAll(/(?:^|;)\s*padding-top\s*:\s*(\d+(?:\.\d+)?)%\s*(?=;|$)/g)];
+                        if (widths.length === 1 && paddings.length === 1) {
+                            const width = Number(widths[0][1]);
+                            const height = (width * Number(paddings[0][1])) / 100;
+                            if (
+                                Number.isInteger(width) &&
+                                width > 0 &&
+                                width <= 32768 &&
+                                height > 0 &&
+                                height <= 32768 &&
+                                Math.abs(height - Math.round(height)) < 0.000001
+                            ) {
+                                photoDimensions = { width, height: Math.round(height) };
+                            }
+                        }
+                    }
                 }
             });
 
@@ -224,7 +246,13 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
             // Add images if any
             if (images.length > 0) {
                 const imagesHtml = images
-                    .map((img) => $("<img>").attr({ src: img, alt: title, loading: "lazy", class: "telegram-post-image" }).toString())
+                    .map((img) => {
+                        const image = $("<img>").attr({ src: img, alt: title, loading: "lazy", class: "telegram-post-image" });
+                        if (images.length === 1 && photoDimensions) {
+                            image.attr({ width: String(photoDimensions.width), height: String(photoDimensions.height) });
+                        }
+                        return image.toString();
+                    })
                     .join("");
                 contentHtml = `<div class="telegram-images">${imagesHtml}</div>${contentHtml}`;
             }

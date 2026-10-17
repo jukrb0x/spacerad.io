@@ -35,6 +35,7 @@ test("pending comment bootstrap never executes after leaving its article", async
     });
     try {
         await page.goto(new URL("/posts/ue5-landscape-grass", baseURL).href, { waitUntil: "domcontentloaded" });
+        await page.locator(".comments-section").scrollIntoViewIfNeeded();
         await requested;
         await page.locator(".editorial-back a").click();
         await page.waitForURL(/\/posts\/?$/);
