@@ -1,5 +1,6 @@
 import { defineCollection, type ImageFunction, z } from "astro:content";
 import { glob } from "astro/loaders";
+import { withGitModifiedTime } from "../scripts/git-modified-time.mjs";
 
 const createSharedSchema = (image: ImageFunction) =>
     z.object({
@@ -8,6 +9,9 @@ const createSharedSchema = (image: ImageFunction) =>
         // Transform string to Date object
         published: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
+        // Derived by the loader; authored values are always replaced.
+        lastModified: z.string().optional(),
+        lastModifiedCommitUrl: z.string().optional(),
         // socialImage: local image (resolved by image()), external URL, or /public/ path
         socialImage: z.union([image(), z.string()]).optional(),
         tags: z.array(z.string()).optional().default([]),
@@ -21,7 +25,7 @@ const createSharedSchema = (image: ImageFunction) =>
     });
 
 const blog = defineCollection({
-    loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
+    loader: withGitModifiedTime(glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" })),
     schema: ({ image }) => createSharedSchema(image),
 });
 

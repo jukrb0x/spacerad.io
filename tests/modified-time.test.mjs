@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import test from "node:test";
 import { pathToFileURL } from "node:url";
-import { remarkModifiedTime } from "../scripts/remark-modified-time.mjs";
+import { getGitModifiedTime, withGitModifiedTime } from "../scripts/git-modified-time.mjs";
 
 const committed = "2020-01-02T12:00:00Z";
 const explicit = new Date("2021-03-04T12:00:00Z");
@@ -33,36 +34,32 @@ function commit(root, name = "post.md") {
     git(root, "add", "--", name);
     git(root, "-c", "commit.gpgsign=false", "commit", "-qm", "article");
 }
-function read(root, name = "post.md", initial = {}) {
+function read(root, name = "post.md") {
     const previous = process.cwd();
     try {
         process.chdir(root);
-        const file = { history: [join(root, name)], data: { astro: { frontmatter: { ...initial } } } };
-        remarkModifiedTime()(null, file);
-        return file.data.astro.frontmatter;
+        return getGitModifiedTime(join(root, name));
     } finally {
         process.chdir(previous);
     }
 }
 
-test("complete history preserves committed date and history link ahead of explicit updatedDate", (t) => {
+test("complete history preserves committed date and history link", (t) => {
     const root = fixture(t);
     commit(root);
-    const result = read(root, "post.md", { updatedDate: explicit });
+    const result = read(root);
     assert.equal(result.lastModified, committed);
-    assert.equal(result.updatedDate, explicit);
     assert.equal(result.lastModifiedCommitUrl, "https://github.com/example/blog/commits/main/post.md");
 });
 
-test("shallow boundary cannot fabricate an update; explicit fallback remains available", (t) => {
+test("shallow boundary cannot fabricate an update", (t) => {
     const root = fixture(t);
     commit(root);
     const clone = join(fixture(t, false), "clone");
     git(root, "clone", "-q", "--depth=1", pathToFileURL(root).href, clone);
-    const result = read(clone, "post.md", { updatedDate: explicit });
+    const result = read(clone);
     assert.equal(result.lastModified, undefined);
     assert.equal(result.lastModifiedCommitUrl, undefined);
-    assert.equal(result.updatedDate, explicit);
 });
 
 test("a real change after the shallow boundary remains trustworthy", (t) => {
@@ -75,10 +72,10 @@ test("a real change after the shallow boundary remains trustworthy", (t) => {
     assert.equal(read(clone).lastModified, undefined);
 });
 
-test("no Git history never turns checkout mtime or stale derived fields into an update", (t) => {
+test("no Git history never turns checkout mtime into an update", (t) => {
     const root = fixture(t, false);
     writeFileSync(join(root, "post.md"), "# Article\n");
-    const result = read(root, "post.md", { lastModified: "invalid", lastModifiedCommitUrl: "stale" });
+    const result = read(root);
     assert.equal(result.lastModified, undefined);
     assert.equal(result.lastModifiedCommitUrl, undefined);
 });
@@ -101,7 +98,7 @@ test("missing remote does not discard a trustworthy timestamp", (t) => {
     assert.equal(result.lastModifiedCommitUrl, undefined);
 });
 
-test("invalid Git timestamp cannot suppress an explicit updatedDate", (t) => {
+test("invalid Git timestamp produces no derived date", (t) => {
     const root = fixture(t);
     commit(root);
     const tree = git(root, "rev-parse", "HEAD^{tree}");
@@ -113,10 +110,9 @@ test("invalid Git timestamp cannot suppress an explicit updatedDate", (t) => {
         input: `tree ${tree}\nauthor ${identity}\ncommitter ${identity}\n\ninvalid date\n`,
     }).trim();
     git(root, "update-ref", "HEAD", hash);
-    const result = read(root, "post.md", { updatedDate: explicit });
+    const result = read(root);
     assert.equal(result.lastModified, undefined);
     assert.equal(result.lastModifiedCommitUrl, undefined);
-    assert.equal(result.updatedDate, explicit);
 });
 
 test("quoted filenames are passed literally and nested working directories keep repository-relative URLs", (t) => {
@@ -126,4 +122,72 @@ test("quoted filenames are passed literally and nested working directories keep 
     const result = read(join(root, "posts"), 'a"b.md');
     assert.equal(result.lastModified, committed);
     assert.equal(result.lastModifiedCommitUrl, "https://github.com/example/blog/commits/main/posts/a%22b.md");
+});
+
+// Exercise the locked Astro store: its same-digest shortcut is the regression.
+const require = createRequire(import.meta.url);
+const { MutableDataStore } = await import(pathToFileURL(join(dirname(require.resolve("astro/package.json")), "dist/content/mutable-data-store.js")));
+
+test("warm loader refreshes dates without replacing rendered content or explicit fallback", async (t) => {
+    const root = fixture(t);
+    commit(root);
+    const clone = join(fixture(t, false), "clone");
+    git(root, "clone", "-q", "--depth=1", pathToFileURL(root).href, clone);
+    const store = new MutableDataStore().scopedStore("blog");
+    store.set({
+        id: "post",
+        filePath: "post.md",
+        digest: "unchanged",
+        body: "body",
+        rendered: { html: "<p>cached</p>", metadata: {} },
+        data: { updatedDate: explicit, lastModified: "stale", lastModifiedCommitUrl: "stale" },
+        assetImports: ["image.png"],
+        deferredRender: true,
+    });
+    const before = store.get("post");
+    const loader = withGitModifiedTime({ name: "cached", load() {} });
+    const context = { store, config: { root: pathToFileURL(`${clone}/`) } };
+    await loader.load(context);
+    let result = store.get("post");
+    assert.equal(result.data.lastModified, undefined);
+    assert.equal(result.data.lastModifiedCommitUrl, undefined);
+    assert.equal(result.data.updatedDate, explicit);
+    for (const key of ["digest", "body", "rendered", "deferredRender"]) assert.equal(result[key], before[key]);
+    assert.deepEqual(result.assetImports, before.assetImports);
+    git(clone, "fetch", "-q", "--unshallow");
+    await loader.load(context);
+    result = store.get("post");
+    assert.equal(result.data.lastModified, committed);
+    git(clone, "remote", "remove", "origin");
+    await loader.load(context);
+    assert.equal(store.get("post").data.lastModified, committed);
+    assert.equal(store.get("post").data.lastModifiedCommitUrl, undefined);
+    const unchanged = store.get("post");
+    await loader.load(context);
+    assert.equal(store.get("post"), unchanged);
+});
+
+test("loader watcher writes derive dates from root-relative paths and reject authored dates", async (t) => {
+    const root = fixture(t);
+    commit(root);
+    const store = new MutableDataStore().scopedStore("blog");
+    let watcherStore;
+    const loader = withGitModifiedTime({
+        name: "watched",
+        load(context) {
+            watcherStore = context.store;
+        },
+    });
+    await loader.load({ store, config: { root: pathToFileURL(`${root}/`) } });
+    watcherStore.set({ id: "slug-is-not-file", filePath: "post.md", digest: "first", data: { updatedDate: explicit, lastModified: "authored" } });
+    assert.equal(store.get("slug-is-not-file").data.lastModified, committed);
+    watcherStore.set({ id: "slug-is-not-file", filePath: "post.md", digest: "changed", data: { title: "Changed", updatedDate: explicit } });
+    assert.equal(store.get("slug-is-not-file").data.title, "Changed");
+    assert.equal(store.get("slug-is-not-file").data.lastModified, committed);
+    watcherStore.set({
+        id: "no-file",
+        digest: "other",
+        data: { updatedDate: explicit, lastModified: "authored", lastModifiedCommitUrl: "authored" },
+    });
+    assert.deepEqual(store.get("no-file").data, { updatedDate: explicit });
 });

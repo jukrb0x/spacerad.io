@@ -132,7 +132,9 @@
 
 ## Custom Plugins
 
-### remarkModifiedTime (`remark-modified-time.mjs`)
+### Git modification metadata (`git-modified-time.mjs`)
+- Wraps the blog glob loader and refreshes Git metadata on every content load, including cached entries and watcher writes
+- Keeps Markdown body digests/rendered content and MDX deferred rendering intact; Git dates are not remark render-cache metadata
 - Executes `git log` for last commit time per file
 - Extracts GitHub repo URL from git config
 - Generates commit history link for each file
@@ -140,7 +142,7 @@
 - Date display priority remains trusted Git time, then explicit `updatedDate`; otherwise omit the update line
 - Missing/unsupported remote omits only the history link; dirty tracked files retain their last committed date
 - Outputs: `lastModified` (ISO string), `lastModifiedCommitUrl` (GitHub URL)
-- Branch: configurable, defaults to "main"
+- History links use the "main" branch by default
 
 ### rehypeMermaidPre (`rehype-mermaid-pre.mjs`)
 - Preprocesses Mermaid code blocks before rehype-pretty-code processes them
