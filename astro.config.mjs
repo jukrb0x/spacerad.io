@@ -18,7 +18,6 @@ import remarkMath from "remark-math";
 import UnoCSS from "unocss/astro";
 import { codeDark, codeLight } from "./scripts/code-themes.mjs";
 import { rehypeMermaidPre } from "./scripts/rehype-mermaid-pre.mjs";
-import { remarkModifiedTime } from "./scripts/remark-modified-time.mjs";
 
 /** @type {import("rehype-pretty-code").Options} */
 const rehypePrettyCodeOptions = {
@@ -106,7 +105,7 @@ export default defineConfig({
     ],
 
     markdown: {
-        remarkPlugins: [remarkMath, remarkAlert, remarkModifiedTime],
+        remarkPlugins: [remarkMath, remarkAlert],
         // Disable Astro's built-in syntax highlighting - using rehype-pretty-code instead
         syntaxHighlight: false,
         rehypePlugins: [
