@@ -35,7 +35,7 @@ const pageTitle = "Topics";
 	<body class="topics-page">
         <Header />
         <main id="main-content" tabindex="-1" class="page-shell" transition:animate="fade">
-            <div class="archive-heading"><p class="editorial-kicker">Explore the journal</p><h1>{pageTitle}</h1><p>{totalTags} subjects, collected across the writing.</p></div>
+            <div data-pagefind-body data-pagefind-weight="0.1" class="archive-heading"><p class="editorial-kicker">Explore the journal</p><h1>{pageTitle}</h1><p>{totalTags} subjects, collected across the writing.</p></div>
             <ul class="topic-grid">{sortedTags.map(([tag, count]) => <li><a href={`/tags/${tag}`}><strong>{tag}</strong><span>{count} {count === 1 ? "essay" : "essays"}</span></a></li>)}</ul>
         </main>
         <Footer />

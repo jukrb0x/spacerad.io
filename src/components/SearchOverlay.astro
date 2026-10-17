@@ -78,6 +78,10 @@
                 <p>No results found</p>
                 <p class="mt-2 text-sm">Try different keywords</p>
             </div>
+            <div data-search-error class="hidden py-8 text-center text-muted" role="status">
+                <p>Search is unavailable</p>
+                <p class="mt-2 text-sm">Edit your search to try again</p>
+            </div>
             <!-- Results list -->
             <ul data-search-list class="hidden space-y-2" role="listbox" aria-label="Search Results">
             </ul>
@@ -107,6 +111,7 @@
 </dialog>
 
 <script>
+    import { loadSearchIndex } from "../lib/search-index";
     import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
     let disposeSearchOverlay: (() => void) | undefined;
@@ -120,6 +125,7 @@
         const searchCloseButtons = document.querySelectorAll<HTMLButtonElement>("[data-search-close]");
         const searchEmpty = document.querySelector<HTMLElement>("[data-search-empty]");
         const searchNoResults = document.querySelector<HTMLElement>("[data-search-no-results]");
+        const searchError = document.querySelector<HTMLElement>("[data-search-error]");
         const searchList = document.querySelector<HTMLElement>("[data-search-list]");
 
         let lastFocusedElement: Element | null = null;
@@ -132,7 +138,6 @@
         let closeTimer: ReturnType<typeof setTimeout> | undefined;
         let debounceTimer: ReturnType<typeof setTimeout> | undefined;
         const frames = new Set<number>();
-        let pagefind: any = null;
         const current = (request: number) => !controller.signal.aborted && locked && request === revision;
         const nextFrame = (callback: () => void) => {
             const id = requestAnimationFrame(() => {
@@ -142,20 +147,6 @@
             frames.add(id);
         };
         let selectedIndex = -1;
-
-        async function loadPagefind() {
-            if (pagefind) return pagefind;
-            try {
-                // Use variable to prevent Vite from resolving at build time
-                const pagefindPath = "/pagefind/pagefind.js";
-                pagefind = await import(/* @vite-ignore */ pagefindPath);
-                await pagefind.init();
-                return pagefind;
-            } catch (e) {
-                console.error("Failed to load Pagefind:", e);
-                return null;
-            }
-        }
 
         function createResultItem(result: any, index: number) {
             const li = document.createElement("li");
@@ -191,25 +182,37 @@
                 return;
             }
 
-            const pf = await loadPagefind();
+            const pf = await loadSearchIndex();
             if (!pf || !current(request)) return;
+            try {
+                const search = await pf.search(query);
+                if (!current(request)) return;
 
-            const search = await pf.search(query);
-            if (!current(request)) return;
+                if (search.results.length === 0) {
+                    showNoResults();
+                    return;
+                }
 
-            if (search.results.length === 0) {
-                showNoResults();
-                return;
+                const results = await Promise.all(
+                    search.results.slice(0, 10).map((r: any) => r.data())
+                );
+
+                if (current(request)) showResults(results);
+            } catch (error) {
+                if (current(request)) {
+                    searchEmpty?.classList.add("hidden");
+                    searchNoResults?.classList.add("hidden");
+                    searchList?.classList.add("hidden");
+                    searchList?.replaceChildren();
+                    searchError?.classList.remove("hidden");
+                    selectedIndex = -1;
+                }
+                throw error;
             }
-
-            const results = await Promise.all(
-                search.results.slice(0, 10).map((r: any) => r.data())
-            );
-
-            if (current(request)) showResults(results);
         }
 
         function showEmpty() {
+            searchError?.classList.add("hidden");
             searchEmpty?.classList.remove("hidden");
             searchNoResults?.classList.add("hidden");
             searchList?.classList.add("hidden");
@@ -217,6 +220,7 @@
         }
 
         function showNoResults() {
+            searchError?.classList.add("hidden");
             searchEmpty?.classList.add("hidden");
             searchNoResults?.classList.remove("hidden");
             searchList?.classList.add("hidden");
@@ -224,6 +228,7 @@
         }
 
         function showResults(results: any[]) {
+            searchError?.classList.add("hidden");
             searchEmpty?.classList.add("hidden");
             searchNoResults?.classList.add("hidden");
             searchList?.classList.remove("hidden");

@@ -39,7 +39,7 @@ const groupedPosts = groupPostsByYear(posts);
 		<Header />
 		<main id="main-content" tabindex="-1" class="page-shell" transition:animate="fade">
 			<Back href="/tags" />
-			<div class="archive-heading"><p class="editorial-kicker">Writing by topic</p><h1>{tag}</h1><p>{posts.length} {posts.length === 1 ? "essay" : "essays"} in the journal.</p></div>
+			<div data-pagefind-body data-pagefind-weight="0.1" class="archive-heading"><p class="editorial-kicker">Writing by topic</p><h1>{tag}</h1><p>{posts.length} {posts.length === 1 ? "essay" : "essays"} in the journal.</p></div>
 			<section class="section-stack">
 				{groupedPosts.map(([year, yearPosts]) => (
 					<div class="relative" data-year-group>

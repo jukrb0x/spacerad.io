@@ -73,7 +73,7 @@ test("real Pagefind result navigation closes search and releases body scroll", a
 test("mobile TOC is named and browser-back navigation releases the modal scroll lock", async () => {
     const { context, page } = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     try {
-        await routeClick(page, 'a[data-post-id="introducing-space-radio"]');
+        await routeClick(page, 'a[data-post-id="ue5-landscape-grass"]');
         await page.locator("[data-toc-mobile-toggle]").click();
         assert.equal(await page.locator("[data-toc-mobile-drawer]").getAttribute("aria-label"), "Table of contents");
         assert.equal(await page.locator("body").evaluate((body) => body.style.overflow), "hidden");

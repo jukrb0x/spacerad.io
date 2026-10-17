@@ -259,3 +259,35 @@ Check `tsconfig.json` in repo when necessary
 | External links | rehype-external-links (auto target/rel) |
 | Figures | rehype-figure |
 | Code features | Line highlighting, char highlighting (v/s/i), line numbers, copy button, language labels |
+
+### Journal search index boundaries
+
+`BlogPost.astro` indexes its article title, prose and own tags (weight 0.5), including
+the standalone About/Friends pages. `Prose.astro` forwards the indexing attributes
+to its existing DOM element. Archives and topic pages index their own headings at
+weight 0.1; repeated article previews no longer compete with the articles themselves.
+Home contains derivative previews and navigation, so it is omitted from static article
+search. Channel is server-rendered and was already outside the static Pagefind index.
+Keep `data-pagefind-body` on future searchable content layouts.
+
+`search-index.ts` lazily starts one disposable worker for the first nonempty query.
+`search-worker.ts` loads separate native `en`/`zh-cn` module instances and combines
+their scores, preserving English stemming and Chinese index segmentation from either
+entry language. Only the selected ten result fragments are normally loaded. Failed
+HTTP/network/chunk validation or a ten-second request deadline terminates the whole
+worker; the next edited query starts fresh rather than retaining partial/empty results.
+Index/filter chunks use the pinned Pagefind 1.4 `pagefind_dcd` uncompressed signature;
+retest this transport guard and both languages before upgrading Pagefind. Browser
+`DecompressionStream` support is required for gzip chunk validation.
+
+Pending work is cancelled on a newer search, dialog close, SPA swap or pagehide. Idle
+native caches survive close/SPA; pagehide always releases the worker. These lifecycle
+bindings do not change modal/keyboard/scroll-lock handlers. Asset failure displays an
+unavailable message distinct from a genuine no-result search.
+
+Pagefind 1.4 cannot reliably search natural unspaced quoted Chinese phrases. A bounded
+fallback uses only public search/data APIs: if a Han-only quoted query (at most 200
+UTF-16 units) has zero native results, inspect at most ten unquoted candidates and keep
+only content containing the full literal phrase. This preserves exactness within that
+candidate window, but is not exhaustive phrase search; mixed-script/punctuated/longer
+quoted queries retain native behavior. No extra tokens or authoring schema are needed.
