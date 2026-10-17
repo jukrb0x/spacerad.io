@@ -9,7 +9,7 @@ import { getPostTranslation } from "../../utils/postTranslations";
 interface Props {
     posts?: BlogPost[];
 }
-const allPosts = (Astro.props.posts ?? await getPublishedPosts()).filter((post) => !post.data.draft);
+const allPosts = (Astro.props.posts ?? (await getPublishedPosts())).filter((post) => !post.data.draft);
 // Home leads with originals; their actual translations remain linked alongside.
 const originals = allPosts.filter((post) => post.data.lang !== "en" || !getPostTranslation(post.id, allPosts));
 const [lead, ...remaining] = originals.slice(0, 5);
