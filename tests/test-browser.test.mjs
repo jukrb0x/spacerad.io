@@ -87,3 +87,43 @@ test("owned server teardown terminates its child process", { timeout: 7000 }, as
         await rm(directory, { recursive: true, force: true });
     }
 });
+
+// The default entry must not inherit an accidentally shortened PR stress budget.
+test("browser profiles explicitly select stress budgets and default to full", { timeout: 10000 }, async () => {
+    const directory = await mkdtemp(join(tmpdir(), "spacerad-test-profile-"));
+    const server = createServer((_request, response) => response.end("ready"));
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const baseURL = `http://127.0.0.1:${server.address().port}`;
+    const fixture = join(directory, "profile.test.mjs");
+    const helper = new URL("./helpers/browser-profile.mjs", import.meta.url);
+    try {
+        await writeFile(
+            fixture,
+            `
+            import assert from "node:assert/strict";
+            import { spaSwaps } from ${JSON.stringify(helper.href)};
+            assert.deepEqual([spaSwaps(10), spaSwaps(20)], JSON.parse(process.env.EXPECTED_SWAPS));
+        `,
+        );
+        for (const [flags, expected] of [
+            [[], [10, 20]],
+            [["--profile=full"], [10, 20]],
+            [["--profile=pr"], [4, 4]],
+        ]) {
+            const result = await run({ BASE_URL: baseURL, BROWSER_TEST_PROFILE: "pr", EXPECTED_SWAPS: JSON.stringify(expected) }, [
+                ...flags,
+                fixture,
+            ]);
+            assert.equal(result.code, 0, result.output);
+        }
+        for (const flags of [["--profile=typo"], ["--profile="], ["--profile=pr", "--profile=full"]]) {
+            const result = await run({ BASE_URL: baseURL }, [...flags, fixture]);
+            assert.equal(result.code, 1, result.output);
+            assert.match(result.output, /Use one --profile=full or --profile=pr/);
+        }
+    } finally {
+        await new Promise((resolve) => server.close(resolve));
+        await rm(directory, { recursive: true, force: true });
+    }
+});

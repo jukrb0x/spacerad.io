@@ -108,13 +108,19 @@ test("direct article HTML exposes exactly one verified counterpart and no empty 
 
 for (const width of [320, 390, 1440]) {
     for (const theme of ["light", "dark"]) {
-        test(`article counterparts support keyboard, touch and SPA navigation at ${width}px in ${theme}`, async () => {
+        // One touch and one desktop keyboard path retain the complete SPA journey.
+        const interaction = (width === 390 && theme === "light") || (width === 1440 && theme === "dark");
+        test(`article counterpart geometry and focus${interaction ? " with complete SPA journey" : ""} at ${width}px in ${theme}`, async () => {
             const context = await openContext({ viewport: { width, height: 960 }, isMobile: width < 768, hasTouch: width < 768 });
             await context.addInitScript((value) => localStorage.setItem("theme-preference", value), theme);
             const page = await context.newPage();
             try {
-                await page.goto(new URL("/posts", baseURL).href);
-                await followSPA(page, page.locator(`a[data-post-id="${optimization}"]`), `/posts/${optimization}`);
+                if (interaction) {
+                    await page.goto(new URL("/posts", baseURL).href);
+                    await followSPA(page, page.locator(`a[data-post-id="${optimization}"]`), `/posts/${optimization}`);
+                } else {
+                    await page.goto(new URL(`/posts/${optimization}`, baseURL).href);
+                }
                 const link = entrance(page);
                 assert.equal(await link.count(), 1);
                 assert.equal((await link.innerText()).trim(), width < 768 ? "EN" : "English");
@@ -133,7 +139,10 @@ for (const width of [320, 390, 1440]) {
                 assert.notEqual(geometry.outline, "none");
                 assert.notEqual(geometry.color, "rgba(0, 0, 0, 0)");
                 if (width < 768) assert.ok(geometry.width >= 44 && geometry.height >= 44, "mobile target remains at least 44px");
-                await followSPA(page, link, `/posts/${optimization}-en`, true);
+                assert.equal(await page.locator("html").getAttribute("data-theme"), theme);
+                assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+                if (!interaction) return;
+                await followSPA(page, link, `/posts/${optimization}-en`, width >= 768);
                 assert.equal(await page.locator("html").getAttribute("lang"), "en");
                 assert.equal((await entrance(page).innerText()).trim(), "中文");
                 await followSPA(page, entrance(page), `/posts/${optimization}`);

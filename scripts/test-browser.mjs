@@ -60,7 +60,12 @@ async function main() {
     if (!["http:", "https:"].includes(url.protocol)) throw new Error("BASE_URL must use HTTP or HTTPS");
     const timeoutMs = Number(process.env.BROWSER_SERVER_TIMEOUT || 45000);
     if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("BROWSER_SERVER_TIMEOUT must be a positive number of milliseconds");
-    const files = process.argv.slice(2);
+    const args = process.argv.slice(2);
+    const profileArgs = args.filter((arg) => arg.startsWith("--profile="));
+    const profile = profileArgs[0]?.slice("--profile=".length) ?? "full";
+    if (profileArgs.length > 1 || !["full", "pr"].includes(profile)) throw new Error("Use one --profile=full or --profile=pr");
+    console.log(`Browser test profile: ${profile}`);
+    const files = args.filter((arg) => !arg.startsWith("--profile="));
     if (!files.length) {
         files.push(
             ...(await readdir(resolve(root, "tests")))
@@ -98,7 +103,7 @@ async function main() {
         await waitForServer(url, timeoutMs, server);
         tests = spawn(process.execPath, ["--test", "--test-concurrency=1", "--test-timeout=60000", ...files], {
             cwd: root,
-            env: { ...process.env, BASE_URL: url.href.replace(/\/$/, "") },
+            env: { ...process.env, BROWSER_TEST_PROFILE: profile, BASE_URL: url.href.replace(/\/$/, "") },
             detached: process.platform !== "win32",
             stdio: "inherit",
         });

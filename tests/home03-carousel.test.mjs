@@ -51,7 +51,9 @@ test("opening phrase is visible before enhancement scripts can load", async () =
     }
 });
 
-// Removing animate(), collapsing reserved width, or skipping/repeating a phrase must fail.
+// Real intermediate animation frames and reserved geometry remain browser checks.
+// One complete round retains every phrase's browser geometry; additional rounds
+// and boundary repeats are covered by build-words.test.mjs.
 for (const width of [1440, 390, 320]) {
     test(`whole phrases move vertically without changing surrounding geometry (${width}px)`, async () => {
         const { context, page } = await open({ viewport: { width, height: 960 } });
@@ -61,7 +63,7 @@ for (const width of [1440, 390, 320]) {
             const heading = await page.locator("#home-title").boundingBox();
             assert.equal(await current(page).textContent(), "games.", "controlled opening sample chooses a random phrase");
             const seen = [await current(page).textContent()];
-            for (let index = 0; index < 11; index++) {
+            for (let index = 0; index < phrases.length - 1; index++) {
                 await page.clock.fastForward(4000);
                 assert.equal(
                     await frame.evaluate((el) => el.getAnimations({ subtree: true }).length),
@@ -81,15 +83,13 @@ for (const width of [1440, 390, 320]) {
                 });
                 assert.ok(separation.gap >= separation.height, "the moving lines must not collide inside the clipped window");
                 const next = await page.locator(".home-profile__word[data-incoming]").textContent();
-                assert.notEqual(next, seen.at(-1), "no adjacent repeats, including between rounds");
+                assert.notEqual(next, seen.at(-1), "adjacent exchanges do not repeat");
                 await page.waitForFunction((expected) => document.querySelector(".home-profile__word[data-current]")?.textContent === expected, next);
                 seen.push(next);
                 assert.deepEqual(await frame.boundingBox(), initial);
                 assert.deepEqual(await page.locator("#home-title").boundingBox(), heading);
             }
-            for (const round of [seen.slice(0, 6), seen.slice(6)]) {
-                assert.deepEqual([...round].sort(), [...phrases].sort(), "each round contains every phrase exactly once");
-            }
+            assert.deepEqual([...seen].sort(), [...phrases].sort(), "every phrase receives real animation and geometry coverage");
             assert.deepEqual(await page.locator(".home-profile__word").allTextContents(), phrases);
             assert.equal(
                 await page.locator("#home-title").getAttribute("aria-label"),
@@ -172,13 +172,21 @@ for (const options of [{ javaScriptEnabled: false }, { reducedMotion: "reduce" }
         await page.addInitScript(() => {
             Math.random = () => 0.5;
         });
+        if (options.javaScriptEnabled !== false) await page.clock.install();
         try {
             await page.goto(baseURL);
             const expected = options.javaScriptEnabled === false ? "Unreal Engine." : "games.";
             assert.equal(await current(page).textContent(), expected);
             assert.equal(await current(page).isVisible(), true);
-            await page.waitForTimeout(4500);
-            assert.equal(await current(page).textContent(), expected);
+            assert.equal(await current(page).count(), 1);
+            assert.equal(await page.locator("[data-build-words]").evaluate((el) => el.getAnimations({ subtree: true }).length), 0);
+            if (options.javaScriptEnabled !== false) {
+                await page.clock.fastForward(20000);
+                assert.equal(await current(page).textContent(), expected);
+                assert.equal(await page.locator("[data-build-words]").evaluate((el) => el.getAnimations({ subtree: true }).length), 0);
+            }
+            // With JavaScript disabled there is no exchange controller; inspect the
+            // rendered state and absence of CSS animation instead of sleeping.
         } finally {
             await context.close();
         }

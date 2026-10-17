@@ -137,3 +137,52 @@ and two text-only rows. The two lead cases cover Chinese/English labels and
 cover geometry/absence without relying on the newest published article. Normal
 homepage checks continue to use the real collection. Production builds register
 neither fixture routes nor design-lab routes; release checks enforce that boundary.
+
+## Explicit browser profiles
+
+`pnpm test:browser` and `pnpm test:browser:full` retain the full SPA stress
+budgets (10 search swaps and 20 stacked-modal swaps). The existing CI workflow
+continues to use this default. Keep the full browser entry in main/release
+validation alongside the build-output-only `test:release` command.
+`pnpm test:browser:pr` is an explicitly selected shorter feedback layer: both
+loops run four swaps, or two complete out-and-back journeys. All other browser
+files still run. No diff selection, automatic schedule or workflow change is
+introduced. Profiles only adjust these two repetition counts; every per-swap
+assertion and both ownership scenarios remain.
+
+Each entry accepts explicit test file paths, for example:
+
+```sh
+pnpm test:browser:pr tests/home03-article-links.test.mjs tests/home03-search.test.mjs tests/home03-modal-keyboard.test.mjs tests/home03-carousel.test.mjs
+pnpm test:browser:full tests/home03-article-links.test.mjs tests/home03-search.test.mjs tests/home03-modal-keyboard.test.mjs tests/home03-carousel.test.mjs
+```
+
+The runner prints the selected profile and defaults to full even if an inherited
+`BROWSER_TEST_PROFILE` says `pr`. Direct `node --test` runs default to full;
+only for those direct invocations may `BROWSER_TEST_PROFILE=pr` select the short
+loops. Invalid profile values fail rather than silently reducing coverage.
+
+### Assertion coverage mapping
+
+| Original coverage | Candidate location / layer |
+| --- | --- |
+| Article counterpart six width/theme journeys | All six keep label, keyboard Tab/focus-visible, outline/color, viewport geometry, mobile 44px target, theme and horizontal overflow checks. Full journeys now use 390px/light touch and 1440px/dark keyboard representatives in both profiles. |
+| Counterpart language, ClientRouter same-document sentinel and page-load, reverse navigation, unpaired cleanup, Home re-entry | Retained in both representative journeys; all direct no-JS counterpart pairs and canonical reference checks remain unchanged. |
+| Search 10 swaps: shortcut uniqueness, theme transition/persistence, scroll unlock | Full: 10; PR: 4. Every assertion and final reload check retained. |
+| Stacked navigation/search 20 swaps: lock ownership, shortcut, closed overlays after route | Full: 20; PR: 4. Every assertion retained; other lightbox, focus, inertness, wheel, keyboard and touch cases unchanged. |
+| Carousel 11 exchanges per width, two shuffled rounds | Five real animated exchanges at each of 1440/390/320px cover every phrase in one complete round, retaining animation count, actual intermediate transform, non-collision, adjacent difference and frame/heading geometry. Existing `build-words.test.mjs` covers additional rounds, shuffle order, boundary repeats and cancelled rounds. |
+| Carousel words/accessibility/no horizontal scroll | Retained at all three widths. |
+| No-JS carousel 4.5s sleep | Direct rendered phrase, visibility, exactly one current word and absence of browser animation; disabled scripting cannot start the exchange controller. |
+| Initial reduced-motion carousel 4.5s sleep | Controlled clock advances 20s; phrase and no-animation assertions before/after. |
+| Hidden/media-change cancellation, SPA old DOM disposal and single rebind | Unchanged, including real animation completion. |
+
+True sequential typing and input races, draft filtering, sanitizer/image proxy
+boundaries, and the inexpensive with-image/without-image reading fixtures are
+unchanged. Unit shuffled-round coverage remains required with either profile.
+
+For comparable timing, use the same installed dependencies, browser, server
+mode and build generation on baseline and candidate, and time only the four
+files above (for example with `/usr/bin/time -p`). Compare baseline full to
+candidate full and candidate PR separately. Record cold/warm server conditions
+and individual Node test durations; do not present reduced repetition counts
+as measured wall-clock savings.

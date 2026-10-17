@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import { baseURL, waitForPageAnimations } from "./helpers/browser.mjs";
+import { spaSwaps } from "./helpers/browser-profile.mjs";
 import { launchNavigationBrowser, navigationBrowserName, touchPan } from "./helpers/navigation-browser.mjs";
 
+const swapCount = spaSwaps(20);
 let browser;
 before(async () => {
     browser = await launchNavigationBrowser();
@@ -298,10 +300,10 @@ test(
     },
 );
 
-test("twenty real route swaps release stacked modal owners and retain one search shortcut", async () => {
+test(`${swapCount} real route swaps release stacked modal owners and retain one search shortcut`, async () => {
     const { context, page } = await open({ reducedMotion: "reduce", colorScheme: "dark" });
     try {
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < swapCount; i++) {
             await page.locator("[data-nav-toggle]").click();
             await waitForPageAnimations(page);
             await search(page);
