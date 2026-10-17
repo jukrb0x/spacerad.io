@@ -136,7 +136,9 @@
 - Executes `git log` for last commit time per file
 - Extracts GitHub repo URL from git config
 - Generates commit history link for each file
-- Fallback to filesystem mtime if git fails
+- Rejects shallow-boundary commits, missing history and invalid Git timestamps; never uses filesystem mtime
+- Date display priority remains trusted Git time, then explicit `updatedDate`; otherwise omit the update line
+- Missing/unsupported remote omits only the history link; dirty tracked files retain their last committed date
 - Outputs: `lastModified` (ISO string), `lastModifiedCommitUrl` (GitHub URL)
 - Branch: configurable, defaults to "main"
 
