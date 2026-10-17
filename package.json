@@ -11,7 +11,7 @@
         "lint": "biome check .",
         "check": "astro check",
         "test": "pnpm test:unit",
-        "test:unit": "node --test tests/modified-time.test.mjs tests/defer-embed.test.mjs tests/code-themes.test.mjs tests/spa-lifecycle.test.mjs tests/post-translations.test.mjs tests/theme-effects.test.mjs tests/likes.test.mjs tests/search.test.mjs tests/test-browser.test.mjs tests/wordmark-whisper.test.mjs tests/mobile-layout-source.test.mjs tests/nav-drawer.test.mjs tests/mobile-content-source.test.mjs tests/build-words.test.mjs tests/header-profile-geometry.test.mjs tests/header-scroll-input.test.mjs tests/telegram.test.mjs tests/rss.test.mjs tests/image-proxy.test.mjs tests/publishing-preflight.test.mjs",
+        "test:unit": "node --test tests/modified-time.test.mjs tests/defer-embed.test.mjs tests/code-themes.test.mjs tests/spa-lifecycle.test.mjs tests/post-translations.test.mjs tests/theme-effects.test.mjs tests/likes.test.mjs tests/search.test.mjs tests/test-browser.test.mjs tests/wordmark-whisper.test.mjs tests/mobile-layout-source.test.mjs tests/nav-drawer.test.mjs tests/mobile-content-source.test.mjs tests/build-words.test.mjs tests/header-profile-geometry.test.mjs tests/header-scroll-input.test.mjs tests/telegram.test.mjs tests/channel-description.test.mjs tests/rss.test.mjs tests/image-proxy.test.mjs tests/publishing-preflight.test.mjs",
         "test:browser": "node scripts/test-browser.mjs",
         "test:browser:pr": "node scripts/test-browser.mjs --profile=pr",
         "test:browser:full": "node scripts/test-browser.mjs --profile=full",

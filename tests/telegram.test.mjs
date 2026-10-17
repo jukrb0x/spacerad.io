@@ -83,3 +83,12 @@ test("Telegram single photos preserve upstream intrinsic dimensions without usin
         assert.equal(missing.attr("height"), undefined);
     }
 });
+
+test("Telegram retains a plain description with original blank lines and literal characters", async (t) => {
+    const html = fixture.replace(
+        /(<div class="tgme_channel_info_description">)[\s\S]*?(<\/div>)/,
+        "$1FM 466.6<br><br>We Know Nothing. 🪐 &amp; &lt;script&gt;\r\n1. Keep numbering$2",
+    );
+    const result = await channel(t, html);
+    assert.equal(result.descriptionText, "FM 466.6\n\nWe Know Nothing. 🪐 & <script>\n1. Keep numbering");
+});

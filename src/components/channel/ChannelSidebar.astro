@@ -1,21 +1,26 @@
 ---
+import { CHANNEL_DESCRIPTION_MODE } from "../../consts";
+import { formatChannelDescription, type ChannelDescriptionMode } from "../../utils/channelDescription";
+
 interface Props {
     title: string;
     description: string;
+    descriptionMode?: ChannelDescriptionMode;
     avatar: string;
     username: string;
 }
 
-const { title, description, avatar, username } = Astro.props;
+const { title, description, descriptionMode = CHANNEL_DESCRIPTION_MODE, avatar, username } = Astro.props;
+const visibleDescription = formatChannelDescription(description, descriptionMode);
 ---
 
 <aside class="channel-sidebar" aria-labelledby="channel-title">
-    <div class="channel-sidebar__card">
+    <div class="channel-sidebar__card" data-description-layout={descriptionMode}>
         <p class="channel-sidebar__identity">Channel</p>
         <img src={avatar} alt={title} width="88" height="88" class="channel-sidebar__avatar" />
         <h1 id="channel-title" class="channel-sidebar__title">{title}</h1>
-        {description && (
-            <div class="channel-sidebar__description" set:html={description} />
+        {visibleDescription && (
+            <div class="channel-sidebar__description" data-description-mode={descriptionMode}>{visibleDescription}</div>
         )}
     </div>
     <nav class="channel-sidebar__actions" aria-label="Follow the channel">
@@ -48,11 +53,13 @@ const { title, description, avatar, username } = Astro.props;
     width: 100%;
     max-width: 280px;
     margin-inline: auto;
+    container-type: inline-size;
 }
 
 .channel-sidebar__card {
     box-sizing: border-box;
     aspect-ratio: 1;
+    height: 100cqi;
     margin-top: -8%;
     padding: 28px 16px 40px;
     border-radius: 50%;
@@ -102,13 +109,15 @@ const { title, description, avatar, username } = Astro.props;
     line-height: 1.5;
     width: 100%;
     overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    flex-shrink: 0;
 }
 
-.channel-sidebar__description :global(a) { color: inherit; text-decoration: underline; }
-.channel-sidebar__description :global(ol),
-.channel-sidebar__description :global(ul) { margin: var(--space-2) 0; padding-left: var(--space-4); text-align: left; }
-.channel-sidebar__description :global(ol) { list-style: decimal; }
-.channel-sidebar__description :global(ul) { list-style: disc; }
+/* Fit the original three-line bio without resizing its text, avatar or circle. */
+.channel-sidebar__card[data-description-layout="full"] { padding-bottom: 32px; }
+.channel-sidebar__card[data-description-layout="full"] .channel-sidebar__identity { margin-bottom: 8px; }
+.channel-sidebar__card[data-description-layout="full"] .channel-sidebar__avatar { margin-bottom: 8px; }
+.channel-sidebar__card[data-description-layout="full"] .channel-sidebar__title { margin-bottom: 6px; }
 
 .channel-sidebar__actions {
     display: flex;

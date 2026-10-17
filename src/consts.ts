@@ -1,3 +1,5 @@
+import type { ChannelDescriptionMode } from "./utils/channelDescription";
+
 // Place any global data in this file.
 // You can import this data from anywhere in your site by using the `import` keyword.
 
@@ -31,3 +33,10 @@ export const NAV_LINKS: NavLink[] = [
     { href: "/friends", label: "Links" },
     { href: "/me", label: "About" },
 ];
+
+// Channel profile only: first-line | full (keep blank lines) | merged (join lines).
+// The cut circle never grows. Use full/merged only when the bio fits at normal
+// text size; oversized text can be clipped by the shape, so verify desktop/mobile
+// after changing this setting or the Telegram bio. No automatic overflow fallback.
+// See memory/architecture.md → Channel profile description.
+export const CHANNEL_DESCRIPTION_MODE: ChannelDescriptionMode = "first-line";
