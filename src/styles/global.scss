@@ -1312,6 +1312,28 @@ a {
   }
 }
 
+// Keep social controls readable and liked hearts fully visible at rest.
+@media (min-width: 1400px) and (hover: hover) and (pointer: fine) {
+  [data-share-sidebar] > a,
+  [data-share-sidebar] > button {
+    opacity: .85;
+    transition: opacity 150ms ease;
+  }
+  [data-share-sidebar] > [data-like-button][data-liked],
+  [data-share-sidebar]:hover > a,
+  [data-share-sidebar]:hover > button,
+  [data-share-sidebar]:focus-within > a,
+  [data-share-sidebar]:focus-within > button {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-share-sidebar] > a,
+  [data-share-sidebar] > button {
+    transition: none;
+  }
+}
+
 // Mobile TOC overrides
 .toc-mobile {
   .toc {
