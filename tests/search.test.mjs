@@ -92,7 +92,10 @@ function fixture(pagefind = { init: async () => {}, search: async () => ({ resul
         cancelAnimationFrame: (id) => timers.delete(id),
         setTimeout: schedule,
         clearTimeout: (id) => timers.delete(id),
-        require: (path) => (path.includes("scrollLock") ? { lockScrollForDialog: () => locked++, unlockScrollForDialog: () => locked-- } : pagefind),
+        require: (path) =>
+            path.includes("scrollLock")
+                ? { lockScrollForDialog: () => locked++, unlockScrollForDialog: () => locked-- }
+                : { loadSearchIndex: async () => pagefind },
         exports: {},
         module: { exports: {} },
     });
@@ -189,6 +192,121 @@ test("closing invalidates an already pending search", async () => {
     pending.resolve(results("late"));
     await f.flush();
     assert.equal(f.nodes.list.children.length, 0);
+});
+
+function indexFixture() {
+    const document = new Target();
+    const window = new Target();
+    const workers = [];
+    const timers = new Map();
+    let id = 0;
+    class Worker {
+        sent = [];
+        terminated = false;
+        constructor() {
+            workers.push(this);
+        }
+        postMessage(message) {
+            this.sent.push(message);
+        }
+        terminate() {
+            this.terminated = true;
+        }
+        reply(data) {
+            this.onmessage({ data });
+        }
+    }
+    const context = vm.createContext({
+        document,
+        window,
+        Worker,
+        URL,
+        DOMException,
+        HTMLInputElement: Element,
+        HTMLDialogElement: Element,
+        exports: {},
+        setTimeout: (fn) => {
+            timers.set(++id, fn);
+            return id;
+        },
+        clearTimeout: (id) => timers.delete(id),
+    });
+    const source = readFileSync(new URL("../src/lib/search-index.ts", import.meta.url), "utf8").replaceAll(
+        "import.meta.url",
+        '"https://example.test/search-index.js"',
+    );
+    vm.runInContext(
+        ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText,
+        context,
+    );
+    return { document, workers, timers, index: context.exports.loadSearchIndex() };
+}
+test("clearing the input terminates pending native work and clears its deadline", async () => {
+    const f = indexFixture();
+    const index = await f.index;
+    const pending = index.search("Landscape");
+    const rejected = assert.rejects(pending, { name: "AbortError" });
+    const input = new Element();
+    input.matches = (selector) => selector === "[data-search-input]";
+    f.document.dispatch("input", { target: input });
+    assert.equal(f.workers[0].terminated, true);
+    assert.equal(f.timers.size, 0);
+    await rejected;
+});
+test("late fatal messages from a cancelled realm cannot reject the newer query", async () => {
+    const f = indexFixture();
+    const index = await f.index;
+    const old = index.search("Landscape");
+    const rejected = assert.rejects(old, { name: "AbortError" });
+    const next = index.search("Surgio");
+    f.workers[0].reply({ fatal: true, error: "late failure" });
+    const active = f.workers[1];
+    active.reply({ id: active.sent[0].id, value: [] });
+    assert.equal((await next).results.length, 0);
+    assert.equal(active.terminated, false);
+    await rejected;
+});
+test("expired data closures reject before sending tokens into a newer search", async () => {
+    const f = indexFixture();
+    const index = await f.index;
+    const first = index.search("Landscape");
+    const worker = f.workers[0];
+    worker.reply({ id: worker.sent[0].id, value: [{ token: "1:0", score: 1 }] });
+    const hit = (await first).results[0];
+    const next = index.search("Surgio");
+    const count = worker.sent.length;
+    await assert.rejects(hit.data(), { name: "AbortError" });
+    assert.equal(worker.sent.length, count);
+    worker.reply({ id: worker.sent.at(-1).id, value: [] });
+    await next;
+});
+test("SPA cancellation rejects concurrent fragment reads and clears every deadline", async () => {
+    const f = indexFixture();
+    const index = await f.index;
+    const first = index.search("Landscape");
+    const worker = f.workers[0];
+    worker.reply({
+        id: worker.sent[0].id,
+        value: [
+            { token: "1:0", score: 1 },
+            { token: "1:1", score: 0.5 },
+        ],
+    });
+    const results = (await first).results;
+    const rejected = assert.rejects(Promise.all(results.map((hit) => hit.data())), { name: "AbortError" });
+    f.document.dispatch("astro:before-swap");
+    assert.equal(worker.terminated, true);
+    assert.equal(f.timers.size, 0);
+    await rejected;
+});
+test("the request deadline terminates a stalled realm instead of leaving readiness work alive", async () => {
+    const f = indexFixture();
+    const index = await f.index;
+    const rejected = assert.rejects(index.search("Landscape"), /timed out/);
+    [...f.timers.values()][0]();
+    assert.equal(f.workers[0].terminated, true);
+    assert.equal(f.timers.size, 0);
+    await rejected;
 });
 
 function tocFixture() {

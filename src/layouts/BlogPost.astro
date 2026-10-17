@@ -79,7 +79,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 				<Back />
 				<!-- Header section -->
 				<div data-article-header class="space-y-3">
-					<h1 class="text-2xl leading-tight font-bold text-primary sm:text-3xl">{title}</h1>
+					<h1 data-pagefind-body class="text-2xl leading-tight font-bold text-primary sm:text-3xl">{title}</h1>
 					<div class="space-y-0.5 text-sm text-muted">
 						<p>
 							<FormattedDate date={published} />
@@ -123,7 +123,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 						</div>
 					)}
 					{tags && tags.length > 0 && (
-						<div class="flex flex-wrap gap-2">
+						<div data-pagefind-body data-pagefind-weight="0.5" class="flex flex-wrap gap-2">
 							{tags.map((tag: string) => (
 								<a
 									href={`/tags/${tag}`}
@@ -139,7 +139,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 
 				<!-- Content -->
 				<div class="pt-10 space-y-10 text-secondary">
-					<Prose class="max-w-none text-secondary">
+					<Prose data-pagefind-body class="max-w-none text-secondary">
 						<slot />
 					</Prose>
 
