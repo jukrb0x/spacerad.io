@@ -23,7 +23,7 @@ function feed(path, dependencies = {}) {
         "sanitizeHtml",
         "SITE_TITLE",
         "SITE_DESCRIPTION",
-        "fetchTelegramChannel",
+        "getCachedTelegramChannel",
         "getPublishedPosts",
         `${source}\nreturn GET;`,
     )(rss, cheerio, sanitizeHtml, "Fixture", "Description", dependencies.channel, dependencies.posts);
@@ -43,6 +43,7 @@ test("Channel RSS emits source dates, useful CJK titles, absolute media and stab
     );
     assert.equal(content('a:contains("#fixture")').attr("href"), "https://t.me/s/SpaceRad_io?q=%23fixture");
     assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(response.headers.get("cache-control"), "no-cache");
 });
 
 test("Channel RSS CJK fallback retains the first 80 characters", async () => {
@@ -70,14 +71,15 @@ test("Channel RSS preserves useful English title boundaries", async () => {
     assert.equal($("item title").text(), `${"word ".repeat(16).trim()}...`);
 });
 
-test("Channel RSS keeps its existing empty successful XML response on upstream failure", async (t) => {
+test("Channel RSS retains empty XML on upstream failure with an uncached 503 response", async (t) => {
     t.mock.method(console, "error", () => {});
     const response = await feed("../src/pages/channel-rss.xml.js", {
         channel: async () => {
             throw new Error("offline fixture");
         },
     })({ site: new URL("https://spacerad.io/") });
-    assert.equal(response.status, 200);
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get("cache-control"), "no-store");
     assert.equal(response.headers.get("content-type"), "application/xml; charset=utf-8");
     const $ = cheerio.load(await response.text(), { xml: true });
     assert.equal($("item").length, 0);

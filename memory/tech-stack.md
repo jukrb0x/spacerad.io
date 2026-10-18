@@ -310,3 +310,13 @@ quoted queries retain native behavior. No extra tokens or authoring schema are n
 ### Channel image dimensions
 
 Telegram single-photo wrappers provide media width plus a proportional spacer. The parser accepts only positive, bounded dimensions yielding integral pixel height, and ignores album crop frames and unknown formats. Width/height hints reserve single-photo space; album thumbnails retain square cropping. No extra media fetch, image transformation or authoring field is introduced.
+
+### Telegram data freshness cache
+
+`src/utils/telegram-cache.ts` shares parsed channel data between homepage, Channel and RSS through a versioned Cloudflare Cache API key (channel + before/after cursor). Latest Channel and after pages accept data younger than 60 seconds; homepage, RSS and before pages accept 300 seconds. Freshness is measured from the last successful refresh, never from a cache hit. HTML/feed responses use `no-cache` so browser response caching does not add another freshness window.
+
+Refreshes wait server-side with a two-second abort deadline. Failed refreshes retain successful data for at most one hour and suppress another attempt for 30 seconds; cold failures return uncached 503 responses. No background DOM update or new stale banner is used. Existing channel title/message structures distinguish legitimate empty results from obvious invalid upstream pages; this is a structural heuristic, not a Telegram schema guarantee.
+
+Cache API storage is per data center, with a bounded 128-entry isolate-local memory fallback and a pending Promise per refreshing key. This is neither persistent storage nor a global single-flight guarantee. Cache failures degrade to local caching. Bump the cache key version in `channel-cache.ts` after parser or sanitization changes. Images retain their separate existing proxy policy. Targeted regressions: `tests/channel-cache.test.mjs`, `tests/channel-routes.test.mjs`, `tests/telegram-page.test.mjs` plus existing Telegram/RSS tests.
+
+The current cache schema is `v2`: parsed posts include the independent `isForwarded` flag. Older snapshots missing that field are bypassed and refetched, including historical pages; optional source names/links do not determine forward status.

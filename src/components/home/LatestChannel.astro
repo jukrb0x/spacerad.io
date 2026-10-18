@@ -1,16 +1,11 @@
 ---
 import { Icon } from "astro-icon/components";
-import { fetchTelegramChannel, type TelegramPost } from "../../utils/telegram";
+import type { TelegramPost } from "../../utils/telegram";
 
-// An SSR fragment: Telegram never blocks the static homepage HTML.
-let posts: TelegramPost[] = [];
-try {
-    const channel = await fetchTelegramChannel("SpaceRad_io");
-    posts = channel.posts.slice(0, 5);
-} catch {
-    // A useful direct link remains available if the upstream service is offline.
+interface Props {
+    posts: TelegramPost[];
 }
-Astro.response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=30");
+const { posts } = Astro.props;
 ---
 {posts.length ? <div class="channel-index">
   {posts.map(post => <article class="channel-entry">

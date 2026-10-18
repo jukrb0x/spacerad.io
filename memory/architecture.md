@@ -198,6 +198,31 @@ SOCIAL_LINKS = { github, email, telegram, rss }
 
 The navigation dialog clips overflow (`overflow: clip`) so its translated panel cannot create a horizontally scrollable outer dialog during focus/animation. Vertical menu scrolling remains on `[data-scroll-container]`. Opening resolves the initial panel geometry before adding `is-open`; opening frames and closing timers are cancelled on interruption and route swaps. `tests/nav-drawer.test.mjs` covers lifecycle races; `tests/home03-nav-drawer.test.mjs` samples animated geometry across mobile widths, themes, motion preferences, repeat opens and route changes. iOS Safari behavior still requires device verification.
 
+### Channel attribution
+
+Channel requests scrape the public `t.me/s/SpaceRad_io` HTML via
+`src/utils/telegram.ts`; successfully parsed snapshots are cached through
+`src/utils/telegram-cache.ts`, without Bot API ingestion.
+`TelegramPost.isForwarded` records an observed forward header or source-name
+element independently of the optional `forwardedFrom` / `forwardedFromLink`.
+The card displays `Forwarded` when a header has no usable source name.
+Ordinary posts retain the existing `Original` badge. Do not infer forwarding
+from body text, reply authors, or link previews.
+
+The same parser handles latest posts and historical `before` / `after` pages,
+so old messages are reclassified when their data is refreshed; no stored records
+require backfilling. Cache schema `v2` includes `isForwarded` and bypasses older
+snapshots that lack it. Latest/after pages use a 60-second freshness budget;
+homepage/RSS/before pages use 300 seconds. Successful HTML/feed responses use
+`no-cache`; upstream failures may reuse successful data for less than one hour
+with a 30-second retry backoff. Cold failures return 503/no-store. Already open
+documents do not update automatically. No cache purge is performed, and missing
+source metadata cannot be recovered from Telegram's public preview.
+
+Captured SpaceRad_io posts 1280/1279 reproduce empty source-name forward headers;
+1281 is a separate ordinary reply. See `docs/telegram-forward-investigation.md`
+and `tests/fixtures/telegram-forward-capture.html` for evidence and regressions.
+
 ### Channel profile description
 
 `fetchTelegramChannel()` retains `descriptionText` as plain text with Telegram's

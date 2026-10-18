@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import sanitizeHtml from "sanitize-html";
+import { assertTelegramPage } from "./telegram-page.ts";
 
 // Keep imported HTML passive. Raw-text/foreign nodes are removed before this
 // policy because the pinned sanitizer predates its raw-text parser fixes.
@@ -74,6 +75,8 @@ export interface TelegramPost {
     /** First posted photo, exposed for the homepage without parsing content HTML. */
     previewImage?: string;
     text: string;
+    /** Public-preview forward metadata, independent of the optional source name. */
+    isForwarded: boolean;
     forwardedFrom?: string;
     forwardedFromLink?: string;
     linkPreview?: LinkPreview;
@@ -110,7 +113,7 @@ function getProxiedImageUrl(imageUrl: string): string {
  * @param options - Pagination options (before/after message ID)
  * @returns Channel information including posts
  */
-export async function fetchTelegramChannel(channelUsername: string, options: FetchOptions = {}): Promise<TelegramChannel> {
+export async function fetchTelegramChannel(channelUsername: string, options: FetchOptions = {}, signal?: AbortSignal): Promise<TelegramChannel> {
     const params = new URLSearchParams();
     if (options.before) params.append("before", options.before);
     if (options.after) params.append("after", options.after);
@@ -119,7 +122,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
     const url = `https://t.me/s/${channelUsername}${queryString ? `?${queryString}` : ""}`;
 
     try {
-        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        const response = await fetch(url, { signal: signal ?? AbortSignal.timeout(2000), cache: "no-store" });
         if (!response.ok) {
             throw new Error(`Failed to fetch channel: ${response.statusText}`);
         }
@@ -129,6 +132,13 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
 
         // Extract channel info
         const title = $(".tgme_channel_info_header_title").text().trim();
+        assertTelegramPage(
+            title,
+            $(".tgme_widget_message_wrap")
+                .toArray()
+                .map((element) => $(element).find(".tgme_widget_message").attr("data-post")),
+            channelUsername,
+        );
         // Get description HTML to preserve line breaks
         const $description = $(".tgme_channel_info_description");
         $description.find("br").replaceWith("\n");
@@ -156,7 +166,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
         const posts: TelegramPost[] = [];
         $(".tgme_widget_message_wrap").each((_index, element) => {
             const $message = $(element).find(".tgme_widget_message");
-            const id = $message.attr("data-post")?.replace(`${channelUsername}/`, "") || "";
+            const id = $message.attr("data-post")?.split("/")[1] || "";
 
             // Skip if no valid ID
             if (!id) return;
@@ -167,8 +177,10 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
                 console.warn(`Missing datetime for message ${id}`);
             }
 
-            // Check if message is forwarded
+            // Forward status and source attribution are separate: a forward header
+            // may survive even when its source name/link is unavailable.
             const $forwardedFromElem = $message.find(".tgme_widget_message_forwarded_from_name");
+            const isForwarded = $message.find(".tgme_widget_message_forwarded_from").length > 0 || $forwardedFromElem.length > 0;
             const forwardedFrom = $forwardedFromElem.text().trim();
             const forwardedFromLink = telegramLink($forwardedFromElem.attr("href") || "", channelUsername) || undefined;
 
@@ -330,6 +342,7 @@ export async function fetchTelegramChannel(channelUsername: string, options: Fet
                 title,
                 content: sanitizeHtml(contentHtml, importedHtmlPolicy),
                 text,
+                isForwarded,
                 ...(images[0] && { previewImage: images[0] }),
                 ...(forwardedFrom && { forwardedFrom }),
                 ...(forwardedFromLink && { forwardedFromLink }),

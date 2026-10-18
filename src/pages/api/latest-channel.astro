@@ -1,6 +1,17 @@
 ---
 import ChannelNotes from "../../components/home/LatestChannel.astro";
+import type { TelegramPost } from "../../utils/telegram";
+import { getCachedTelegramChannel } from "../../utils/telegram-cache";
 export const prerender = false;
 Astro.response.headers.set("X-Robots-Tag", "noindex");
+Astro.response.headers.set("Cache-Control", "no-cache");
+let posts: TelegramPost[] = [];
+try {
+    const channel = await getCachedTelegramChannel("SpaceRad_io", {}, 300);
+    posts = channel.posts.slice(0, 5);
+} catch {
+    Astro.response.status = 503;
+    Astro.response.headers.set("Cache-Control", "no-store");
+}
 ---
-<ChannelNotes />
+<ChannelNotes posts={posts} />

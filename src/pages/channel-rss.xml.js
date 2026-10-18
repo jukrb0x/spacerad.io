@@ -2,7 +2,7 @@ import rss from "@astrojs/rss";
 import * as cheerio from "cheerio";
 import sanitizeHtml from "sanitize-html";
 import { SITE_TITLE } from "../consts";
-import { fetchTelegramChannel } from "../utils/telegram";
+import { getCachedTelegramChannel } from "../utils/telegram-cache";
 
 // This page needs SSR because it fetches live Telegram data
 export const prerender = false;
@@ -144,7 +144,7 @@ export async function GET(context) {
 
     try {
         // Fetch the latest posts (no pagination parameters)
-        const channelData = await fetchTelegramChannel(CHANNEL_USERNAME, {});
+        const channelData = await getCachedTelegramChannel(CHANNEL_USERNAME, {}, 300);
 
         const rssContent = await rss({
             title: `${channelData.title || SITE_TITLE} - Chanel`,
@@ -186,6 +186,7 @@ export async function GET(context) {
         return new Response(rssContent.body, {
             headers: {
                 "Content-Type": "application/xml; charset=utf-8",
+                "Cache-Control": "no-cache",
                 "x-content-type-options": "nosniff",
             },
         });
@@ -201,7 +202,9 @@ export async function GET(context) {
         });
 
         return new Response(errorFeed.body, {
+            status: 503,
             headers: {
+                "Cache-Control": "no-store",
                 "Content-Type": "application/xml; charset=utf-8",
                 "x-content-type-options": "nosniff",
             },

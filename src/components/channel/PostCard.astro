@@ -31,15 +31,15 @@ const { post, channelUsername } = Astro.props;
                 </time>
             )}
 
-            {post.forwardedFrom ? (
+            {post.isForwarded ? (
                 <span class="post-card__badge post-card__badge--forward">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                         <path d="M13 7L18 12M18 12L13 17M18 12H6"
                               stroke="currentColor" stroke-width="2"
                               stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Forwarded from
-                    {post.forwardedFromLink ? (
+                    {post.forwardedFrom ? "Forwarded from" : "Forwarded"}
+                    {post.forwardedFrom && post.forwardedFromLink ? (
                         <a href={post.forwardedFromLink} target="_blank"
                            rel="noopener noreferrer">{post.forwardedFrom}</a>
                     ) : post.forwardedFrom}

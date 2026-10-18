@@ -10,14 +10,13 @@ import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import Lightbox from "@components/Lightbox.astro";
 import type { TelegramChannel } from "../../utils/telegram";
-import { fetchTelegramChannel } from "../../utils/telegram";
+import { getCachedTelegramChannel } from "../../utils/telegram-cache";
 
 // Enable server-side rendering for this dynamic route
 export const prerender = false;
 
 const { cursor } = Astro.params;
 const CHANNEL_USERNAME = "SpaceRad_io";
-const CACHE_SECONDS = 300;
 
 // Parse cursor parameter
 const cursorType = cursor?.startsWith("before-") ? "before" : cursor?.startsWith("after-") ? "after" : null;
@@ -34,7 +33,7 @@ try {
         options.after = cursorValue;
     }
 
-    channelData = await fetchTelegramChannel(CHANNEL_USERNAME, options);
+    channelData = await getCachedTelegramChannel(CHANNEL_USERNAME, options, cursorType === "before" ? 300 : 60);
 } catch (e) {
     error = e instanceof Error ? e.message : "Failed to load channel";
     console.error("Error loading Telegram channel:", e);
@@ -48,8 +47,9 @@ const lastPostId = channelData?.posts?.[channelData.posts.length - 1]?.id;
 const hasNewerPosts = cursorType === "before" || cursorType === "after";
 const hasOlderPosts = !cursorType || (channelData?.posts && channelData.posts.length > 0);
 
-// Set short cache to avoid re-fetching on every refresh
-Astro.response.headers.set("Cache-Control", `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=30`);
+// Freshness is owned by the shared data cache, not an additional HTML cache.
+Astro.response.headers.set("Cache-Control", error ? "no-store" : "no-cache");
+if (error) Astro.response.status = 503;
 ---
 
 <!doctype html>
