@@ -473,21 +473,6 @@ header.site-header[data-header].is-scrolled {
     min-height: 0;
     max-width: none;
 }
-.home-channel__identity > .home-channel__more {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-    color: var(--color-link);
-    gap: 10px;
-}
-.home-channel__identity > .home-channel__more > span {
-    line-height: 1;
-    font-size: 20px;
-}
-.home-channel__more:hover {
-    text-decoration: underline;
-}
 .channel-index {
     display: grid;
     grid-template-columns: 1fr;
@@ -1403,9 +1388,6 @@ html {
     .home-writing .post-meta .mobile-translation {
         min-height: 32px;
         min-width: 32px;
-    }
-    .home-channel__identity > .home-channel__more {
-        font-size: 13px;
     }
     .channel-entry p {
         font-size: 14px;

@@ -65,6 +65,8 @@ const items = await Promise.all(entries.map(async entry => ({ entry, ...(await r
         const controller = new AbortController();
         const { signal } = controller;
         let active: HTMLDialogElement | null = null;
+        document.addEventListener("pointerdown", () => { document.documentElement.dataset.collectionInput = "pointer"; }, { signal });
+        document.addEventListener("keydown", () => { delete document.documentElement.dataset.collectionInput; }, { signal });
         const release = () => {
             if (!active) return;
             active = null;
@@ -97,6 +99,7 @@ const items = await Promise.all(entries.map(async entry => ({ entry, ...(await r
             active?.close();
             release();
             controller.abort();
+            delete document.documentElement.dataset.collectionInput;
         };
     });
     document.addEventListener("astro:before-swap", () => dispose?.());
@@ -110,6 +113,9 @@ const items = await Promise.all(entries.map(async entry => ({ entry, ...(await r
     .collection-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: hidden; isolation: isolate; padding: 0; border: 0; border-radius: 0; background: var(--collection-tile); color: var(--color-text-primary); text-align: left; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .collection-tile::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgb(24 23 20 / .94), rgb(24 23 20 / .35)); opacity: 0; transition: opacity 280ms ease; }
     .collection-tile:focus-visible, .collection-detail__close:focus-visible { outline: 2px solid var(--color-link); outline-offset: 4px; }
+    :global(html[data-collection-input="pointer"]) .collection-page:focus,
+    :global(html[data-collection-input="pointer"]) .collection-tile:focus-visible,
+    :global(html[data-collection-input="pointer"]) .collection-detail__close:focus-visible { outline: none; }
     .collection-cover { display: block; position: absolute; inset: 0; aspect-ratio: 1; }
     .collection-logo { width: 60%; height: 60%; display: block; position: absolute; left: 50%; top: 50%; translate: -50% -50%; }
     .collection-logo img { width: 100%; height: 100%; display: block; object-fit: contain; }

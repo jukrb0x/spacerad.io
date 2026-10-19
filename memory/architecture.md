@@ -194,6 +194,12 @@ NAV_LINKS = [/* posts, channel, tags, friends, me — some drawer_only */]
 SOCIAL_LINKS = { github, email, telegram, rss }
 ```
 
+### Home section actions
+
+The Blog “All posts” and Channel “Visit the Channel” links share `.text-link`
+typography and the same up-right arrow icon. Keep these two section actions
+visually matched across themes and viewport sizes.
+
 ### Mobile navigation containment
 
 The navigation dialog clips overflow (`overflow: clip`) so its translated panel cannot create a horizontally scrollable outer dialog during focus/animation. Vertical menu scrolling remains on `[data-scroll-container]`. Opening resolves the initial panel geometry before adding `is-open`; opening frames and closing timers are cancelled on interruption and route swaps. `tests/nav-drawer.test.mjs` covers lifecycle races; `tests/home03-nav-drawer.test.mjs` samples animated geometry across mobile widths, themes, motion preferences, repeat opens and route changes. iOS Safari behavior still requires device verification.
@@ -272,7 +278,9 @@ Four square tiles on desktop, three on tablets, and two on phones use 6px gutter
 Fine-pointer hover/focus reveals identifying facts; click opens the sourced
 entry, with a bottom panel on mobile. Escape, focus restoration, reduced motion
 and SPA cleanup use the existing dialog/scroll-lock conventions. Collection
-palette overrides are scoped to `html.collection-root`.
+palette overrides are scoped to `html.collection-root`. Pointer input suppresses
+WebKit's focus frames on the dialog close control and collection main; keyboard
+activation retains visible focus.
 
 CollectionsNav is available in production. Desktop
 pointer hover opens the disclosure, a short close delay and pointer bridge keep

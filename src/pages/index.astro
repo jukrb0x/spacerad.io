@@ -4,6 +4,7 @@ import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import LatestChannelSlot from "@components/home/LatestChannelSlot.astro";
 import LatestPosts from "@components/home/LatestPosts.astro";
+import { Icon } from "astro-icon/components";
 import { SITE_DESCRIPTION, SITE_TITLE_OG } from "../consts";
 export const prerender = true;
 ---
@@ -15,7 +16,7 @@ export const prerender = true;
         <main id="main-content" tabindex="-1" class="editorial-shell" transition:animate="fade">
             <LatestPosts />
             <section class="home-channel" aria-labelledby="channel-title">
-                <div class="home-channel__identity"><h2 id="channel-title"><a class="section-heading-link" href="/channel"><span data-i18n-en="Channel" data-i18n-zh="电台">Channel</span><span class="section-heading-link__wipe" aria-hidden="true" data-i18n-en="Channel" data-i18n-zh="电台">Channel</span></a></h2><a class="home-channel__more" href="/channel"><span data-i18n-en="Visit the Channel" data-i18n-zh="进入电台">Visit the Channel</span> <span aria-hidden="true">→</span></a></div>
+                <div class="home-channel__identity"><h2 id="channel-title"><a class="section-heading-link" href="/channel"><span data-i18n-en="Channel" data-i18n-zh="电台">Channel</span><span class="section-heading-link__wipe" aria-hidden="true" data-i18n-en="Channel" data-i18n-zh="电台">Channel</span></a></h2><a class="text-link home-channel__more" href="/channel"><span data-i18n-en="Visit the Channel" data-i18n-zh="进入电台">Visit the Channel</span> <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
                 <LatestChannelSlot />
             </section>
         </main>

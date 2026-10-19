@@ -11,6 +11,34 @@ after(async () => {
     await browser?.close();
 });
 
+test("Blog and Channel section actions share typography and arrow treatment", async () => {
+    for (const theme of ["light", "dark"]) {
+        for (const width of [390, 1440]) {
+            const page = await browser.newPage({ viewport: { width, height: 900 }, colorScheme: theme });
+            try {
+                await page.goto(new URL("/", baseURL).href);
+                const actions = await page.locator(".editorial-heading > a, .home-channel__identity > a").evaluateAll((links) =>
+                    links.map((link) => {
+                        const style = getComputedStyle(link);
+                        const label = link.querySelector("span");
+                        return {
+                            color: style.color,
+                            fontSize: style.fontSize,
+                            fontWeight: style.fontWeight,
+                            labelFontSize: getComputedStyle(label).fontSize,
+                            arrow: !!link.querySelector("svg.link-arrow"),
+                        };
+                    }),
+                );
+                assert.equal(actions.length, 2);
+                assert.deepEqual(actions[1], actions[0]);
+            } finally {
+                await page.close();
+            }
+        }
+    }
+});
+
 for (const width of [320, 390, 430, 768, 1440]) {
     for (const theme of ["light", "dark"]) {
         test(`editorial content fits ${width}px in ${theme} mode`, async () => {
