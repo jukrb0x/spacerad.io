@@ -77,7 +77,8 @@ for (const width of [1440, 390])
                     probe.remove();
                     return ink;
                 });
-                assert.ok((await buttons.count()) >= 4, "share and like controls must be present");
+                assert.ok((await buttons.count()) >= (width < 1400 ? 3 : 4), "share controls must be present");
+                if (width < 1400) assert.equal(await page.locator("[data-share-mobile] [data-like-button]").isVisible(), true);
                 for (let i = 0; i < (await buttons.count()); i++) {
                     const button = buttons.nth(i);
                     await button.hover();

@@ -11,6 +11,11 @@ test("resizing a closed navigation drawer preserves the open TOC scroll lock", a
     const page = await context.newPage();
     try {
         await page.goto(new URL("/posts/introducing-space-radio", baseURL).href, { waitUntil: "networkidle" });
+        await page.evaluate(() => {
+            const header = document.querySelector("[data-article-header]");
+            scrollTo({ top: header.getBoundingClientRect().bottom + scrollY + 16, behavior: "instant" });
+        });
+        await page.waitForFunction(() => !document.querySelector("[data-toc-mobile-toggle]").inert);
         await page.locator("[data-toc-mobile-toggle]").click();
         assert.equal(await page.locator("body").evaluate((el) => el.style.overflow), "hidden");
         await page.setViewportSize({ width: 900, height: 844 });

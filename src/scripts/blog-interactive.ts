@@ -308,11 +308,15 @@ let sidebarsInitialized = false;
 let cachedTocSidebar: HTMLElement | null = null;
 let cachedShareSidebar: HTMLElement | null = null;
 let cachedArticleHeader: HTMLElement | null = null;
+let cachedArticleBody: HTMLElement | null = null;
+let cachedMobileTocToggle: HTMLElement | null = null;
 
 function initSidebarCache(): void {
     cachedTocSidebar = document.querySelector<HTMLElement>("[data-toc-sidebar]");
     cachedShareSidebar = document.querySelector<HTMLElement>("[data-share-sidebar]");
     cachedArticleHeader = document.querySelector<HTMLElement>("[data-article-header]");
+    cachedArticleBody = document.querySelector<HTMLElement>("main > article .prose");
+    cachedMobileTocToggle = document.querySelector<HTMLElement>("[data-toc-mobile-toggle]");
     sidebarsInitialized = false;
 }
 
@@ -326,6 +330,12 @@ function adjustSidebarPositions(): void {
         if (!cachedArticleHeader) return;
 
         const headerBottom = cachedArticleHeader.getBoundingClientRect().bottom;
+        const reading = headerBottom < 0 && (cachedArticleBody?.getBoundingClientRect().bottom ?? 0) > window.innerHeight;
+        document.body.toggleAttribute("data-article-reading", reading);
+        if (cachedMobileTocToggle) {
+            cachedMobileTocToggle.inert = !reading;
+            cachedMobileTocToggle.setAttribute("aria-hidden", String(!reading));
+        }
         const minTop = 64; // header navigation bar height
         const padding = 24; // spacing from separator line
 

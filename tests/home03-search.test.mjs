@@ -77,6 +77,11 @@ test("mobile TOC is named and browser-back navigation releases the modal scroll 
     const { context, page } = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     try {
         await routeClick(page, 'a[data-post-id="ue5-landscape-grass"]');
+        await page.evaluate(() => {
+            const header = document.querySelector("[data-article-header]");
+            scrollTo({ top: header.getBoundingClientRect().bottom + scrollY + 16, behavior: "instant" });
+        });
+        await page.waitForFunction(() => !document.querySelector("[data-toc-mobile-toggle]").inert);
         await page.locator("[data-toc-mobile-toggle]").click();
         assert.equal(await page.locator("[data-toc-mobile-drawer]").getAttribute("aria-label"), "Table of contents");
         assert.equal(await page.locator("body").evaluate((body) => body.style.overflow), "hidden");

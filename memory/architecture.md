@@ -111,9 +111,9 @@ Specialized blog layout. Additional features on top of Page:
 - Article header with title, date, reading time, update info
 - Tag pills linking to `/tags/[tag]`
 - Article language entrance uses the shared verified `getPostTranslation()` mapping and existing responsive language controls. `/posts/[...slug]` resolves counterparts from the renderable collection used for route generation; unpaired or unavailable counterparts render no control. Authored article links use absolute `/posts/<id>` paths so they work with or without a trailing slash.
-- **Table of Contents** — fixed sidebar on desktop (1400px+), floating drawer on mobile
-- **Share sidebar** — sticky left sidebar (desktop), floating FAB (mobile)
-- Social sharing (Twitter, Telegram, WeChat, etc.)
+- **Table of Contents** — fixed sidebar on desktop (1400px+); on smaller screens, a labeled blue pill appears while the prose fills the viewport, then leaves before the article-end actions and comments, and opens the existing drawer
+- **Article actions** — fixed share/like rail on desktop; on smaller screens, a visible Like/Share pair sits after the prose and before comments, with Share expanding into labeled sharing and copy-link rows
+- Social sharing (Twitter, Telegram, and copy link)
 - Like button with Cloudflare KV persistence
 - Blog-interactive and mermaid init scripts (re-initialized via `astro:page-load`)
 

@@ -183,6 +183,10 @@ In dark mode, avoid solid gray fills. Use `color-mix()` tinted backgrounds for g
 }
 ```
 
+### Mobile article tools
+
+The return arrow and label use an 8px gap. The reading shortcut appears only while the prose fills the viewport, after the header has left and before the article-end actions arrive. It is a blue 44px-high pill with a route-node mark and an explicit Contents label. The article-end action band sits after prose and before comments on mobile: Like stays visible in a pale red cell and fills with the site's language red after a like, while Share expands into labeled rows for social links and copy link. The band's top rule and outline reuse structural blue; imagery stays clear of share overlays.
+
 ---
 
 ## Global Style Features (`global.scss`)

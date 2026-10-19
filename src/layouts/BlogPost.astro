@@ -138,16 +138,21 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 				</div>
 
 				<!-- Content -->
-				<div class="pt-10 space-y-10 text-secondary">
+				<div class="pt-10 text-secondary">
 					<Prose data-pagefind-body class="max-w-none text-secondary">
 						<slot />
 					</Prose>
 
-					<Comments
-						commentSystem={commentSystem}
-						comment={comment}
-						pageTitle={title}
-					/>
+					<!-- Article-end actions sit before comments on mobile; desktop rail remains fixed. -->
+					<ShareSidebar title={title} description={description} tags={tags} slug={slug} />
+
+					<div class="mt-10">
+						<Comments
+							commentSystem={commentSystem}
+							comment={comment}
+							pageTitle={title}
+						/>
+					</div>
 					<Lightbox id="blog-lightbox" selector=".prose img:not([data-lightbox-skip])" />
 				</div>
 			</article>
@@ -165,8 +170,6 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 				</aside>
 			)}
 
-			<!-- Share sidebar: Desktop left side, Mobile floating button -->
-			<ShareSidebar title={title} description={description} tags={tags} slug={slug} hasToc={showToc} />
 		</main>
 
 		<!-- Mobile TOC: rendered outside main to avoid view-transition stacking context -->
@@ -175,12 +178,16 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 				<!-- Mobile: Floating toggle button -->
 				<button
 					data-toc-mobile-toggle
-					class="min-[1400px]:hidden fixed bottom-16 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(251,143,104,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(251,143,104,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(251,143,104,0.95)] hover:shadow-[0_12px_40px_rgba(251,143,104,0.45)] active:scale-95"
+					class="article-toc-toggle"
 					aria-label="Open table of contents"
+					data-i18n-attr="aria-label"
+					data-i18n-en="Open table of contents"
+					data-i18n-zh="打开目录"
+					aria-hidden="true"
+					inert
 				>
-					<svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-						<path d="M3 4h18M3 12h18M3 20h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
+					<span class="article-toc-toggle__node" aria-hidden="true"></span>
+					<span data-i18n-en="Contents" data-i18n-zh="目录">Contents</span>
 				</button>
 
 				<!-- Mobile: Drawer (dialog for proper iOS Safari viewport handling) -->

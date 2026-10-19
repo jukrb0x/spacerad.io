@@ -280,7 +280,7 @@ Home uses one reading column with a 520px lead image (up to 300px on mobile), fo
 | Token | Value |
 |-------|-------|
 | `--color-bg-page` | `#131315` |
-| `--color-bg-surface` | `#161b22` |
+| `--color-bg-surface` | `#22242b` |
 | `--color-bg-muted` | `#21262d` |
 | `--color-bg-elevated` | `#1c2128` |
 

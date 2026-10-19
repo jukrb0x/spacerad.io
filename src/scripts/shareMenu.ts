@@ -14,7 +14,6 @@ import { autoInit } from "../utils/spaLifecycle";
 let menuOpen = false;
 let toastTimeout: number;
 let cleanupController: AbortController | null = null;
-let menuTimers: ReturnType<typeof setTimeout>[] = [];
 
 /**
  * Set menu open state
@@ -22,38 +21,15 @@ let menuTimers: ReturnType<typeof setTimeout>[] = [];
 function setMenuOpen(open: boolean): void {
     const mobileToggle = document.querySelector<HTMLElement>("[data-share-mobile-toggle]");
     const shareMenu = document.querySelector<HTMLElement>("[data-share-menu]");
-    const shareMenuItems = document.querySelectorAll<HTMLElement>("[data-share-menu-item]");
-
     if (!shareMenu || !mobileToggle) return;
 
-    menuTimers.forEach(clearTimeout);
-    menuTimers = [];
     const restoreFocus = !open && shareMenu.contains(document.activeElement);
     menuOpen = open;
-    shareMenu.inert = !open;
     if (restoreFocus) mobileToggle.focus({ preventScroll: true });
+    shareMenu.hidden = !open;
+    shareMenu.inert = !open;
     mobileToggle.setAttribute("aria-expanded", String(open));
     shareMenu.setAttribute("aria-hidden", String(!open));
-
-    if (open) {
-        shareMenu.classList.remove("opacity-0", "pointer-events-none");
-        shareMenuItems.forEach((item, i) => {
-            menuTimers.push(
-                setTimeout(() => {
-                    if (menuOpen && shareMenu.isConnected) {
-                        item.classList.remove("scale-75");
-                        item.classList.add("scale-100");
-                    }
-                }, i * 50),
-            );
-        });
-    } else {
-        shareMenu.classList.add("opacity-0", "pointer-events-none");
-        shareMenuItems.forEach((item) => {
-            item.classList.remove("scale-100");
-            item.classList.add("scale-75");
-        });
-    }
 }
 
 /**
@@ -158,11 +134,9 @@ function initShareMenu(): void {
         );
     });
 
-    // Share link items (Twitter, Telegram) — close menu after click
-    // Skip like button (should stay open for repeat clicks) and
-    // copy button (already handled above with its own close logic)
+    // Share links close the expanded menu after click; copy handles itself above.
     shareMenuItems.forEach((item) => {
-        if (!item.hasAttribute("data-like-button") && !item.hasAttribute("data-copy-link")) {
+        if (!item.hasAttribute("data-copy-link")) {
             item.addEventListener(
                 "click",
                 () => {
@@ -178,8 +152,6 @@ function initShareMenu(): void {
 autoInit(initShareMenu, "page-load");
 document.addEventListener("astro:before-swap", () => {
     cleanupController?.abort();
-    menuTimers.forEach(clearTimeout);
-    menuTimers = [];
     clearTimeout(toastTimeout);
     menuOpen = false;
 });

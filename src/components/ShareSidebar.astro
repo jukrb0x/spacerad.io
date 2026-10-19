@@ -7,14 +7,9 @@ interface Props {
     tags?: string[];
     url?: string;
     slug: string;
-    hasToc?: boolean;
 }
 
-const { title, description, tags = [], url = Astro.url.href, slug, hasToc = false } = Astro.props;
-
-// Mobile button position: if TOC exists, stack above it; otherwise take TOC's position
-const mobileButtonPosition = hasToc ? "bottom-34" : "bottom-16";
-const mobileMenuPosition = hasToc ? "bottom-34" : "bottom-16";
+const { title, description, tags = [], url = Astro.url.href, slug } = Astro.props;
 
 // Twitter: hashtags as comma-separated (without #), max 3 tags
 const twitterHashtags = tags.slice(0, 3).join(",");
@@ -107,69 +102,34 @@ const shareLinks = [
     </button>
 </aside>
 
-<!-- Mobile: Share menu (rendered before toggle so toggle paints on top of menu padding) -->
-<div
-    data-share-menu
-    class:list={[
-        "min-[1400px]:hidden fixed right-7 z-40 flex flex-col-reverse gap-2 pb-16 opacity-0 pointer-events-none transition-opacity duration-200",
-        mobileMenuPosition
-    ]}
-    aria-hidden="true"
-    inert
->
-    {shareLinks.map((link) => (
-        <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-surface border border-border shadow-lg transition-transform duration-200 scale-75 focus-accent"
-            aria-label={link.label}
-            data-share-menu-item
-        >
-            <Icon name={link.icon} class="h-5 w-5 text-secondary" aria-hidden="true" />
-        </a>
-    ))}
-    <button
-        type="button"
-        class="flex h-12 w-12 items-center justify-center rounded-full bg-surface border border-border shadow-lg transition-transform duration-200 scale-75 focus-accent"
-        aria-label="Copy link" data-i18n-attr="aria-label" data-i18n-en="Copy link" data-i18n-zh="复制链接"
-        data-copy-link
-        data-url={url}
-        data-share-menu-item
-    >
-        <Icon name="ri:link" class="h-5 w-5 text-secondary" aria-hidden="true" />
-    </button>
-    <!-- Mobile like button -->
-    <button
-        type="button"
-        class="relative flex h-12 w-12 items-center justify-center rounded-full bg-surface border border-border shadow-lg transition-transform duration-200 scale-75 focus-accent group"
-        aria-label="Like" data-i18n-attr="aria-label" data-i18n-en="Like" data-i18n-zh="喜欢"
-        data-like-button
-        data-slug={slug}
-        data-share-menu-item
-    >
-        <Icon name="ri:heart-line" class="h-5 w-5 text-secondary group-data-[liked]:hidden" aria-hidden="true" />
-        <Icon name="ri:heart-fill" class="h-5 w-5 hidden group-data-[liked]:block text-red-500" aria-hidden="true" />
-        <span
-            class="absolute -bottom-0.5 -right-0.5 min-w-4 h-4 flex items-center justify-center rounded-full bg-surface border border-border text-[10px] text-muted"
-            data-like-count
-        ></span>
-    </button>
-</div>
-
-<!-- Mobile: Floating action button (after menu in DOM so it paints on top of menu padding) -->
-<button
-    type="button"
-    data-share-mobile-toggle
-    class:list={[
-        "min-[1400px]:hidden fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95",
-        mobileButtonPosition
-    ]}
-    aria-label="Share article" data-i18n-attr="aria-label" data-i18n-en="Share article" data-i18n-zh="分享文章"
-    aria-expanded="false"
->
-    <Icon name="ri:share-line" class="h-6 w-6" aria-hidden="true" />
-</button>
+<!-- Mobile: a visible article-end action pair before comments. -->
+<aside data-share-mobile class="article-share min-[1400px]:hidden" aria-label="Article actions" data-i18n-attr="aria-label" data-i18n-en="Article actions" data-i18n-zh="文章操作">
+    <div class="article-share__eyebrow" data-i18n-en="End of article" data-i18n-zh="文章结尾">End of article</div>
+    <div class="article-share__actions">
+        <button type="button" data-like-button data-slug={slug} class="article-share__like group">
+            <Icon name="ri:heart-line" class="group-data-[liked]:hidden" aria-hidden="true" />
+            <Icon name="ri:heart-fill" class="hidden group-data-[liked]:block" aria-hidden="true" />
+            <span data-i18n-en="Like" data-i18n-zh="点赞">Like</span>
+            <span data-like-count></span>
+        </button>
+        <button type="button" data-share-mobile-toggle class="article-share__toggle" aria-expanded="false" aria-controls="article-share-menu">
+            <Icon name="ri:share-line" aria-hidden="true" />
+            <span data-i18n-en="Share" data-i18n-zh="分享">Share</span>
+        </button>
+    </div>
+    <div id="article-share-menu" data-share-menu aria-hidden="true" inert hidden>
+        {shareLinks.map((link) => (
+            <a href={link.href} target="_blank" rel="noopener noreferrer" data-share-menu-item aria-label={link.label}>
+                <Icon name={link.icon} aria-hidden="true" />
+                <span>{link.name}</span>
+            </a>
+        ))}
+        <button type="button" data-copy-link data-url={url} data-share-menu-item>
+            <Icon name="ri:link" aria-hidden="true" />
+            <span data-i18n-en="Copy link" data-i18n-zh="复制链接">Copy link</span>
+        </button>
+    </div>
+</aside>
 
 <!-- Toast notification -->
 <div
