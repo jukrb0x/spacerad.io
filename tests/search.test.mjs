@@ -410,6 +410,8 @@ function tocFixture() {
     const toggle = new Element();
     const dialog = new Element();
     const content = new Element();
+    toggle.getBoundingClientRect = () => ({ width: 120 });
+    dialog.style = { setProperty() {} };
     let locked = 0;
     const timers = new Map();
     let id = 0;
@@ -421,6 +423,7 @@ function tocFixture() {
         ({ "[data-toc-mobile-toggle]": toggle, "[data-toc-mobile-drawer]": dialog, "[data-toc-mobile-content]": content })[selector];
     const context = vm.createContext({
         document,
+        window: { matchMedia: () => ({ matches: false }) },
         AbortController,
         console,
         requestAnimationFrame: schedule,
