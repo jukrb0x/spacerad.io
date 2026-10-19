@@ -5,6 +5,7 @@ export default defineConfig({
     presets: [
         presetWind3(),
         presetWebFonts({
+            inlineImports: false,
             fonts: {
                 sans: "Inter:400,600,800",
                 mono: "Fira Code:400,500",
