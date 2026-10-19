@@ -232,6 +232,10 @@ declare namespace App {
 }
 ```
 
+### CI Testing
+
+GitHub Actions runs type, lint, unit, build and release checks separately from a five-file browser smoke suite. `pnpm test:browser` uses that short suite; `pnpm test:browser:full` runs all `home03` browser files on demand. See `docs/testing.md` for the selected files and runner behavior.
+
 ---
 
 ## TypeScript Config (`tsconfig.json`)

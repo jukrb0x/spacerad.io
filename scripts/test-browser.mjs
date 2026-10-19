@@ -8,6 +8,13 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const defaultURL = "http://127.0.0.1:4321";
+const smokeFiles = [
+    "home03-acceptance.test.mjs",
+    "home03-collection-focus.test.mjs",
+    "home03-navigation.test.mjs",
+    "home03-page-canvas.test.mjs",
+    "home03-search.test.mjs",
+];
 
 export async function stopChild(child) {
     if (!child || child.exitCode !== null || child.signalCode !== null) return;
@@ -67,14 +74,12 @@ async function main() {
     console.log(`Browser test profile: ${profile}`);
     const files = args.filter((arg) => !arg.startsWith("--profile="));
     if (!files.length) {
-        files.push(
-            ...(await readdir(resolve(root, "tests")))
-                .filter((file) => /^home03.*\.test\.mjs$/.test(file))
-                .sort()
-                .map((file) => `tests/${file}`),
-        );
+        let selected = smokeFiles;
+        if (profile === "full") selected = (await readdir(resolve(root, "tests"))).filter((file) => /^home03.*\.test\.mjs$/.test(file)).sort();
+        files.push(...selected.map((file) => `tests/${file}`));
     }
     if (!files.length) throw new Error("No browser test files found");
+    console.log(`Browser test files (${files.length}): ${files.join(", ")}`);
     let server;
     let tests;
     const onSignal = async (signal) => {

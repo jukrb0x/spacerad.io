@@ -52,5 +52,4 @@ jobs:
           console.log(`Chromium ${browser.version()}`);
           await browser.close();
           JS
-      - run: pnpm build
       - run: pnpm test:browser
