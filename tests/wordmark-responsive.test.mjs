@@ -7,7 +7,9 @@ test('wordmark hover survives compact desktop widths without overlapping navigat
     const browser = await chromium.launch(launchOptions);
     try {
         const page = await browser.newPage();
+        await page.addInitScript(() => document.addEventListener('astro:page-load', () => { window.__pageReady = true; }));
         await page.goto(new URL('/posts', baseURL).href);
+        await page.waitForFunction(() => window.__pageReady);
         for (const width of [1019, 1099, 1100, 1164, 768, 390]) {
             await page.setViewportSize({ width, height: 900 });
             await page.mouse.move(0, 0);

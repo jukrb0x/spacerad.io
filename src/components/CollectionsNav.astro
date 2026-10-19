@@ -5,14 +5,14 @@ const { mobile = false } = Astro.props;
 const pathname = Astro.url.pathname.replace(/\/$/, "");
 const active = COLLECTION_LINKS.some(link => pathname === link.href);
 ---
-{import.meta.env.DEV && <details class:list={["collections-nav", { "collections-nav--mobile": mobile }]} data-collections-nav data-mobile={mobile} open={mobile && active}>
+<details class:list={["collections-nav", { "collections-nav--mobile": mobile }]} data-collections-nav data-mobile={mobile} open={mobile && active}>
     <summary class="nav-link" data-active={active || undefined} aria-expanded={mobile && active ? "true" : "false"}>
         <span data-i18n-en="Collections" data-i18n-zh="收藏">Collections</span> <span class="collections-nav__chevron" aria-hidden="true"></span>
     </summary>
     <div class="collections-nav__links">
         {COLLECTION_LINKS.map(link => <a href={link.href} data-nav-link aria-current={pathname === link.href ? "page" : undefined}>{link.label}</a>)}
     </div>
-</details>}
+</details>
 <style>
     .collections-nav { position: relative; }
     summary { list-style: none; display: flex; align-items: center; gap: 7px; cursor: pointer; }

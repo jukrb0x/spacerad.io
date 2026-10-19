@@ -24,7 +24,7 @@ type NavLink = {
     drawer_only?: boolean;
 };
 
-// Only published collections belong here; the local preview entry is dev-only in CollectionsNav.
+// Only published, usable collection routes belong here.
 export const COLLECTION_LINKS = [{ href: "/beer-collection", label: "Beer Log" }];
 
 // Navigation links

@@ -63,7 +63,6 @@ export default defineConfig({
             hooks: {
                 "astro:config:setup": ({ command, injectRoute }) => {
                     if (command !== "dev") return;
-                    injectRoute({ pattern: "/beer-collection", entrypoint: "./src/pages/_beer-collection.astro" });
                     injectRoute({ pattern: "/design-lab", entrypoint: "./src/pages/_design-lab/index.astro" });
                     injectRoute({ pattern: "/design-lab/read/[slug]", entrypoint: "./src/pages/_design-lab/read/[slug].astro" });
                 },

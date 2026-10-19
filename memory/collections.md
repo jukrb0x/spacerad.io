@@ -1,8 +1,8 @@
 # Collections: templates and authored data
 
-The current Beer Log is a dev-only preview at `/beer-collection`. Its route only
-loads content and sorts entries. Do not add a production navigation link until
-there is a production route.
+Beer Log is published at `/beer-collection` through `src/pages/beer-collection.astro`.
+Its route loads content and sorts entries. Collections navigation is available in
+production on desktop and mobile; the page heading is indexed by Pagefind.
 
 ## Files to edit
 

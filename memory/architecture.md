@@ -258,9 +258,9 @@ The project currently uses `first-line`. No page settings UI or client-side
 state is involved. The circle-external overflow candidates were temporary
 previews only and are not part of the project.
 
-### Local Beer Collection preview
+### Beer Log collection
 
-`/beer-collection` is injected only for `astro dev`. Its small excluded route
+`/beer-collection` is a public Astro page at `src/pages/beer-collection.astro`. Its route
 loads `collectionPages` YAML metadata and `collectionItems` Markdown records,
 then renders `components/collections/CollectionPage.astro`. See
 [collections.md](collections.md) for editing data and adding future collections.
@@ -272,9 +272,9 @@ Four square tiles on desktop, three on tablets, and two on phones use 6px gutter
 Fine-pointer hover/focus reveals identifying facts; click opens the sourced
 entry, with a bottom panel on mobile. Escape, focus restoration, reduced motion
 and SPA cleanup use the existing dialog/scroll-lock conventions. Collection
-palette overrides are scoped to `html.collection-preview-root`.
+palette overrides are scoped to `html.collection-root`.
 
-CollectionsNav is dev-only while its destination remains a preview. Desktop
+CollectionsNav is available in production. Desktop
 pointer hover opens the disclosure, a short close delay and pointer bridge keep
 links reachable, and clicking/keyboard activation remain supported. Mobile uses
 an inline expandable group. Published entries come from `COLLECTION_LINKS`.

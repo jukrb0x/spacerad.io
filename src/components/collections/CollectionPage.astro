@@ -10,15 +10,14 @@ const { page, entries } = Astro.props;
 const items = await Promise.all(entries.map(async entry => ({ entry, ...(await render(entry)) })));
 ---
 <!doctype html>
-<html lang="en" class="collection-preview-root">
+<html lang="en" class="collection-root">
     <head>
         <BaseHead title={`${page.title.en} — Space Radio`} description={page.subtitle.en} />
-        <meta name="robots" content="noindex,nofollow" />
     </head>
-    <body class="archive-page" data-pagefind-ignore="all">
+    <body class="archive-page">
         <Header />
         <main id="main-content" tabindex="-1" class="page-shell collection-page" transition:animate="fade">
-            <div class="archive-heading">
+            <div class="archive-heading" data-pagefind-body>
                 <h1 data-i18n-en={page.title.en} data-i18n-zh={page.title.zh}>{page.title.en}</h1>
                 <p data-i18n-en={page.subtitle.en} data-i18n-zh={page.subtitle.zh}>{page.subtitle.en}</p>
             </div>
@@ -104,9 +103,9 @@ const items = await Promise.all(entries.map(async entry => ({ entry, ...(await r
 </script>
 
 <style>
-    :global(html.collection-preview-root) { --color-bg-page: #f7f3e9; --collection-tile: #eee7d7; }
-    :global(html.collection-preview-root[data-theme="dark"]) { --color-bg-page: #201f1b; --collection-tile: #2a2822; }
-    :global(html.collection-preview-root body) { background: var(--color-bg-page); background-image: none; }
+    :global(html.collection-root) { --color-bg-page: #f7f3e9; --collection-tile: #eee7d7; }
+    :global(html.collection-root[data-theme="dark"]) { --color-bg-page: #201f1b; --collection-tile: #2a2822; }
+    :global(html.collection-root body) { background: var(--color-bg-page); background-image: none; }
     .collection-grid { list-style: none; padding: 0; margin: 28px 12px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .collection-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: hidden; isolation: isolate; padding: 0; border: 0; border-radius: 0; background: var(--collection-tile); color: var(--color-text-primary); text-align: left; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .collection-tile::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgb(24 23 20 / .94), rgb(24 23 20 / .35)); opacity: 0; transition: opacity 280ms ease; }

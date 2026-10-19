@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 test("collection controls and responsive overlays stay consistent", async () => {
 const b=await chromium.launch(launchOptions);
 try {const p=await b.newPage({viewport:{width:1164,height:900},locale:'en-GB'});p.setDefaultTimeout(10000);
-await p.goto(new URL('/beer-collection',baseURL).href);await p.locator('.collection-tile').first().waitFor();
+await p.addInitScript(() => document.addEventListener('astro:page-load', () => { window.__pageReady = true; }));
+await p.goto(new URL('/beer-collection',baseURL).href);await p.waitForFunction(() => window.__pageReady);await p.locator('.collection-tile').first().waitFor();
 assert.equal(await p.locator('.collection-tile').count(),12);
 assert.equal(await p.locator('[data-collection-open="collection-beer-flight-mode"] img').count(), 1);
 const tools = await p.locator('.site-header [data-search-trigger], .site-header [data-language-toggle], .site-header [data-theme-toggle]').evaluateAll(es => es.map(e => ({ search: e.hasAttribute('data-search-trigger'), x: e.getBoundingClientRect().x, width: e.getBoundingClientRect().width })));
@@ -25,7 +26,7 @@ for(const width of [1164,768,559,390,320]){
  assert(r.gap>=11&&r.gap<=17,JSON.stringify({width,...r}));assert(!r.overflow);
 }
 await p.setViewportSize({width:1164,height:1100});await p.mouse.move(0,0);
-await p.locator('[data-collection-open="collection-beer-sangria-de-cava"]').click();assert(await p.locator('dialog[open]').isVisible());await p.keyboard.press('Escape');
+await p.locator('[data-collection-open="collection-beer-sangria-de-cava"]').click();await p.locator('dialog[open]').waitFor({state:'visible'});await p.keyboard.press('Escape');
 
 } finally { await b.close(); }
 });
