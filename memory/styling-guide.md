@@ -230,9 +230,9 @@ The fade reaches 80%, 40%, and 10% of its initial strength at 45, 95, and 140px.
 32px margin (mobile has no top margin).
 
 `--browser-canvas-color` is the solid `html`/`body` background color, so Safari's
-browser chrome canvas fallback follows the current top edge. The header's existing
+browser chrome canvas fallback follows the current page edge. The header's existing
 scroll RAF interpolates `--browser-canvas-strength` over the same stop positions
-and levels that define the static wash in CSS, reading those parameters once per
+and levels that define the static top wash in CSS, reading those parameters once per
 page load. The color reaches the page base at 170px and restores the wash at 0px.
 An opaque, uniform page-base background image on `body` preserves its visible
 paint beneath `body::before`; keep this layer on collections too. Theme and Beer
@@ -270,20 +270,14 @@ unchanged. The structure/brand color itself is never overridden.
 The footer has a full-width upward wash painted by an absolute `body::after`
 behind content, using the same page-wash ink and page-base tokens. It fades over
 110px at 5% strength on desktop, and 80px at 4% on mobile. Beer Log retains its
-warm ink, with 8% desktop / 6% mobile strength in dark mode. This decoration has
-no pointer events. The real footer is full width with its original content gutter
-and divider preserved. `position: sticky; top: 0` makes it eligible for WebKit's
-independent bottom-edge sampling; as the last flow element it stays at its natural
-position rather than pinning to the viewport bottom. Its solid background is the
-wash's bottom color, while matching gradient/base image layers preserve visible
-paint. The root canvas continues following the top edge. The nav-menu override
-also resets the footer sampling color to the panel base.
-
-WebKit's `LocalFrameView::fixedContainerEdges()` requires a fixed/sticky element
-spanning at least 90% of the sampled viewport edge; it does not require the sticky
-box to be currently stuck. The source applies colors separately to each edge.
-This is a local experiment with geometry and sampling inputs checked in desktop
-WebKit/Chromium; actual iOS toolbar tint and blur still require device verification.
+warm ink, with 8% desktop / 6% mobile strength in dark mode. The footer wash tokens
+live on `html` so the canvas can use them while `body::after` inherits them.
+On mobile, the same scroll RAF adds the footer ink to the solid canvas over the
+last 24px of scrolling (the footer's bottom padding). The tint reaches full
+strength at the document bottom and returns to the page base when the footer's
+last link row reaches the viewport bottom. The visible wash remains anchored to
+the document footer; the footer is neither fixed nor sticky. Safari's actual
+toolbar appearance was checked on an iPhone in both article and Beer Log pages.
 - Sticky with z-index `--z-sticky` (20)
 - `.is-scrolled` — backdrop-filter blur(12px) saturate(180%), semi-transparent bg
 - `.header--hidden` — translateY(-100%)

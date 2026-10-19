@@ -19,11 +19,17 @@ function fixture() {
     let dialogOpen = false;
     let navigation;
     let header;
-    const window = Object.assign(new EventTarget(), { scrollY: 0, innerHeight: 844 });
+    const rootPaint = new Map();
+    const footer = {};
+    const window = Object.assign(new EventTarget(), { scrollY: 0, innerHeight: 844, innerWidth: 390 });
     const document = Object.assign(new EventTarget(), {
         activeElement: null,
-        documentElement: { style: { setProperty() {} }, scrollHeight: 5000 },
-        querySelector: (selector) => (selector === "[data-header]" ? header : selector === "dialog[open]" && dialogOpen ? {} : null),
+        documentElement: {
+            style: { setProperty: (key, value) => rootPaint.set(key, value) },
+            scrollHeight: 5000,
+        },
+        querySelector: (selector) =>
+            selector === "[data-header]" ? header : selector === ".site-footer" ? footer : selector === "dialog[open]" && dialogOpen ? {} : null,
     });
     function mount() {
         const attributes = new Set();
@@ -53,6 +59,7 @@ function fixture() {
             CSSTransition: Transition,
             getComputedStyle: () => ({
                 paddingTop: "0px",
+                paddingBottom: "24px",
                 getPropertyValue: (name) =>
                     ({
                         "--page-wash-stop-1": "45px",
@@ -84,6 +91,7 @@ function fixture() {
             flush();
         },
         paint: () => paint.get("--page-wash-nav-offset"),
+        footerPaint: () => Number(rootPaint.get("--footer-edge-strength")),
         pendingFrames: () => frames.size,
         input(type) {
             document.dispatchEvent(new Event(type));
@@ -114,6 +122,21 @@ function fixture() {
         },
     };
 }
+
+test("footer edge color clears when its final row reaches the bottom browser edge", () => {
+    const f = fixture();
+    const bottom = 5000 - 844;
+    f.scroll(bottom);
+    assert.equal(f.footerPaint(), 1);
+    f.scroll(bottom - 12);
+    assert.equal(f.footerPaint(), 0.5);
+    f.scroll(bottom - 24);
+    assert.equal(f.footerPaint(), 0);
+    f.scroll(bottom - 400);
+    assert.equal(f.footerPaint(), 0);
+    f.scroll(bottom);
+    assert.equal(f.footerPaint(), 1);
+});
 
 test("article navigation follows the page wash throughout its return animation", () => {
     const f = fixture();

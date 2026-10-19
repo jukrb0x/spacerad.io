@@ -2,6 +2,7 @@
 let header: HTMLElement | null = null;
 let navigation: HTMLElement | null = null;
 let profile: HTMLElement | null = null;
+let footer: HTMLElement | null = null;
 let profileLink: HTMLElement | null = null;
 let profileLinkTop = 0;
 let progressBar: HTMLElement | null = null;
@@ -16,6 +17,8 @@ let pointerInput = false;
 let navigationPaintOffset = "";
 let profilePaintOffset = "";
 let canvasStrength = "";
+let footerEdgeStrength = "";
+let footerEdgeCutoff = 24;
 let washStops: [number, number][] = [];
 const REVEAL_DISTANCE = 32;
 const HIDE_DISTANCE = 24;
@@ -39,6 +42,24 @@ function updateCanvasPaint(scrollY: number) {
     }
 }
 
+function updateFooterPaint(scrollY: number) {
+    const root = document.documentElement;
+    if (!footer || window.innerWidth >= 768) {
+        if (footerEdgeStrength !== "0") {
+            root.style.setProperty("--footer-edge-strength", "0");
+            footerEdgeStrength = "0";
+        }
+        return;
+    }
+    const remaining = Math.max(0, document.documentElement.scrollHeight - window.innerHeight - scrollY);
+    const strength = Math.max(0, Math.min(1, 1 - remaining / footerEdgeCutoff));
+    const value = String(strength);
+    if (value !== footerEdgeStrength) {
+        root.style.setProperty("--footer-edge-strength", value);
+        footerEdgeStrength = value;
+    }
+}
+
 function updateBackgroundPaint(scrollY: number, profileInset: number) {
     if (!header || !navigation || !floating) return;
     const beyondWash = scrollY >= PAGE_WASH_HEIGHT;
@@ -58,6 +79,7 @@ function updateBackgroundPaint(scrollY: number, profileInset: number) {
 
 function measureNavigation() {
     if (!header || !navigation) return;
+    footerEdgeCutoff = footer ? Number.parseFloat(getComputedStyle(footer).paddingBottom) || 24 : 24;
     // Include the header's top spacing even while navigation is fixed.
     headerTop = header.getBoundingClientRect().top + window.scrollY + (Number.parseFloat(getComputedStyle(header).paddingTop) || 0);
     navigationHeight = navigation.offsetHeight;
@@ -71,6 +93,7 @@ function updateHeader() {
     if (!header || !navigation) return;
     const scrollY = Math.max(0, window.scrollY);
     updateCanvasPaint(scrollY);
+    updateFooterPaint(scrollY);
     // Dialogs restore focus to their trigger for every input method. Only
     // keyboard focus should hold the bar open once pointer reading resumes.
     const focused = !pointerInput && navigation.contains(document.activeElement);
@@ -157,6 +180,7 @@ function initHeader() {
     header = document.querySelector<HTMLElement>("[data-header]");
     navigation = header?.querySelector<HTMLElement>(".site-header__inner") ?? null;
     profile = header?.querySelector<HTMLElement>(".home-profile") ?? null;
+    footer = document.querySelector<HTMLElement>(".site-footer");
     profileLink = profile?.querySelector<HTMLElement>(".home-profile__about") ?? null;
     progressBar = document.querySelector<HTMLElement>("[data-reading-progress]");
     floating = false;
@@ -164,6 +188,7 @@ function initHeader() {
     navigationPaintOffset = "";
     profilePaintOffset = "";
     canvasStrength = "";
+    footerEdgeStrength = "";
     const washStyle = getComputedStyle(document.documentElement);
     washStops = [
         [0, 1],
@@ -213,6 +238,8 @@ document.addEventListener("astro:before-swap", () => {
     header = null;
     navigation = null;
     profile = null;
+    footer = null;
+    document.documentElement.style.setProperty("--footer-edge-strength", "0");
     profileLink = null;
     progressBar = null;
 });
