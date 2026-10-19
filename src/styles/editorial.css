@@ -15,6 +15,16 @@ body {
     position: relative;
     isolation: isolate;
 }
+:root {
+    --page-wash-gradient: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--color-structure) var(--page-wash-strength), var(--color-bg-page)) 0px,
+        color-mix(in srgb, var(--color-structure) calc(var(--page-wash-strength) * 0.8), var(--color-bg-page)) 45px,
+        color-mix(in srgb, var(--color-structure) calc(var(--page-wash-strength) * 0.4), var(--color-bg-page)) 95px,
+        color-mix(in srgb, var(--color-structure) calc(var(--page-wash-strength) * 0.1), var(--color-bg-page)) 140px,
+        var(--color-bg-page) 170px
+    );
+}
 h1,
 h2,
 h3,
@@ -122,6 +132,17 @@ header.site-header[data-header].is-scrolled {
     z-index: -1;
     pointer-events: none;
     background: var(--color-bg-page);
+}
+.site-header[data-nav-floating] .site-header__inner,
+.site-header[data-profile-return] .home-profile::before {
+    background-color: var(--color-bg-page);
+    background-image: var(--page-wash-gradient);
+    background-size: 100% 170px;
+    background-repeat: no-repeat;
+    background-position: 0 var(--page-wash-nav-offset, -170px);
+}
+.site-header[data-profile-return] .home-profile::before {
+    background-position: 0 var(--page-wash-profile-offset, -170px);
 }
 @media (prefers-reduced-motion: reduce) {
     .site-header[data-nav-floating][data-nav-ready] .site-header__inner {
@@ -1002,12 +1023,11 @@ body::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 0 0 auto;
-    height: 160px;
+    /* Cover the desktop header's collapsed top margin without moving content. */
+    inset: -32px 0 auto;
+    height: 170px;
     pointer-events: none;
-    background-image: radial-gradient(circle, rgba(8, 25, 174, 0.065) 0.6px, transparent 0.8px);
-    background-size: 20px 20px;
-    mask-image: linear-gradient(#000, transparent);
+    background-image: var(--page-wash-gradient);
 }
 header.site-header[data-header] {
     margin-top: 32px;
@@ -1155,6 +1175,9 @@ html {
     scroll-padding-top: calc(var(--header-offset, 64px) + 12px);
 }
 @media (max-width: 767px) {
+    body::before {
+        top: 0;
+    }
     .site-header[data-nav-floating]::before {
         height: var(--navigation-height, 64px);
     }

@@ -7,6 +7,13 @@ import { createContext, runInContext } from "node:vm";
 const source = readFileSync(new URL("../src/scripts/header-scroll.ts", import.meta.url), "utf8");
 
 function fixture() {
+    class Transition {
+        transitionProperty = "transform";
+        playState = "finished";
+    }
+    const transition = new Transition();
+    const paint = new Map();
+    let navigationBottom = 64;
     const frames = new Map();
     let frameId = 0;
     let dialogOpen = false;
@@ -23,13 +30,13 @@ function fixture() {
         navigation = {
             offsetHeight: 64,
             contains: (el) => el === navigation,
-            getBoundingClientRect: () => ({ bottom: 64 }),
-            getAnimations: () => [],
+            getBoundingClientRect: () => ({ bottom: navigationBottom }),
+            getAnimations: () => [transition],
             inert: false,
         };
         header = {
             attributes,
-            style: { setProperty() {} },
+            style: { setProperty: (key, value) => paint.set(key, value) },
             getBoundingClientRect: () => ({ top: 28 - window.scrollY }),
             querySelector: (selector) => (selector === ".site-header__inner" ? navigation : null),
             toggleAttribute: (key, value) => (value ? attributes.add(key) : attributes.delete(key)),
@@ -43,6 +50,7 @@ function fixture() {
         createContext({
             window,
             document,
+            CSSTransition: Transition,
             getComputedStyle: () => ({ paddingTop: "0px" }),
             requestAnimationFrame: (callback) => {
                 frames.set(++frameId, callback);
@@ -59,6 +67,13 @@ function fixture() {
     };
     document.dispatchEvent(new Event("astro:page-load"));
     return {
+        animation(bottom, running) {
+            navigationBottom = bottom;
+            transition.playState = running ? "running" : "finished";
+            flush();
+        },
+        paint: () => paint.get("--page-wash-nav-offset"),
+        pendingFrames: () => frames.size,
         input(type) {
             document.dispatchEvent(new Event(type));
             flush();
@@ -88,6 +103,20 @@ function fixture() {
         },
     };
 }
+
+test("article navigation follows the page wash throughout its return animation", () => {
+    const f = fixture();
+    f.scroll(200);
+    f.animation(32, true);
+    f.scroll(160);
+    assert.equal(f.paint(), "-128px", "partly revealed paint follows the document coordinate");
+    assert.equal(f.pendingFrames(), 1, "article pages without a profile keep sampling the return transform");
+    f.animation(64, false);
+    assert.equal(f.paint(), "-160px");
+    assert.equal(f.pendingFrames(), 0, "sampling stops with the transform");
+    f.scroll(100);
+    assert.equal(f.paint(), "-100px");
+});
 
 function reveal(f) {
     f.scroll(700);

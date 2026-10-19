@@ -318,6 +318,7 @@ $breakpoints: (
   --color-channel: #ffcc00;
   --color-on-channel: #24262d;
   --color-structure: #0819ae;
+  --page-wash-strength: 6%;
   --color-on-structure: #ffffff;
   --color-structure-muted: #d2d8ff;
   --measure: #{$measure};
@@ -450,6 +451,7 @@ $breakpoints: (
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --page-wash-strength: 8%;
 
   // Background palette
   --color-bg-page: #131315;

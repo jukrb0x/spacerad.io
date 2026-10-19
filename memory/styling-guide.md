@@ -217,6 +217,19 @@ Custom 6px width, rounded, themed colors (`--c-scrollbar` / `--c-scrollbar-hover
 ## Component-Specific SCSS
 
 ### Header (`components/_header.scss`)
+
+`editorial.css` paints a static 170px page-top wash from the invariant structure
+blue `#0819ae` into the existing page base. `--page-wash-strength` in `_tokens.scss`
+is 6% light / 8% dark; dark uses the same ink rather than the brighter link color.
+The fade reaches 80%, 40%, and 10% of its initial strength at 45, 95, and 140px.
+`body::before` replaces the former dots and covers the desktop header's collapsed
+32px margin (mobile has no top margin).
+
+Floating navigation and the Home return backdrop share the same opaque gradient.
+`header-scroll.ts` aligns their paint in document coordinates, including navigation
+transforms and the profile backdrop's negative inset. It uses the existing RAF and
+SPA cleanup lifecycle; past 170px, paint alignment skips geometry reads. Profile
+content clipping and navigation interaction stay unchanged.
 - Sticky with z-index `--z-sticky` (20)
 - `.is-scrolled` — backdrop-filter blur(12px) saturate(180%), semi-transparent bg
 - `.header--hidden` — translateY(-100%)

@@ -13,9 +13,30 @@ let profileHeight = 0;
 let floating = false;
 let hidden = false;
 let pointerInput = false;
+let navigationPaintOffset = "";
+let profilePaintOffset = "";
 const REVEAL_DISTANCE = 32;
 const HIDE_DISTANCE = 24;
 const MIN_SCROLL_DISTANCE_VH = 1.5;
+// Matches the static page wash in editorial.css.
+const PAGE_WASH_HEIGHT = 170;
+
+function updateBackgroundPaint(scrollY: number, profileInset: number) {
+    if (!header || !navigation || !floating) return;
+    const beyondWash = scrollY >= PAGE_WASH_HEIGHT;
+    const navigationTop = beyondWash ? 0 : navigation.getBoundingClientRect().bottom - navigationHeight;
+    const profileTop = profile && !beyondWash ? profile.getBoundingClientRect().top + profileInset : 0;
+    const navOffset = `${beyondWash ? -PAGE_WASH_HEIGHT : -scrollY - navigationTop}px`;
+    const profileOffset = `${beyondWash ? -PAGE_WASH_HEIGHT : -scrollY - profileTop}px`;
+    if (navOffset !== navigationPaintOffset) {
+        header.style.setProperty("--page-wash-nav-offset", navOffset);
+        navigationPaintOffset = navOffset;
+    }
+    if (profile && profileOffset !== profilePaintOffset) {
+        header.style.setProperty("--page-wash-profile-offset", profileOffset);
+        profilePaintOffset = profileOffset;
+    }
+}
 
 function measureNavigation() {
     if (!header || !navigation) return;
@@ -73,26 +94,29 @@ function updateHeader() {
         directionAnchor = scrollY;
     }
 
+    let profileInset = 0;
     if (profile) {
         const paintedBottom = floating ? Math.max(0, navigation.getBoundingClientRect().bottom) : 0;
         const distance = Math.max(0, scrollY - headerTop);
         // Occlude in place: the drawer must never translate the profile's content.
         // A negative inset exposes only background across the near-top gap.
         const clipTop = Math.min(profileHeight, paintedBottom - (navigationHeight - distance));
+        profileInset = Math.min(0, clipTop);
         const returning = floating && (paintedBottom > 0 || distance < navigationHeight);
         header.toggleAttribute("data-profile-return", returning);
         header.style.setProperty("--profile-return-top", `${clipTop}px`);
         if (profileLink) profileLink.inert = returning && clipTop > profileLinkTop;
-        if (
-            navigation
-                .getAnimations()
-                .some(
-                    (animation) =>
-                        animation instanceof CSSTransition && animation.transitionProperty === "transform" && animation.playState === "running",
-                )
-        )
-            queueUpdate();
     }
+    updateBackgroundPaint(scrollY, profileInset);
+    if (
+        navigation
+            .getAnimations()
+            .some(
+                (animation) =>
+                    animation instanceof CSSTransition && animation.transitionProperty === "transform" && animation.playState === "running",
+            )
+    )
+        queueUpdate();
 
     if (progressBar) {
         const trackLength = document.documentElement.scrollHeight - window.innerHeight;
@@ -118,6 +142,8 @@ function initHeader() {
     progressBar = document.querySelector<HTMLElement>("[data-reading-progress]");
     floating = false;
     hidden = false;
+    navigationPaintOffset = "";
+    profilePaintOffset = "";
     directionAnchor = Math.max(0, window.scrollY);
     measureNavigation();
     // Only the navigation bar occupies the viewport during reading.
