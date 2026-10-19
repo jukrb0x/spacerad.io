@@ -56,7 +56,7 @@ iOS Safari behavior.
 The cross-engine suite also checks keyboard Escape followed by wheel reading in a narrow desktop context,
 including focus protection before wheel input and stable document geometry.
 
-`pnpm test:release` inspects the fresh production route manifest, emitted page files and sitemap. Run it after `pnpm build`; it rejects any design-lab route. The development suite separately verifies `/design-lab` and both reading studies remain available locally. Their templates live under Astro’s excluded `src/pages/_design-lab/` directory and are injected only for the `dev` command.
+`pnpm test:release` checks the fresh production output and sitemap. Run it after `pnpm build`; it verifies that draft articles stay unpublished.
 
 ## Imported content and image boundaries
 
@@ -138,7 +138,7 @@ with explicit article inputs, including an excluded draft, two illustrated rows
 and two text-only rows. The two lead cases cover Chinese/English labels and
 cover geometry/absence without relying on the newest published article. Normal
 homepage checks continue to use the real collection. Production builds register
-neither fixture routes nor design-lab routes; release checks enforce that boundary.
+no fixture routes.
 
 ## Explicit browser profiles
 

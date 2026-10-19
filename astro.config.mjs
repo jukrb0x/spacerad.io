@@ -58,16 +58,6 @@ export default defineConfig({
     }),
     site: "https://spacerad.io",
     integrations: [
-        {
-            name: "local-design-lab",
-            hooks: {
-                "astro:config:setup": ({ command, injectRoute }) => {
-                    if (command !== "dev") return;
-                    injectRoute({ pattern: "/design-lab", entrypoint: "./src/pages/_design-lab/index.astro" });
-                    injectRoute({ pattern: "/design-lab/read/[slug]", entrypoint: "./src/pages/_design-lab/read/[slug].astro" });
-                },
-            },
-        },
         mdx(),
         sitemap({ filter: (url) => !new URL(url).pathname.startsWith("/api/") }),
         UnoCSS({ injectReset: true }),

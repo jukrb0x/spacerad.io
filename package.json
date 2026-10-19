@@ -15,7 +15,7 @@
         "test:browser": "node scripts/test-browser.mjs --profile=pr",
         "test:browser:pr": "node scripts/test-browser.mjs --profile=pr",
         "test:browser:full": "node scripts/test-browser.mjs --profile=full",
-        "test:release": "node --test tests/design-lab-build.test.mjs tests/social-sharing-build.test.mjs",
+        "test:release": "node --test tests/release-output.test.mjs tests/social-sharing-build.test.mjs",
         "preview:verify": "node scripts/verify-preview.mjs",
         "check:publishing": "node scripts/check-publishing.mjs"
     },
