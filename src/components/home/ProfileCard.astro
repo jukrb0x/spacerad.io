@@ -12,8 +12,7 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
 <script is:inline data-astro-rerun>
     // Select before first paint; the server-rendered phrase remains the no-JS fallback.
     {
-        const chineseWords: Record<string, string> = { "Unreal Engine.": "虚幻引擎。", "tools.": "工具。", "teams.": "团队。", "games.": "游戏。", "stories.": "故事。", "performance.": "性能。" };
-const words = document.currentScript.previousElementSibling.querySelectorAll(".home-profile__word");
+        const words = document.currentScript.previousElementSibling.querySelectorAll(".home-profile__word");
         if (words.length > 0) {
             words.forEach((word) => word.removeAttribute("data-current"));
             words[Math.floor(Math.random() * words.length)].setAttribute("data-current", "");
@@ -28,8 +27,7 @@ const words = document.currentScript.previousElementSibling.querySelectorAll(".h
         disposeCarousel = undefined;
         const element = document.querySelector<HTMLElement>("[data-build-words]");
         if (!element || !element.animate) return;
-        const chineseWords: Record<string, string> = { "Unreal Engine.": "虚幻引擎。", "tools.": "工具。", "teams.": "团队。", "games.": "游戏。", "stories.": "故事。", "performance.": "性能。" };
-const words = Array.from(element.querySelectorAll<HTMLElement>(".home-profile__word"));
+        const words = Array.from(element.querySelectorAll<HTMLElement>(".home-profile__word"));
         if (words.length < 2) return;
         const controller = new AbortController();
         const motion = window.matchMedia("(prefers-reduced-motion: reduce)");

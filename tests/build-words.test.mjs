@@ -6,6 +6,37 @@ import ts from "typescript";
 
 const source = readFileSync(new URL("../src/components/home/ProfileCard.astro", import.meta.url), "utf8");
 
+test("raw inline first-paint script remains valid JavaScript when rerun after navigation", () => {
+    const inline = source.match(/<script is:inline[^>]*>([\s\S]*?)<\/script>/)?.[1];
+    assert.ok(inline, "first-paint selection must run before the deferred carousel module");
+    const words = Array.from({ length: 6 }, (_, index) => ({
+        current: index === 0,
+        removeAttribute() {
+            this.current = false;
+        },
+        setAttribute() {
+            this.current = true;
+        },
+    }));
+    let sample = 0;
+    const context = createContext({
+        document: { currentScript: { previousElementSibling: { querySelectorAll: () => words } } },
+        Math: { random: () => sample, floor: Math.floor },
+    });
+    for (const [random, expected] of [
+        [0, 0],
+        [0.5, 3],
+        [0.999999, 5],
+    ]) {
+        sample = random;
+        runInContext(inline, context);
+        assert.deepEqual(
+            words.flatMap((word, index) => (word.current ? [index] : [])),
+            [expected],
+        );
+    }
+});
+
 function fixture({ count = 6, random = () => 0.5, reduced = false, animate = true } = {}) {
     const timers = new Map();
     const animations = new Set();
