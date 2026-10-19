@@ -17,7 +17,7 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
 <!doctype html>
 <html lang="en" class="collection-root" data-collection={collectionId}>
     <head>
-        <BaseHead title={`${page.title.en} — Space Radio`} description={page.subtitle.en} />
+        <BaseHead title={`${page.title.en} — Space Radio`} description={page.subtitle.en} image={collectionId === "beer" ? "/beer-log-social.png" : undefined} />
     </head>
     <body class="archive-page">
         <Header />

@@ -40,3 +40,11 @@ test("articles retain their own cover or article fallback without default-card d
         assert.equal(meta("og:image:height"), undefined);
     }
 });
+
+test("Beer Log advertises its beer badge collage", async () => {
+    const meta = await head("beer-collection/");
+    assert.equal(meta("og:image"), "https://spacerad.io/beer-log-social.png");
+    assert.equal(meta("twitter:image"), meta("og:image"));
+    const image = await sharp("dist/beer-log-social.png").metadata();
+    assert.deepEqual([image.width, image.height, image.format], [1200, 630, "png"]);
+});
