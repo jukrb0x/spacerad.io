@@ -27,6 +27,7 @@ async function open(options = {}) {
         });
     });
     page.setDefaultTimeout(5000);
+    page.setDefaultNavigationTimeout(20000);
     await page.clock.install();
     await page.goto(baseURL, { waitUntil: "domcontentloaded" });
     await page.waitForFunction(() => window.carouselPageLoaded);
@@ -107,6 +108,38 @@ for (const width of [1440, 390, 320]) {
         }
     });
 }
+
+test("mobile marker changes length during the phrase slide instead of jumping at the end", async () => {
+    const { context, page } = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    try {
+        const marker = () =>
+            page.locator("#home-title").evaluate((el) => {
+                const style = getComputedStyle(el, "::before");
+                return parseFloat(style.width) * new DOMMatrixReadOnly(style.transform).m11;
+            });
+        const start = await marker();
+        assert.ok(start > 0, "touch marker stays visible");
+        await page.clock.fastForward(4000);
+        const incoming = page.locator(".home-profile__word[data-incoming]");
+        await incoming.waitFor();
+        const target = await incoming.evaluate(
+            (el) => el.getBoundingClientRect().right - document.querySelector("#home-title").getBoundingClientRect().left,
+        );
+        assert.ok(Math.abs(target - start) > 4);
+        await page.waitForTimeout(110);
+        const middle = await marker();
+        const progress = Math.abs((middle - start) / (target - start));
+        assert.ok(progress > 0.15 && progress < 0.85, "marker should resize steadily while both words are sliding");
+        const next = await incoming.textContent();
+        await page.waitForFunction((expected) => document.querySelector(".home-profile__word[data-current]")?.textContent === expected, next);
+        await page.waitForFunction((expected) => {
+            const style = getComputedStyle(document.querySelector("#home-title"), "::before");
+            return Math.abs(parseFloat(style.width) * new DOMMatrixReadOnly(style.transform).m11 - expected) < 1;
+        }, target);
+    } finally {
+        await context.close();
+    }
+});
 
 // Removing the visibility/media-query controller would allow motion to continue.
 test("hidden pages and reduced motion cancel exchanges and stay static until eligible", async () => {

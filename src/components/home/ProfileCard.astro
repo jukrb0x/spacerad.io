@@ -127,15 +127,24 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
         if (!heading || !lead || !carousel) return;
 
         const update = () => {
-            const current = carousel.querySelector<HTMLElement>(".home-profile__word[data-current]");
-            if (current) heading.style.setProperty("--intro-marker-width", `${current.getBoundingClientRect().right - heading.getBoundingClientRect().left}px`);
+            const target = carousel.querySelector<HTMLElement>(".home-profile__word[data-incoming]")
+                ?? carousel.querySelector<HTMLElement>(".home-profile__word[data-current]");
+            const bounds = heading.getBoundingClientRect();
+            if (target && bounds.width) {
+                const length = target.getBoundingClientRect().right - bounds.left;
+                heading.style.setProperty("--intro-marker-scale", String(Math.min(1, length / bounds.width)));
+            }
         };
         const sizes = new ResizeObserver(update);
+        sizes.observe(heading);
         sizes.observe(lead);
         carousel.querySelectorAll<HTMLElement>(".home-profile__word").forEach((word) => sizes.observe(word));
         const phrase = new MutationObserver(update);
-        phrase.observe(carousel, { attributes: true, attributeFilter: ["data-current"], childList: true, subtree: true });
+        phrase.observe(carousel, { attributes: true, attributeFilter: ["data-current", "data-incoming"], childList: true, subtree: true });
         update();
+        // Establish the initial length before enabling the slide transition.
+        getComputedStyle(heading, "::before").transform;
+        heading.setAttribute("data-marker-ready", "");
         disposeMarker = () => {
             sizes.disconnect();
             phrase.disconnect();

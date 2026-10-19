@@ -41,6 +41,13 @@ async function settledWord(page, index) {
         () => getComputedStyle(document.querySelector(".home-profile__word[data-current]")).transform === "matrix(1, 0, 0, 1, 0, 0)",
     );
 }
+function markerMatchesCurrentWord() {
+    const title = document.querySelector("#home-title");
+    const word = title.querySelector(".home-profile__word[data-current]");
+    const style = getComputedStyle(title, "::before");
+    const visibleWidth = parseFloat(style.width) * new DOMMatrixReadOnly(style.transform).m11;
+    return Math.abs(visibleWidth - (word.getBoundingClientRect().right - title.getBoundingClientRect().left)) < 1;
+}
 async function scroll(page, y) {
     await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), y);
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -75,7 +82,9 @@ for (const width of [1440, 390, 320])
                             lead: lead.getBoundingClientRect().y,
                             word: word.getBoundingClientRect().y,
                             link: document.querySelector(".home-profile__about").getBoundingClientRect().toJSON(),
-                            marker: parseFloat(getComputedStyle(title, "::before").width),
+                            marker:
+                                parseFloat(getComputedStyle(title, "::before").width) *
+                                parseFloat(getComputedStyle(title).getPropertyValue("--intro-marker-scale")),
                             phrase: active.getBoundingClientRect().right - title.getBoundingClientRect().left,
                         };
                     });
@@ -94,7 +103,7 @@ for (const width of [1440, 390, 320])
                         height: parseFloat(style.height),
                         top: parseFloat(style.top),
                         wordHeight: word.height,
-                        width: parseFloat(style.width),
+                        width: parseFloat(style.width) * new DOMMatrixReadOnly(style.transform).m11,
                         phrase: word.right - el.getBoundingClientRect().left,
                         slotEnd: slot.right - el.getBoundingClientRect().left,
                         scale: style.transform,
@@ -106,7 +115,7 @@ for (const width of [1440, 390, 320])
                 assert.ok(ink.top + ink.height <= ink.wordHeight + 0.1, "backing stays inside the carousel clip");
                 assert.ok(Math.abs(ink.width - ink.phrase) < 1);
                 assert.ok(ink.width < ink.slotEnd - 50, "short phrase backing must not fill the reserved blank width");
-                assert.equal(ink.scale, "matrix(1, 0, 0, 1, 0, 0)");
+                assert.notEqual(ink.scale, "matrix(0, 0, 0, 1, 0, 0)");
                 assert.equal(ink.duration, "0s");
                 assert.deepEqual(
                     await about.evaluate((el) => [
@@ -185,9 +194,7 @@ test("one About marker expands and retracts, supports keyboard focus and keeps t
         const initial = await about.boundingBox();
         assert.equal(await about.locator("h1").evaluate((el) => getComputedStyle(el, "::before").transitionProperty), "transform");
         await about.hover();
-        await page.waitForFunction(
-            () => getComputedStyle(document.querySelector("#home-title"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
-        );
+        await page.waitForFunction(markerMatchesCurrentWord);
         await page.mouse.move(4, 4);
         await page.waitForFunction(
             () => getComputedStyle(document.querySelector("#home-title"), "::before").transform === "matrix(0, 0, 0, 1, 0, 0)",
@@ -195,31 +202,28 @@ test("one About marker expands and retracts, supports keyboard focus and keeps t
         assert.deepEqual(await about.boundingBox(), initial);
         await about.focus();
         assert.equal(await about.evaluate((el) => el.matches(":focus-visible")), true);
-        await page.waitForFunction(
-            () => getComputedStyle(document.querySelector("#home-title"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
-        );
-        const englishWidth = await about.locator("h1").evaluate((el) => parseFloat(getComputedStyle(el, "::before").width));
-        await page.locator("[data-language-toggle]:visible").first().click();
-        await page.waitForFunction(() => {
-            const title = document.querySelector("#home-title");
-            const word = title.querySelector(".home-profile__word[data-current]");
-            return (
-                document.documentElement.dataset.uiLanguage === "zh" &&
-                Math.abs(
-                    parseFloat(getComputedStyle(title, "::before").width) - (word.getBoundingClientRect().right - title.getBoundingClientRect().left),
-                ) < 1
-            );
+        await page.waitForFunction(markerMatchesCurrentWord);
+        const englishWidth = await about.locator("h1").evaluate((el) => {
+            const style = getComputedStyle(el, "::before");
+            return parseFloat(style.width) * new DOMMatrixReadOnly(style.transform).m11;
         });
-        assert.notEqual(await about.locator("h1").evaluate((el) => parseFloat(getComputedStyle(el, "::before").width)), englishWidth);
+        await page.locator("[data-language-toggle]:visible").first().click();
+        await page.waitForFunction(() => document.documentElement.dataset.uiLanguage === "zh");
+        await about.hover();
+        await page.waitForFunction(markerMatchesCurrentWord);
+        assert.notEqual(
+            await about.locator("h1").evaluate((el) => {
+                const style = getComputedStyle(el, "::before");
+                return parseFloat(style.width) * new DOMMatrixReadOnly(style.transform).m11;
+            }),
+            englishWidth,
+        );
     } finally {
         await context.close();
     }
     const touch = await open(390, { isMobile: true, hasTouch: true });
     try {
-        assert.equal(
-            await touch.page.locator("#home-title").evaluate((el) => getComputedStyle(el, "::before").transform),
-            "matrix(1, 0, 0, 1, 0, 0)",
-        );
+        await touch.page.waitForFunction(markerMatchesCurrentWord);
         await touch.page.locator(".home-profile__about").tap();
         await touch.page.waitForURL(/\/me\/?$/);
     } finally {
