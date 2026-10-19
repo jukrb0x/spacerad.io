@@ -18,10 +18,10 @@ body {
 :root {
     --page-wash-gradient: linear-gradient(
         to bottom,
-        color-mix(in srgb, var(--color-structure) var(--page-wash-strength), var(--color-bg-page)) 0px,
-        color-mix(in srgb, var(--color-structure) calc(var(--page-wash-strength) * 0.8), var(--color-bg-page)) 45px,
-        color-mix(in srgb, var(--color-structure) calc(var(--page-wash-strength) * 0.4), var(--color-bg-page)) 95px,
-        color-mix(in srgb, var(--color-structure) calc(var(--page-wash-strength) * 0.1), var(--color-bg-page)) 140px,
+        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) var(--page-wash-strength), var(--color-bg-page)) 0px,
+        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.8), var(--color-bg-page)) 45px,
+        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.4), var(--color-bg-page)) 95px,
+        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.1), var(--color-bg-page)) 140px,
         var(--color-bg-page) 170px
     );
 }

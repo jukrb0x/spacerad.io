@@ -8,4 +8,4 @@ const entries = (await getCollection("collectionItems", (entry) => entry.data.co
     (a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id),
 );
 ---
-<CollectionPage page={page.data} entries={entries} />
+<CollectionPage collectionId="beer" page={page.data} entries={entries} />

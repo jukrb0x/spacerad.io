@@ -7,14 +7,15 @@ import Footer from "../Footer.astro";
 import Header from "../Header.astro";
 
 interface Props {
+    collectionId?: string;
     page: CollectionEntry<"collectionPages">["data"];
     entries: CollectionEntry<"collectionItems">[];
 }
-const { page, entries } = Astro.props;
+const { page, entries, collectionId } = Astro.props;
 const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await render(entry)) })));
 ---
 <!doctype html>
-<html lang="en" class="collection-root">
+<html lang="en" class="collection-root" data-collection={collectionId}>
     <head>
         <BaseHead title={`${page.title.en} — Space Radio`} description={page.subtitle.en} />
     </head>
@@ -115,6 +116,8 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
 <style>
     :global(html.collection-root) { --color-bg-page: #f7f3e9; --collection-tile: #eee7d7; }
     :global(html.collection-root[data-theme="dark"]) { --color-bg-page: #201f1b; --collection-tile: #2a2822; }
+    :global(html[data-collection="beer"]) { --page-wash-ink: #766249; --page-wash-strength: 6%; }
+    :global(html[data-collection="beer"][data-theme="dark"]) { --page-wash-ink: #3b3020; --page-wash-strength: 14%; }
     :global(html.collection-root body) { background: var(--color-bg-page); background-image: none; }
     .collection-grid { list-style: none; padding: 0; margin: 28px 12px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
     .collection-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: hidden; isolation: isolate; padding: 0; border: 0; border-radius: 0; background: var(--collection-tile); color: var(--color-text-primary); text-align: left; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }

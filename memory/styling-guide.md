@@ -230,6 +230,13 @@ Floating navigation and the Home return backdrop share the same opaque gradient.
 transforms and the profile backdrop's negative inset. It uses the existing RAF and
 SPA cleanup lifecycle; past 170px, paint alignment skips geometry reads. Profile
 content clipping and navigation interaction stay unchanged.
+
+Beer Log passes `collectionId="beer"` to CollectionPage, setting
+`html[data-collection="beer"]`. Only that root overrides `--page-wash-ink` and
+`--page-wash-strength`: warm gray-brown `#766249` at 6% in light mode, deep brown
+`#3b3020` at 14% in dark mode. The shared gradient falls back to `--color-structure`
+on other pages and collections; the 170px fade and header paint alignment remain
+unchanged. The structure/brand color itself is never overridden.
 - Sticky with z-index `--z-sticky` (20)
 - `.is-scrolled` — backdrop-filter blur(12px) saturate(180%), semi-transparent bg
 - `.header--hidden` — translateY(-100%)
