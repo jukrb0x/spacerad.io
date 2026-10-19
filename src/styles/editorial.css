@@ -199,8 +199,7 @@ header.site-header[data-header].is-scrolled {
         transition: none !important;
         animation: none !important;
     }
-    .home-profile__lead::before,
-    .home-profile__word::before {
+    .home-profile__about h1::before {
         transition: none !important;
     }
 }
@@ -1162,6 +1161,8 @@ header.site-header[data-header] {
     text-decoration: none;
 }
 .home-profile .home-profile__about h1 {
+    position: relative;
+    isolation: isolate;
     margin: 0;
     font: inherit;
     letter-spacing: -0.02em;
@@ -1180,41 +1181,31 @@ header.site-header[data-header] {
     text-decoration: none;
     white-space: nowrap;
 }
-.home-profile__lead::before,
-.home-profile__word::before {
+.home-profile__about h1::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset-inline: 0;
+    inset-inline-start: 0;
     top: calc(var(--intro-line-height) * 0.7);
+    width: var(--intro-marker-width, 100%);
     height: calc(var(--intro-line-height) * 0.3);
     background: var(--color-channel);
     pointer-events: none;
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform 180ms cubic-bezier(0.2, 0.65, 0.3, 1);
-}
-.home-profile__lead::before {
-    transition-duration: 120ms;
-    transition-delay: 180ms;
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .home-profile__about:focus-visible {
     outline: 2px solid var(--color-text-primary);
     outline-offset: 7px;
 }
-.home-profile__about:focus-visible .home-profile__lead::before {
+.home-profile__about:focus-visible h1::before {
     transform: scaleX(1);
-    transition-delay: 0s;
-}
-.home-profile__about:focus-visible .home-profile__word::before {
-    transform: scaleX(1);
-    transition-delay: 120ms;
 }
 .home-profile__about:focus-visible .home-profile__name {
     color: var(--color-text-primary);
 }
-html[data-theme="dark"] .home-profile__lead::before,
-html[data-theme="dark"] .home-profile__word::before {
+html[data-theme="dark"] .home-profile__about h1::before {
     opacity: 0.42;
 }
 .site-header__inner [data-reading-progress] {
@@ -1526,21 +1517,15 @@ html {
     .site-brand:hover .site-brand__text::after {
         clip-path: inset(0 0 0 0);
     }
-    .home-profile__about:hover .home-profile__lead::before {
+    .home-profile__about:hover h1::before {
         transform: scaleX(1);
-        transition-delay: 0s;
-    }
-    .home-profile__about:hover .home-profile__word::before {
-        transform: scaleX(1);
-        transition-delay: 120ms;
     }
     .home-profile__about:hover .home-profile__name {
         color: var(--color-text-primary);
     }
 }
 @media (hover: none), (pointer: coarse) {
-    .home-profile__lead::before,
-    .home-profile__word::before {
+    .home-profile__about h1::before {
         transform: scaleX(1);
     }
     .home-profile__about .home-profile__name {

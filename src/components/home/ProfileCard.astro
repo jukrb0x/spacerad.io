@@ -116,3 +116,32 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
         disposeCarousel = undefined;
     });
 </script>
+<script>
+    let disposeMarker: (() => void) | undefined;
+
+    function initMarker() {
+        disposeMarker?.();
+        const heading = document.querySelector<HTMLElement>("#home-title");
+        const lead = heading?.querySelector<HTMLElement>(".home-profile__lead");
+        const carousel = heading?.querySelector<HTMLElement>("[data-build-words]");
+        if (!heading || !lead || !carousel) return;
+
+        const update = () => {
+            const current = carousel.querySelector<HTMLElement>(".home-profile__word[data-current]");
+            if (current) heading.style.setProperty("--intro-marker-width", `${current.getBoundingClientRect().right - heading.getBoundingClientRect().left}px`);
+        };
+        const sizes = new ResizeObserver(update);
+        sizes.observe(lead);
+        carousel.querySelectorAll<HTMLElement>(".home-profile__word").forEach((word) => sizes.observe(word));
+        const phrase = new MutationObserver(update);
+        phrase.observe(carousel, { attributes: true, attributeFilter: ["data-current"], childList: true, subtree: true });
+        update();
+        disposeMarker = () => {
+            sizes.disconnect();
+            phrase.disconnect();
+        };
+    }
+
+    document.addEventListener("astro:page-load", initMarker);
+    document.addEventListener("astro:before-swap", () => disposeMarker?.());
+</script>

@@ -66,31 +66,37 @@ for (const width of [1440, 390, 320])
                     await settledWord(page, index);
                     const geometry = await page.evaluate(() => {
                         const lead = document.createRange(),
-                            word = document.createRange();
+                            word = document.createRange(),
+                            title = document.querySelector("#home-title"),
+                            active = document.querySelector(".home-profile__word[data-current]");
                         lead.selectNodeContents(document.querySelector(".home-profile__lead"));
-                        word.selectNodeContents(document.querySelector(".home-profile__word[data-current]"));
+                        word.selectNodeContents(active);
                         return {
                             lead: lead.getBoundingClientRect().y,
                             word: word.getBoundingClientRect().y,
                             link: document.querySelector(".home-profile__about").getBoundingClientRect().toJSON(),
+                            marker: parseFloat(getComputedStyle(title, "::before").width),
+                            phrase: active.getBoundingClientRect().right - title.getBoundingClientRect().left,
                         };
                     });
                     assert.equal(geometry.lead, geometry.word, `phrase ${index} must share the text baseline`);
+                    assert.ok(Math.abs(geometry.marker - geometry.phrase) < 1, `phrase ${index} must have one marker ending at its text`);
                     initial ??= geometry.link;
                     assert.deepEqual(geometry.link, initial, "phrase changes must not move or resize the About link");
                 }
                 await settledWord(page, 1);
                 await about.hover();
-                const ink = await page.locator(".home-profile__word[data-current]").evaluate((el) => {
+                const ink = await page.locator("#home-title").evaluate((el) => {
                     const style = getComputedStyle(el, "::before");
-                    const slot = el.parentElement.getBoundingClientRect();
-                    const rect = el.getBoundingClientRect();
+                    const slot = el.querySelector(".home-profile__carousel").getBoundingClientRect();
+                    const word = el.querySelector(".home-profile__word[data-current]").getBoundingClientRect();
                     return {
                         height: parseFloat(style.height),
                         top: parseFloat(style.top),
-                        wordHeight: rect.height,
-                        width: rect.width,
-                        slot: slot.width,
+                        wordHeight: word.height,
+                        width: parseFloat(style.width),
+                        phrase: word.right - el.getBoundingClientRect().left,
+                        slotEnd: slot.right - el.getBoundingClientRect().left,
                         scale: style.transform,
                         duration: style.transitionDuration,
                     };
@@ -98,10 +104,17 @@ for (const width of [1440, 390, 320])
                 assert.ok(ink.height >= (width >= 768 ? 11 : 9), "yellow must be a backing plane below the text");
                 assert.ok(ink.top > ink.wordHeight * 0.65);
                 assert.ok(ink.top + ink.height <= ink.wordHeight + 0.1, "backing stays inside the carousel clip");
-                assert.ok(ink.width < ink.slot - 50, "short phrase backing must not fill the reserved blank width");
+                assert.ok(Math.abs(ink.width - ink.phrase) < 1);
+                assert.ok(ink.width < ink.slotEnd - 50, "short phrase backing must not fill the reserved blank width");
                 assert.equal(ink.scale, "matrix(1, 0, 0, 1, 0, 0)");
                 assert.equal(ink.duration, "0s");
-                assert.equal(await about.evaluate((el) => getComputedStyle(el, "::before").content), "none");
+                assert.deepEqual(
+                    await about.evaluate((el) => [
+                        getComputedStyle(el.querySelector(".home-profile__lead"), "::before").content,
+                        getComputedStyle(el.querySelector(".home-profile__word[data-current]"), "::before").content,
+                    ]),
+                    ["none", "none"],
+                );
                 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
             } finally {
                 await context.close();
@@ -165,33 +178,46 @@ for (const width of [1440, 768, 390, 320])
         });
     }
 
-test("About marker slides smoothly, retracts, supports keyboard focus and keeps the touch link direct", async () => {
+test("one About marker expands and retracts, supports keyboard focus and keeps the touch link direct", async () => {
     const { context, page } = await open(1440, { reducedMotion: "no-preference" });
     try {
         const about = page.locator(".home-profile__about");
         const initial = await about.boundingBox();
-        assert.equal(await about.locator(".home-profile__lead").evaluate((el) => getComputedStyle(el, "::before").transitionProperty), "transform");
+        assert.equal(await about.locator("h1").evaluate((el) => getComputedStyle(el, "::before").transitionProperty), "transform");
         await about.hover();
         await page.waitForFunction(
-            () => getComputedStyle(document.querySelector(".home-profile__word[data-current]"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
+            () => getComputedStyle(document.querySelector("#home-title"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
         );
         await page.mouse.move(4, 4);
         await page.waitForFunction(
-            () => getComputedStyle(document.querySelector(".home-profile__lead"), "::before").transform === "matrix(0, 0, 0, 1, 0, 0)",
+            () => getComputedStyle(document.querySelector("#home-title"), "::before").transform === "matrix(0, 0, 0, 1, 0, 0)",
         );
         assert.deepEqual(await about.boundingBox(), initial);
         await about.focus();
         assert.equal(await about.evaluate((el) => el.matches(":focus-visible")), true);
         await page.waitForFunction(
-            () => getComputedStyle(document.querySelector(".home-profile__lead"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
+            () => getComputedStyle(document.querySelector("#home-title"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
         );
+        const englishWidth = await about.locator("h1").evaluate((el) => parseFloat(getComputedStyle(el, "::before").width));
+        await page.locator("[data-language-toggle]:visible").first().click();
+        await page.waitForFunction(() => {
+            const title = document.querySelector("#home-title");
+            const word = title.querySelector(".home-profile__word[data-current]");
+            return (
+                document.documentElement.dataset.uiLanguage === "zh" &&
+                Math.abs(
+                    parseFloat(getComputedStyle(title, "::before").width) - (word.getBoundingClientRect().right - title.getBoundingClientRect().left),
+                ) < 1
+            );
+        });
+        assert.notEqual(await about.locator("h1").evaluate((el) => parseFloat(getComputedStyle(el, "::before").width)), englishWidth);
     } finally {
         await context.close();
     }
     const touch = await open(390, { isMobile: true, hasTouch: true });
     try {
         assert.equal(
-            await touch.page.locator(".home-profile__lead").evaluate((el) => getComputedStyle(el, "::before").transform),
+            await touch.page.locator("#home-title").evaluate((el) => getComputedStyle(el, "::before").transform),
             "matrix(1, 0, 0, 1, 0, 0)",
         );
         await touch.page.locator(".home-profile__about").tap();
