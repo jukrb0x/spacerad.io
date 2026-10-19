@@ -266,6 +266,13 @@ Beer Log passes `collectionId="beer"` to CollectionPage, setting
 `#3b3020` at 14% in dark mode. The shared gradient falls back to `--color-structure`
 on other pages and collections; the 170px fade and header paint alignment remain
 unchanged. The structure/brand color itself is never overridden.
+
+The footer has a full-width upward wash painted by an absolute `body::after`
+behind content, using the same page-wash ink and page-base tokens. It fades over
+110px at 5% strength on desktop, and 80px at 4% on mobile. Beer Log retains its
+warm ink, with 8% desktop / 6% mobile strength in dark mode. This decoration has
+no pointer events and does not change footer geometry, fixed controls, or the
+Safari canvas color mechanism.
 - Sticky with z-index `--z-sticky` (20)
 - `.is-scrolled` — backdrop-filter blur(12px) saturate(180%), semi-transparent bg
 - `.header--hidden` — translateY(-100%)

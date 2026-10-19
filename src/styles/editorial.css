@@ -9,6 +9,8 @@
         U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 body {
+    --footer-wash-strength: 5%;
+    --footer-wash-height: 110px;
     letter-spacing: 0;
     font-family: var(--font-family-sans);
     /* Safari samples the solid canvas color; keep the visible page base above it. */
@@ -1215,6 +1217,22 @@ body::before {
     pointer-events: none;
     background-image: var(--page-wash-gradient);
 }
+body::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: var(--footer-wash-height);
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) var(--footer-wash-strength), var(--color-bg-page)),
+        transparent
+    );
+}
+html[data-collection="beer"][data-theme="dark"] body {
+    --footer-wash-strength: 8%;
+}
 header.site-header[data-header] {
     margin-top: 32px;
 }
@@ -1354,6 +1372,13 @@ html {
     scroll-padding-top: calc(var(--header-offset, 64px) + 12px);
 }
 @media (max-width: 767px) {
+    body {
+        --footer-wash-strength: 4%;
+        --footer-wash-height: 80px;
+    }
+    html[data-collection="beer"][data-theme="dark"] body {
+        --footer-wash-strength: 6%;
+    }
     body::before {
         top: 0;
     }
