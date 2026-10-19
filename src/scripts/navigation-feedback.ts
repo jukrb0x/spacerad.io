@@ -59,7 +59,7 @@ document.addEventListener("astro:before-preparation", (event) => {
     mode = navigation.sourceElement?.closest(".site-brand") ? "brand" : "page";
     started = performance.now();
     if (mode === "brand") paint("active");
-    else revealTimer = setTimeout(() => paint("active"), 180);
+    else revealTimer = setTimeout(() => paint("active"), 300);
     navigation.signal.addEventListener(
         "abort",
         () => {

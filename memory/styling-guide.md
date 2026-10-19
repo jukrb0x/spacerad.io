@@ -307,7 +307,7 @@ The hidden clip resets without a transition before hover re-entry.
 `NavigationFeedback.astro` and the Header runner are included in production on
 desktop and mobile. `navigation-feedback.ts` starts at before-preparation,
 carries the logo state into the swapped Header and finishes on the matching after-swap without
-delaying navigation. Other SPA navigation shows the wash after 180ms; aborts and
+delaying navigation. Other SPA navigation shows the wash after 300ms; aborts and
 loader failures clear state. Persistent module listeners bind once; navigation
 revision guards prevent aborted requests from clearing a newer indicator.
 Completion uses the matching swap signal, not uncorrelated page-load events: an
