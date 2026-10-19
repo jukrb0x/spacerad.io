@@ -91,7 +91,7 @@ for (const width of [1440, 390, 320])
                         wordHeight: rect.height,
                         width: rect.width,
                         slot: slot.width,
-                        clip: style.clipPath,
+                        scale: style.transform,
                         duration: style.transitionDuration,
                     };
                 });
@@ -99,7 +99,7 @@ for (const width of [1440, 390, 320])
                 assert.ok(ink.top > ink.wordHeight * 0.65);
                 assert.ok(ink.top + ink.height <= ink.wordHeight + 0.1, "backing stays inside the carousel clip");
                 assert.ok(ink.width < ink.slot - 50, "short phrase backing must not fill the reserved blank width");
-                assert.equal(ink.clip, "inset(0px)");
+                assert.equal(ink.scale, "matrix(1, 0, 0, 1, 0, 0)");
                 assert.equal(ink.duration, "0s");
                 assert.equal(await about.evaluate((el) => getComputedStyle(el, "::before").content), "none");
                 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), true);
@@ -165,27 +165,35 @@ for (const width of [1440, 768, 390, 320])
         });
     }
 
-test("About marker retracts, supports keyboard focus and keeps the touch link direct", async () => {
+test("About marker slides smoothly, retracts, supports keyboard focus and keeps the touch link direct", async () => {
     const { context, page } = await open(1440, { reducedMotion: "no-preference" });
     try {
         const about = page.locator(".home-profile__about");
         const initial = await about.boundingBox();
+        assert.equal(await about.locator(".home-profile__lead").evaluate((el) => getComputedStyle(el, "::before").transitionProperty), "transform");
         await about.hover();
         await page.waitForFunction(
-            () => getComputedStyle(document.querySelector(".home-profile__word[data-current]"), "::before").clipPath === "inset(0px)",
+            () => getComputedStyle(document.querySelector(".home-profile__word[data-current]"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
         );
         await page.mouse.move(4, 4);
-        await page.waitForFunction(() => getComputedStyle(document.querySelector(".home-profile__lead"), "::before").clipPath.includes("100%"));
+        await page.waitForFunction(
+            () => getComputedStyle(document.querySelector(".home-profile__lead"), "::before").transform === "matrix(0, 0, 0, 1, 0, 0)",
+        );
         assert.deepEqual(await about.boundingBox(), initial);
         await about.focus();
         assert.equal(await about.evaluate((el) => el.matches(":focus-visible")), true);
-        await page.waitForFunction(() => getComputedStyle(document.querySelector(".home-profile__lead"), "::before").clipPath === "inset(0px)");
+        await page.waitForFunction(
+            () => getComputedStyle(document.querySelector(".home-profile__lead"), "::before").transform === "matrix(1, 0, 0, 1, 0, 0)",
+        );
     } finally {
         await context.close();
     }
     const touch = await open(390, { isMobile: true, hasTouch: true });
     try {
-        assert.equal(await touch.page.locator(".home-profile__lead").evaluate((el) => getComputedStyle(el, "::before").clipPath), "inset(0px)");
+        assert.equal(
+            await touch.page.locator(".home-profile__lead").evaluate((el) => getComputedStyle(el, "::before").transform),
+            "matrix(1, 0, 0, 1, 0, 0)",
+        );
         await touch.page.locator(".home-profile__about").tap();
         await touch.page.waitForURL(/\/me\/?$/);
     } finally {
