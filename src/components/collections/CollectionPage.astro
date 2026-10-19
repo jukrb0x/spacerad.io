@@ -70,10 +70,14 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
         const controller = new AbortController();
         const { signal } = controller;
         let active: HTMLDialogElement | null = null;
+        const sheetResizeObserver = new ResizeObserver((entries) => {
+            for (const { target } of entries) (target as HTMLDialogElement).style.setProperty("--collection-sheet-height", `${target.getBoundingClientRect().height}px`);
+        });
         document.addEventListener("pointerdown", () => { document.documentElement.dataset.collectionInput = "pointer"; }, { signal });
         document.addEventListener("keydown", () => { delete document.documentElement.dataset.collectionInput; }, { signal });
         const release = () => {
             if (!active) return;
+            sheetResizeObserver.unobserve(active);
             active = null;
             unlockScrollForDialog();
         };
@@ -84,6 +88,8 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
             button.addEventListener("blur", resetPreview, { signal });
             button.addEventListener("click", () => {
                 dialog.showModal();
+                dialog.style.setProperty("--collection-sheet-height", `${dialog.offsetHeight}px`);
+                sheetResizeObserver.observe(dialog);
                 active = dialog;
                 lockScrollForDialog();
             }, { signal });
@@ -106,6 +112,7 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
         dispose = () => {
             active?.close();
             release();
+            sheetResizeObserver.disconnect();
             controller.abort();
             delete document.documentElement.dataset.collectionInput;
         };
@@ -146,8 +153,10 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
     .collection-tile:focus-visible:not([data-preview-dismissed]) .collection-tile__info { opacity: 1; transform: translateY(0); }
     .collection-detail { position: fixed; width: min(540px, calc(100% - 40px)); max-height: calc(100dvh - 48px); margin: auto; padding: 36px; border: 0; border-radius: 3px; background: var(--color-bg-page); color: var(--color-text-primary); box-shadow: 0 24px 80px rgb(0 0 0 / .18); overscroll-behavior: contain; }
     .collection-detail::backdrop { background: rgb(20 19 17 / .35); }
-    .collection-detail[open] { animation: collection-detail-enter 220ms cubic-bezier(.2,.65,.3,1); }
-    @keyframes collection-detail-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .collection-detail[open] { animation: collection-detail-enter 480ms cubic-bezier(.22,.75,.2,1) both; }
+    .collection-detail[open]::backdrop { animation: collection-backdrop-enter 320ms ease-out both; }
+    @keyframes collection-detail-enter { from { opacity: .75; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes collection-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
     .collection-detail__close { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--color-text-secondary); cursor: pointer; font: 26px/1 var(--font-family-sans); }
     .collection-detail__close:hover { color: var(--color-text-primary); background: color-mix(in srgb, var(--color-text-primary) 5%, transparent); }
     .collection-detail__heading { display: grid; grid-template-columns: 116px minmax(0, 1fr); align-items: center; gap: 24px; padding: 14px 0 28px; }
@@ -172,9 +181,11 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
         .collection-tile__name { font-size: 16px; }
         .collection-tile__meta { gap: 6px; }
         .collection-detail { width: 100%; max-width: none; max-height: 85dvh; margin: auto 0 0; border-radius: 12px 12px 0 0; padding: 20px 24px max(24px, env(safe-area-inset-bottom)); }
+        /* WebKit samples the backdrop near the sheet for its lower browser chrome. */
+        .collection-detail::backdrop { background: linear-gradient(to top, var(--color-bg-page) 0 calc(var(--collection-sheet-height, 12px) - 12px), rgb(20 19 17 / .35) calc(var(--collection-sheet-height, 12px) - 12px) 100%); }
         .collection-detail__heading { grid-template-columns: 84px minmax(0, 1fr); gap: 20px; padding-top: 24px; }
         .collection-detail__emblem { width: 84px; height: 84px; }
         .collection-detail h2 { font-size: 25px; }
     }
-    @media (prefers-reduced-motion: reduce) { .collection-detail[open] { animation: none; } .collection-tile::after, .collection-tile__info { transition: none !important; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .collection-detail[open], .collection-detail[open]::backdrop { animation: none; } .collection-tile::after, .collection-tile__info { transition: none !important; transform: none; } }
 </style>

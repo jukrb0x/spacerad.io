@@ -280,7 +280,10 @@ entry, with a bottom panel on mobile. Escape, focus restoration, reduced motion
 and SPA cleanup use the existing dialog/scroll-lock conventions. Collection
 palette overrides are scoped to `html.collection-root`. Pointer input suppresses
 WebKit's focus frames on the dialog close control and collection main; keyboard
-activation retains visible focus.
+activation retains visible focus. The mobile panel measures its rendered height
+for a backdrop color stop hidden behind the panel, allowing Safari's lower browser
+pocket to sample the panel color. The panel rises over 480ms while the backdrop
+fades in; reduced-motion preferences skip both animations.
 
 CollectionsNav is available in production. Desktop
 pointer hover opens the disclosure, a short close delay and pointer bridge keep
