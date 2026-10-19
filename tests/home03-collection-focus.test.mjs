@@ -26,7 +26,7 @@ test("Beer Log touch opens and closes details without focus frames while keyboar
     }
 });
 
-test("Beer Log sheet rises gently and keeps the lower Safari pocket the same color as the sheet", async () => {
+test("Beer Log sheet slides fully in and out while keeping the lower Safari pocket the same color", async () => {
     const browser = await webkit.launch(launchOptions);
     try {
         const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, reducedMotion: "no-preference" });
@@ -34,25 +34,28 @@ test("Beer Log sheet rises gently and keeps the lower Safari pocket the same col
         await page.locator(".collection-tile").first().tap();
         const dialog = page.locator(".collection-detail[open]");
         const duration = await dialog.evaluate((element) => Number.parseFloat(getComputedStyle(element).animationDuration) * 1000);
-        assert(duration >= 400, `sheet entrance is only ${duration}ms`);
+        assert(duration >= 500, `sheet entrance is only ${duration}ms`);
         const opening = await dialog.evaluate((element) => {
-            const animation = element.getAnimations().find((item) => item.animationName === "collection-detail-enter");
+            const animation = element.getAnimations().find((item) => item.animationName === "collection-sheet-enter");
             return animation?.effect?.getKeyframes()[0];
         });
         assert.equal(opening?.opacity ?? "1", "1", "sheet must be opaque throughout its entrance");
-        assert(
-            Number.parseFloat(opening?.transform?.match(/translateY\((\d+)px\)/)?.[1] ?? "0") <= 12,
-            "sheet lift must stay within its rounded edge",
-        );
-        const earlyLift = await dialog.evaluate((element) => {
-            const animation = element.getAnimations().find((item) => item.animationName === "collection-detail-enter");
+        assert.equal(opening?.transform, "translateY(100%)", "sheet must start below the viewport");
+        const midpoint = await dialog.evaluate((element, animationDuration) => {
+            const animation = element.getAnimations().find((item) => item.animationName === "collection-sheet-enter");
             animation.pause();
-            animation.currentTime = 120;
-            const lift = new DOMMatrix(getComputedStyle(element).transform).m42;
+            animation.currentTime = animationDuration / 2;
+            const remaining = new DOMMatrix(getComputedStyle(element).transform).m42;
+            const height = element.getBoundingClientRect().height;
+            const progress = Number.parseFloat(getComputedStyle(element).getPropertyValue("--collection-sheet-progress"));
             animation.play();
-            return lift;
-        });
-        assert(earlyLift > 5, `sheet has already settled after 120ms (${earlyLift}px remaining)`);
+            return { remaining, height, progress };
+        }, duration);
+        assert(
+            midpoint.remaining > midpoint.height * 0.35 && midpoint.remaining < midpoint.height * 0.65,
+            `sheet should be halfway through its travel: ${JSON.stringify(midpoint)}`,
+        );
+        assert(midpoint.progress > 0.35 && midpoint.progress < 0.65, `Safari pocket tint should track the sheet: ${JSON.stringify(midpoint)}`);
         const backdropDuration = await dialog.evaluate(
             (element) => Number.parseFloat(getComputedStyle(element, "::backdrop").animationDuration) * 1000,
         );
@@ -78,6 +81,7 @@ test("Beer Log sheet rises gently and keeps the lower Safari pocket the same col
 
         await dialog.evaluate((element) => {
             for (const animation of element.getAnimations()) animation.cancel();
+            element.style.setProperty("--collection-sheet-progress", "1");
             element.style.transform = "translateY(-80px)";
         });
         const rect = await dialog.boundingBox();
@@ -95,6 +99,56 @@ test("Beer Log sheet rises gently and keeps the lower Safari pocket the same col
             sheet.every((value, index) => Math.abs(value - pocket[index]) <= 3),
             `sheet ${sheet} and lower pocket ${pocket} differ`,
         );
+
+        await dialog.evaluate((element) => {
+            if (element instanceof HTMLDialogElement) element.close();
+            element.style.transform = "";
+            element.style.removeProperty("--collection-sheet-progress");
+        });
+        await page.locator(".collection-tile").first().tap();
+        await page.waitForTimeout(duration + 50);
+        await dialog.locator("[data-collection-close]").click();
+        await page.waitForFunction(() =>
+            document
+                .querySelector(".collection-detail[open]")
+                ?.getAnimations()
+                .some((item) => item.animationName === "collection-sheet-enter" && item.playbackRate === -1),
+        );
+        const closing = await dialog.evaluate((element) => ({
+            open: element.open,
+            playbackRate: element.getAnimations().find((item) => item.animationName === "collection-sheet-enter")?.playbackRate,
+        }));
+        assert.deepEqual(closing, { open: true, playbackRate: -1 }, "close should reverse the entrance in place");
+        await page.waitForTimeout(duration / 2);
+        const closingRect = await dialog.boundingBox();
+        assert(closingRect.y > top.y + top.height * 0.3, "sheet should move down before closing");
+        await page.waitForFunction(() => !document.querySelector(".collection-detail")?.open);
+    } finally {
+        await browser.close();
+    }
+});
+
+test("Beer Log dismisses the sheet by reversing from its current position", async () => {
+    const browser = await webkit.launch(launchOptions);
+    try {
+        const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+        await page.goto(new URL("/beer-collection", baseURL).href);
+        const tile = page.locator(".collection-tile").first();
+        await tile.tap();
+        const dialog = page.locator(".collection-detail[open]");
+        await page.waitForTimeout(180);
+        const beforeDismiss = await dialog.boundingBox();
+        await page.mouse.click(195, 100);
+        await page.waitForFunction(() => document.querySelector(".collection-detail[open]")?.dataset.collectionClosing === "true");
+        const afterDismiss = await dialog.boundingBox();
+        assert(Math.abs(afterDismiss.y - beforeDismiss.y) < 100, "dismissing mid entrance should not jump the sheet to the top");
+        await page.waitForFunction(() => !document.querySelector(".collection-detail")?.open);
+
+        await tile.tap();
+        await page.waitForTimeout(600);
+        await page.keyboard.press("Escape");
+        await page.waitForFunction(() => document.querySelector(".collection-detail[open]")?.dataset.collectionClosing === "true");
+        await page.waitForFunction(() => !document.querySelector(".collection-detail")?.open);
     } finally {
         await browser.close();
     }

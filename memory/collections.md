@@ -49,6 +49,11 @@ local asset references, empty current personal notes and rejected private fields
 Browser checks cover desktop hover across the dropdown gap, Escape, touch,
 preferred language persistence, translated details and SPA navigation.
 
+On narrow screens the detail dialog rises from below the viewport. Closing it
+reverses that same animation from its current position, including when dismissed
+mid-entrance. Its backdrop tint follows the visible sheet height so Safari's
+lower browser chrome matches the panel; reduced motion closes immediately.
+
 The current data contains 11 Beer Log entries and Sangria de cava. Only the drink identity was extracted from the separate Sangria record; private receipt context is excluded. Missing verified artwork renders as an ordinary text tile, never a fabricated logo. Missing ABV is explicitly unconfirmed. Sources may be empty when only the private log supports the identity; private Notion URLs are not published. Brand artwork is distinct from a verified product tap badge.
 
 Artwork follow-up: Flight Mode uses a round CSS crop of Big Smoke’s official tap photograph. Optional crop `height` preserves a non-square source aspect ratio; cropped images request enough source pixels for a legible badge. Stella, Estrella Galicia and Turia use fuller label artwork with attribution links. The Cow Pale Ale and Sangria remain text-only because no matching product mark is verified. Header tools are search, language, theme, with 44px hit targets and 4px gaps.

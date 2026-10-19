@@ -81,6 +81,18 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
             active = null;
             unlockScrollForDialog();
         };
+        const closeWithMotion = (dialog: HTMLDialogElement) => {
+            if (!dialog.open || dialog.dataset.collectionClosing) return;
+            const sheet = dialog.getAnimations().find((animation) => (animation as CSSAnimation).animationName === (matchMedia("(max-width: 600px)").matches ? "collection-sheet-enter" : "collection-detail-enter"));
+            if (!sheet) { dialog.close(); return; }
+            dialog.dataset.collectionClosing = "true";
+            for (const animation of dialog.getAnimations({ subtree: true })) {
+                if (animation === sheet || (animation as CSSAnimation).animationName === "collection-backdrop-enter") animation.reverse();
+            }
+            void sheet.finished.then(() => {
+                if (dialog.open && dialog.dataset.collectionClosing) dialog.close();
+            }).catch(() => {});
+        };
         document.querySelectorAll<HTMLButtonElement>("[data-collection-open]").forEach((button) => {
             const dialog = document.getElementById(button.dataset.collectionOpen!) as HTMLDialogElement;
             const resetPreview = () => delete button.dataset.previewDismissed;
@@ -93,14 +105,16 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
                 active = dialog;
                 lockScrollForDialog();
             }, { signal });
-            dialog.querySelector("[data-collection-close]")?.addEventListener("click", () => dialog.close(), { signal });
+            dialog.querySelector("[data-collection-close]")?.addEventListener("click", () => closeWithMotion(dialog), { signal });
+            dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeWithMotion(dialog); }, { signal });
             dialog.addEventListener("close", () => {
+                delete dialog.dataset.collectionClosing;
                 release();
                 if (document.documentElement.dataset.collectionInput === "pointer") document.querySelector<HTMLElement>("#main-content")?.focus({ preventScroll: true });
             }, { signal });
             dialog.addEventListener("click", (event) => {
                 const rect = dialog.getBoundingClientRect();
-                if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
+                if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) closeWithMotion(dialog);
             }, { signal });
         });
         document.addEventListener("keydown", (event) => {
@@ -121,6 +135,7 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
 </script>
 
 <style>
+    @property --collection-sheet-progress { syntax: "<number>"; inherits: true; initial-value: 0; }
     :global(html.collection-root) { --color-bg-page: #f7f3e9; --collection-tile: #eee7d7; }
     :global(html.collection-root[data-theme="dark"]) { --color-bg-page: #201f1b; --collection-tile: #2a2822; }
     :global(html[data-collection="beer"]) { --page-wash-ink: #766249; --page-wash-strength: 6%; }
@@ -156,6 +171,7 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
     .collection-detail[open] { animation: collection-detail-enter 420ms ease-in-out both; }
     .collection-detail[open]::backdrop { animation: collection-backdrop-enter 320ms ease-in-out both; }
     @keyframes collection-detail-enter { from { transform: translateY(12px); } to { transform: translateY(0); } }
+    @keyframes collection-sheet-enter { from { transform: translateY(100%); --collection-sheet-progress: 0; } to { transform: translateY(0); --collection-sheet-progress: 1; } }
     @keyframes collection-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
     .collection-detail__close { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--color-text-secondary); cursor: pointer; font: 26px/1 var(--font-family-sans); }
     .collection-detail__close:hover { color: var(--color-text-primary); background: color-mix(in srgb, var(--color-text-primary) 5%, transparent); }
@@ -181,8 +197,10 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
         .collection-tile__name { font-size: 16px; }
         .collection-tile__meta { gap: 6px; }
         .collection-detail { width: 100%; max-width: none; max-height: 85dvh; margin: auto 0 0; border-radius: 12px 12px 0 0; padding: 20px 24px max(24px, env(safe-area-inset-bottom)); }
+        .collection-detail[open] { animation: collection-sheet-enter 560ms cubic-bezier(.42, 0, .58, 1) both; }
+        .collection-detail[open]::backdrop { animation-duration: 560ms; animation-timing-function: cubic-bezier(.42, 0, .58, 1); }
         /* WebKit samples the backdrop near the sheet for its lower browser chrome. */
-        .collection-detail::backdrop { background: linear-gradient(to top, var(--color-bg-page) 0 calc(var(--collection-sheet-height, 12px) - 12px), rgb(20 19 17 / .35) calc(var(--collection-sheet-height, 12px) - 12px) 100%); }
+        .collection-detail::backdrop { background: linear-gradient(to top, var(--color-bg-page) 0 calc((var(--collection-sheet-height, 12px) - 12px) * var(--collection-sheet-progress)), rgb(20 19 17 / .35) calc((var(--collection-sheet-height, 12px) - 12px) * var(--collection-sheet-progress)) 100%); }
         .collection-detail__heading { grid-template-columns: 84px minmax(0, 1fr); gap: 20px; padding-top: 24px; }
         .collection-detail__emblem { width: 84px; height: 84px; }
         .collection-detail h2 { font-size: 25px; }
