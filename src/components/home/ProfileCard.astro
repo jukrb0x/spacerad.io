@@ -1,17 +1,19 @@
 ---
+const chineseWords: Record<string, string> = { "Unreal Engine.": "虚幻引擎。", "tools.": "工具。", "teams.": "团队。", "games.": "游戏。", "stories.": "故事。", "performance.": "性能。" };
 const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performance"].map((word) => `${word}.`);
 ---
 <div class="home-profile">
-    <a href="/me" class="home-profile__about" aria-label="About Jabriel">
+    <a href="/me" class="home-profile__about" aria-label="About Jabriel" data-i18n-attr="aria-label" data-i18n-en="About Jabriel" data-i18n-zh="关于 Jabriel">
         <span class="home-profile__greeting" aria-hidden="true">👋</span>
-        <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance."><span class="home-profile__lead">I build </span><span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
+        <h1 id="home-title" aria-label="I build Unreal Engine, tools, teams, games, stories and performance." data-i18n-attr="aria-label" data-i18n-en="I build Unreal Engine, tools, teams, games, stories and performance." data-i18n-zh="我创造虚幻引擎、工具、团队、游戏、故事和性能。"><span class="home-profile__lead" data-i18n-en="I build " data-i18n-zh="我创造 ">I build </span><span class="home-profile__carousel" data-build-words aria-hidden="true">{words.map((word, index) => <span class="home-profile__word" data-i18n-en={word} data-i18n-zh={chineseWords[word]} data-current={index === 0 ? "" : undefined}>{word}</span>)}</span></h1>
         <span class="home-profile__name">Jabriel</span>
     </a>
 </div>
 <script is:inline data-astro-rerun>
     // Select before first paint; the server-rendered phrase remains the no-JS fallback.
     {
-        const words = document.currentScript.previousElementSibling.querySelectorAll(".home-profile__word");
+        const chineseWords: Record<string, string> = { "Unreal Engine.": "虚幻引擎。", "tools.": "工具。", "teams.": "团队。", "games.": "游戏。", "stories.": "故事。", "performance.": "性能。" };
+const words = document.currentScript.previousElementSibling.querySelectorAll(".home-profile__word");
         if (words.length > 0) {
             words.forEach((word) => word.removeAttribute("data-current"));
             words[Math.floor(Math.random() * words.length)].setAttribute("data-current", "");
@@ -26,7 +28,8 @@ const words = ["Unreal Engine", "tools", "teams", "games", "stories", "performan
         disposeCarousel = undefined;
         const element = document.querySelector<HTMLElement>("[data-build-words]");
         if (!element || !element.animate) return;
-        const words = Array.from(element.querySelectorAll<HTMLElement>(".home-profile__word"));
+        const chineseWords: Record<string, string> = { "Unreal Engine.": "虚幻引擎。", "tools.": "工具。", "teams.": "团队。", "games.": "游戏。", "stories.": "故事。", "performance.": "性能。" };
+const words = Array.from(element.querySelectorAll<HTMLElement>(".home-profile__word"));
         if (words.length < 2) return;
         const controller = new AbortController();
         const motion = window.matchMedia("(prefers-reduced-motion: reduce)");

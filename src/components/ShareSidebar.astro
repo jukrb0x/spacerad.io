@@ -68,7 +68,7 @@ const shareLinks = [
     data-share-sidebar
     class="hidden min-[1400px]:flex fixed flex-col gap-3 opacity-0 transition-opacity duration-200 mt-[5px]"
     style="right: calc(50% + 25rem + 2rem); top: 6rem;"
-    aria-label="Share article"
+    aria-label="Share article" data-i18n-attr="aria-label" data-i18n-en="Share article" data-i18n-zh="分享文章"
 >
     {shareLinks.map((link) => (
         <a
@@ -84,7 +84,7 @@ const shareLinks = [
     <button
         type="button"
         class="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface shadow-sm transition-all hover:border-accent hover:text-accent hover:shadow-md focus-accent"
-        aria-label="Copy link"
+        aria-label="Copy link" data-i18n-attr="aria-label" data-i18n-en="Copy link" data-i18n-zh="复制链接"
         data-copy-link
         data-url={url}
     >
@@ -94,7 +94,7 @@ const shareLinks = [
     <button
         type="button"
         class="relative flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface shadow-sm transition-all hover:border-accent hover:shadow-md focus-accent group"
-        aria-label="Like"
+        aria-label="Like" data-i18n-attr="aria-label" data-i18n-en="Like" data-i18n-zh="喜欢"
         data-like-button
         data-slug={slug}
     >
@@ -132,7 +132,7 @@ const shareLinks = [
     <button
         type="button"
         class="flex h-12 w-12 items-center justify-center rounded-full bg-surface border border-border shadow-lg transition-transform duration-200 scale-75 focus-accent"
-        aria-label="Copy link"
+        aria-label="Copy link" data-i18n-attr="aria-label" data-i18n-en="Copy link" data-i18n-zh="复制链接"
         data-copy-link
         data-url={url}
         data-share-menu-item
@@ -143,7 +143,7 @@ const shareLinks = [
     <button
         type="button"
         class="relative flex h-12 w-12 items-center justify-center rounded-full bg-surface border border-border shadow-lg transition-transform duration-200 scale-75 focus-accent group"
-        aria-label="Like"
+        aria-label="Like" data-i18n-attr="aria-label" data-i18n-en="Like" data-i18n-zh="喜欢"
         data-like-button
         data-slug={slug}
         data-share-menu-item
@@ -165,7 +165,7 @@ const shareLinks = [
         "min-[1400px]:hidden fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full backdrop-blur-md bg-[rgba(100,149,237,0.85)] border border-[rgba(255,255,255,0.3)] text-white shadow-[0_8px_32px_rgba(100,149,237,0.35)] transition-all duration-300 hover:scale-105 hover:bg-[rgba(100,149,237,0.95)] hover:shadow-[0_12px_40px_rgba(100,149,237,0.45)] active:scale-95",
         mobileButtonPosition
     ]}
-    aria-label="Share article"
+    aria-label="Share article" data-i18n-attr="aria-label" data-i18n-en="Share article" data-i18n-zh="分享文章"
     aria-expanded="false"
 >
     <Icon name="ri:share-line" class="h-6 w-6" aria-hidden="true" />
@@ -179,7 +179,7 @@ const shareLinks = [
     aria-live="polite"
 >
     <Icon name="ri:check-line" class="h-5 w-5 text-accent" aria-hidden="true" />
-    <span class="text-sm text-primary">Link copied</span>
+    <span class="text-sm text-primary"><span data-i18n-en="Link copied" data-i18n-zh="链接已复制">Link copied</span></span>
 </div>
 
 <style>

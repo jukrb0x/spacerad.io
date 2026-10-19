@@ -4,6 +4,7 @@
 import "../styles/global.scss";
 import "../styles/editorial.css";
 import "../styles/code-blocks.css";
+import "../styles/i18n.css";
 import { ClientRouter } from "astro:transitions";
 import { SITE_SOCIAL_IMAGE, SITE_TITLE, SITE_TITLE_OG } from "../consts";
 
@@ -20,6 +21,17 @@ const socialImageURL = new URL(image, canonicalURL);
 const isDefaultSocialImage = image === SITE_SOCIAL_IMAGE;
 ---
 
+<!-- Read preference before paint; the module owns updates after navigation. -->
+<script is:inline>
+    (() => {
+        let stored;
+        try { stored = localStorage.getItem("ui-language"); } catch {}
+        const languages = navigator.languages || [navigator.language];
+        const detected = languages.map(value => value.toLowerCase().split("-")[0]).find(value => value === "en" || value === "zh");
+        document.documentElement.dataset.uiLanguage = stored === "en" || stored === "zh" ? stored : detected || "en";
+    })();
+</script>
+<script>import "../i18n/client";</script>
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

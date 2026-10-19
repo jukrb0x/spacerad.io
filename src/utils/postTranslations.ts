@@ -11,3 +11,13 @@ export function getPostTranslation(id: string, posts: BlogPost[]): BlogPost | un
     const counterpart = pair?.find((candidate) => candidate !== id);
     return posts.find((post) => post.id === counterpart);
 }
+
+/** Keep each original's ordering and select only independently authored counterparts. */
+export function getHomePosts(posts: BlogPost[], language: "en" | "zh", limit = 5): BlogPost[] {
+    const published = posts.filter(post => !post.data.draft);
+    const originals = published.filter(post => post.data.lang !== "en" || !getPostTranslation(post.id, published));
+    return originals.slice(0, limit).map(post => {
+        const translation = getPostTranslation(post.id, published);
+        return post.data.lang === language ? post : translation?.data.lang === language ? translation : post;
+    });
+}

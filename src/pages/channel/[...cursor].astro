@@ -66,8 +66,8 @@ if (error) Astro.response.status = 503;
     <main id="main-content" tabindex="-1" class="page-shell" transition:animate="fade">
       {error ? (
         <div class="error-message surface-card">
-          <h1>Channel is temporarily unavailable</h1>
-          <p>The channel couldn’t be reached. You can read the same notes on Telegram.</p>
+          <h1><span data-i18n-en="Channel is temporarily unavailable" data-i18n-zh="电台暂时无法访问">Channel is temporarily unavailable</span></h1>
+          <p><span data-i18n-en="The channel couldn’t be reached. You can read the same notes on Telegram." data-i18n-zh="暂时无法连接电台，你可以在 Telegram 阅读这些动态。">The channel couldn’t be reached. You can read the same notes on Telegram.</span></p>
           <p>
             Please visit <a href={`https://t.me/${CHANNEL_USERNAME}`} target="_blank" rel="noopener noreferrer">
               Telegram channel
@@ -98,16 +98,16 @@ if (error) Astro.response.status = 503;
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  Newer posts
+                  <span data-i18n-en="Newer posts" data-i18n-zh="较新动态">Newer posts</span>
                 </a>
               )}
               <a href="/channel"
                  class:list={["pagination__link", "pagination__link--home", { "pagination__link--active": !cursor }]}>
-                Latest
+                <span data-i18n-en="Latest" data-i18n-zh="最新动态">Latest</span>
               </a>
               {hasOlderPosts && lastPostId && (
                 <a href={`/channel/before-${lastPostId}`} class="pagination__link pagination__link--next">
-                  Older posts
+                  <span data-i18n-en="Older posts" data-i18n-zh="较早动态">Older posts</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>

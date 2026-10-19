@@ -15,8 +15,8 @@ function initWordmarkWhisper() {
         whisper.removeAttribute("data-visible");
     };
     const reveal = () => {
-        // The compact header has no spare space; touch navigation stays one tap.
-        if (!window.matchMedia("(min-width: 1100px)").matches || phrases.length === 0) return;
+        // CSS places the phrase below the wordmark when horizontal space is limited.
+        if (phrases.length === 0) return;
         hide();
         const choices = phrases.filter((phrase) => phrase !== lastPhrase);
         lastPhrase = choices[Math.floor(Math.random() * choices.length)] ?? phrases[0];

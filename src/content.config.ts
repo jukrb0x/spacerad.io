@@ -2,6 +2,8 @@ import { defineCollection, type ImageFunction, z } from "astro:content";
 import { glob } from "astro/loaders";
 import { withGitModifiedTime } from "../scripts/git-modified-time.mjs";
 
+import { collectionItemSchema, collectionPageSchema } from "./utils/collectionSchema";
+
 const createSharedSchema = (image: ImageFunction) =>
     z.object({
         title: z.string(),
@@ -29,4 +31,12 @@ const blog = defineCollection({
     schema: ({ image }) => createSharedSchema(image),
 });
 
-export const collections = { blog };
+const collectionItems = defineCollection({
+    loader: glob({ base: "./src/content/collections/items", pattern: "**/*.md" }),
+    schema: ({ image }) => collectionItemSchema(image),
+});
+const collectionPages = defineCollection({
+    loader: glob({ base: "./src/content/collections/pages", pattern: "*.yaml" }),
+    schema: collectionPageSchema,
+});
+export const collections = { blog, collectionItems, collectionPages };

@@ -93,7 +93,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 						{
 							(lastModified || updatedDate) && (
 								<p>
-									Last updated on {
+									<span data-i18n-en="Last updated on" data-i18n-zh="最后更新于">Last updated on</span> {
 										lastModifiedCommitUrl ? (
 											<a
 												href={lastModifiedCommitUrl}

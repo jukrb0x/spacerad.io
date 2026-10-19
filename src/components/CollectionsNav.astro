@@ -1,0 +1,73 @@
+---
+import { COLLECTION_LINKS } from "../consts";
+interface Props { mobile?: boolean }
+const { mobile = false } = Astro.props;
+const pathname = Astro.url.pathname.replace(/\/$/, "");
+const active = COLLECTION_LINKS.some(link => pathname === link.href);
+---
+{import.meta.env.DEV && <details class:list={["collections-nav", { "collections-nav--mobile": mobile }]} data-collections-nav data-mobile={mobile} open={mobile && active}>
+    <summary class="nav-link" data-active={active || undefined} aria-expanded={mobile && active ? "true" : "false"}>
+        <span data-i18n-en="Collections" data-i18n-zh="收藏">Collections</span> <span class="collections-nav__chevron" aria-hidden="true"></span>
+    </summary>
+    <div class="collections-nav__links">
+        {COLLECTION_LINKS.map(link => <a href={link.href} data-nav-link aria-current={pathname === link.href ? "page" : undefined}>{link.label}</a>)}
+    </div>
+</details>}
+<style>
+    .collections-nav { position: relative; }
+    summary { list-style: none; display: flex; align-items: center; gap: 7px; cursor: pointer; }
+    summary::-webkit-details-marker { display: none; }
+    summary[data-active], summary:hover, details[open] summary { color: var(--color-link); }
+    .collections-nav__chevron { width: 5px; height: 5px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg); transition: transform 160ms ease; }
+    details[open] .collections-nav__chevron { transform: rotate(225deg); }
+    .collections-nav__links { position: absolute; top: calc(100% + 8px); left: -16px; min-width: 180px; padding: 8px; background: var(--color-bg-page); border: 1px solid var(--color-border-soft); box-shadow: 0 8px 24px rgb(0 0 0 / .08); z-index: 10; }
+    .collections-nav__links::before { content: ""; position: absolute; height: 10px; bottom: 100%; left: 0; right: 0; }
+    .collections-nav__links a { display: block; padding: 12px; color: var(--color-text-primary); font-size: 14px; text-decoration: none; }
+    .collections-nav__links a:hover, .collections-nav__links a[aria-current] { color: var(--color-link); background: color-mix(in srgb, var(--color-link) 6%, transparent); }
+    summary:focus-visible, a:focus-visible { outline: 2px solid var(--color-link); outline-offset: 3px; }
+    .collections-nav--mobile summary { padding: 10px 0; min-height: 44px; font-size: 18px; text-decoration: none; justify-content: space-between; color: var(--color-text-secondary); }
+    .collections-nav--mobile summary[data-active], .collections-nav--mobile[open] summary { color: var(--color-link); }
+    .collections-nav--mobile .collections-nav__links::before { display: none; }
+    .collections-nav--mobile .collections-nav__links { position: static; margin: 0 0 4px 0; min-width: 0; padding: 0 0 0 18px; border: 0; box-shadow: none; background: transparent; }
+    .collections-nav--mobile .collections-nav__links a { display: flex; align-items: center; min-height: 44px; font-size: 16px; background: transparent; }
+    @media (prefers-reduced-motion: reduce) { .collections-nav__chevron { transition: none; } }
+</style>
+<script>
+    let cleanup: (() => void) | undefined;
+    document.addEventListener("astro:page-load", () => {
+        cleanup?.();
+        const controller = new AbortController();
+        const { signal } = controller;
+        document.querySelectorAll<HTMLDetailsElement>("[data-collections-nav]").forEach(details => {
+            const summary = details.querySelector("summary")!;
+            details.addEventListener("toggle", () => summary.setAttribute("aria-expanded", String(details.open)), { signal });
+            if (details.dataset.mobile === "true") return;
+            let closeTimer: ReturnType<typeof setTimeout> | undefined;
+            const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+            details.addEventListener("pointerenter", () => {
+                clearTimeout(closeTimer);
+                if (finePointer.matches) details.open = true;
+            }, { signal });
+            details.addEventListener("pointerleave", () => {
+                if (finePointer.matches) closeTimer = setTimeout(() => {
+                    if (!details.contains(document.activeElement)) details.open = false;
+                }, 160);
+            }, { signal });
+            signal.addEventListener("abort", () => clearTimeout(closeTimer), { once: true });
+            document.addEventListener("click", event => {
+                if (!details.contains(event.target as Node)) details.open = false;
+            }, { signal });
+            details.addEventListener("focusout", event => {
+                if (!details.contains(event.relatedTarget as Node)) details.open = false;
+            }, { signal });
+            details.addEventListener("keydown", event => {
+                if (event.key === "Escape" && details.open) {
+                    event.preventDefault(); event.stopPropagation();
+                    details.open = false; summary.focus();
+                }
+            }, { signal });
+        });
+        cleanup = () => controller.abort();
+    });
+    document.addEventListener("astro:before-swap", () => cleanup?.());
+</script>

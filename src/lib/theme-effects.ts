@@ -2,6 +2,7 @@
  * Theme side effects and initialization (client-only)
  */
 
+import { uiLanguage } from "../i18n/client";
 import { activeTheme, isThemeInitialized, themePreference } from "../stores/theme";
 import type { ThemeName, ThemePreference, ThemeState } from "./theme-core";
 import { calculateTheme, cyclePreference, describeState, isValidPreference } from "./theme-core";
@@ -156,7 +157,12 @@ export const bindThemeToggles = (root: ParentNode = document) => {
     if (!toggles.length) return;
 
     const update = (state: ThemeState) => {
-        const { nextPreference, message } = describeState(state);
+        const description = describeState(state);
+        const { nextPreference } = description;
+        const labels = { system: "跟随系统", light: "浅色", dark: "深色" };
+        const message = uiLanguage.get() === "zh"
+            ? `当前主题：${labels[state.preference]}。点击切换为${labels[nextPreference]}`
+            : description.message;
         toggles.forEach((toggle) => {
             toggle.dataset.themePreference = state.preference;
             toggle.dataset.themeState = state.theme;
@@ -183,9 +189,11 @@ export const bindThemeToggles = (root: ParentNode = document) => {
 
     // Subscribe to changes
     const unsubscribe = onThemeChange(update);
+    const unsubscribeLanguage = uiLanguage.listen(() => update(getThemeState()));
 
     return () => {
         unsubscribe();
+        unsubscribeLanguage();
         toggles.forEach((toggle) => {
             delete toggle.dataset.themeBound;
             toggle.removeEventListener("click", handleClick);

@@ -1,0 +1,166 @@
+---
+import "virtual:uno.css";
+import { Image } from "astro:assets";
+import { render, type CollectionEntry } from "astro:content";
+import BaseHead from "../BaseHead.astro";
+import Header from "../Header.astro";
+import Footer from "../Footer.astro";
+interface Props { page: CollectionEntry<"collectionPages">["data"]; entries: CollectionEntry<"collectionItems">[] }
+const { page, entries } = Astro.props;
+const items = await Promise.all(entries.map(async entry => ({ entry, ...(await render(entry)) })));
+---
+<!doctype html>
+<html lang="en" class="collection-preview-root">
+    <head>
+        <BaseHead title={`${page.title.en} — Space Radio`} description={page.subtitle.en} />
+        <meta name="robots" content="noindex,nofollow" />
+    </head>
+    <body class="archive-page" data-pagefind-ignore="all">
+        <Header />
+        <main id="main-content" tabindex="-1" class="page-shell collection-page" transition:animate="fade">
+            <div class="archive-heading">
+                <h1 data-i18n-en={page.title.en} data-i18n-zh={page.title.zh}>{page.title.en}</h1>
+                <p data-i18n-en={page.subtitle.en} data-i18n-zh={page.subtitle.zh}>{page.subtitle.en}</p>
+            </div>
+            <ul class="collection-grid">
+
+                {items.map(({ entry, Content }, index) => { const item = entry.data; const itemId = `collection-${entry.id.replaceAll("/", "-")}`; return (
+                    <li>
+                        <button class="collection-tile" type="button" data-collection-open={itemId} aria-haspopup="dialog" aria-controls={itemId} data-i18n-attr="aria-label" data-i18n-en={`View ${item.maker} ${item.title}`} data-i18n-zh={`查看 ${item.maker} ${item.title}`} aria-label={`View ${item.maker} ${item.title}`}>
+                            <span class="collection-cover">
+                                <span class="collection-logo" data-fit={item.imageFit} data-cropped={item.crop ? "true" : undefined} data-round={item.crop?.round ? "true" : undefined} style={item.crop ? `--crop-scale:${item.crop.scale * 100}%;--crop-height:${(item.crop.height ?? item.crop.scale) * 100}%;--crop-left:${item.crop.left}%;--crop-top:${item.crop.top}%` : undefined}>{item.image ? <Image src={item.image} alt={item.imageLabel.en} data-i18n-attr="alt" data-i18n-en={item.imageLabel.en} data-i18n-zh={item.imageLabel.zh} width={item.crop ? 1600 : 496} format="webp" loading={index < 3 ? "eager" : "lazy"} /> : <span class="collection-wordlabel">{item.maker && <small>{item.maker}</small>}<strong>{item.title}</strong></span>}</span>
+                            </span>
+                            <span class="collection-tile__info" aria-hidden="true">
+                                <span class="collection-tile__brand">{item.maker}</span>
+                                <span class="collection-tile__name">{item.title}</span>
+                                <span class="collection-tile__meta">{item.facts.slice(0, 2).map(fact => <span data-i18n-en={fact.value.en} data-i18n-zh={fact.value.zh}>{fact.value.en}</span>)}</span>
+                            </span>
+                        </button>
+                        <dialog id={itemId} class="collection-detail" aria-labelledby={`${itemId}-title`} aria-describedby={`${itemId}-summary`} data-scroll-container>
+                            <button class="collection-detail__close" type="button" data-collection-close autofocus aria-label="Close details" data-i18n-attr="aria-label" data-i18n-en="Close details" data-i18n-zh="关闭详情"><span aria-hidden="true">×</span></button>
+                            <div class="collection-detail__heading">
+                                <div class="collection-detail__emblem"><span class="collection-logo" data-fit={item.imageFit} data-cropped={item.crop ? "true" : undefined} data-round={item.crop?.round ? "true" : undefined} style={item.crop ? `--crop-scale:${item.crop.scale * 100}%;--crop-height:${(item.crop.height ?? item.crop.scale) * 100}%;--crop-left:${item.crop.left}%;--crop-top:${item.crop.top}%` : undefined}>{item.image ? <Image src={item.image} alt="" width={item.crop ? 1200 : 320} format="webp" /> : <span class="collection-wordlabel"><strong>{item.title}</strong></span>}</span></div>
+                                <div><p class="collection-detail__brand">{item.maker}</p><h2 id={`${itemId}-title`}>{item.title}</h2></div>
+                            </div>
+                            <dl class="collection-detail__facts">{item.facts.map(fact => <div><dt data-i18n-en={fact.label.en} data-i18n-zh={fact.label.zh}>{fact.label.en}</dt><dd data-i18n-en={fact.value.en} data-i18n-zh={fact.value.zh}>{fact.value.en}</dd></div>)}</dl>
+                            {entry.body?.trim() && <section class="collection-detail__personal"><h3 data-i18n-en="My notes" data-i18n-zh="我的笔记">My notes</h3><div lang={item.noteLanguage}><Content /></div></section>}
+                            <section class="collection-detail__about"><h3 data-i18n-en={page.aboutLabel.en} data-i18n-zh={page.aboutLabel.zh}>{page.aboutLabel.en}</h3><p id={`${itemId}-summary`} data-i18n-en={item.summary.en} data-i18n-zh={item.summary.zh}>{item.summary.en}</p></section>
+                            {item.sources.length > 0 && <footer class="collection-detail__sources">
+                                <p data-i18n-en={page.sourceNote.en} data-i18n-zh={page.sourceNote.zh}>{page.sourceNote.en}</p>
+                                <div>{item.sources.map(source => <a href={source.url} target="_blank" rel="noreferrer" data-i18n-en={source.label.en} data-i18n-zh={source.label.zh}>{source.label.en}</a>)}</div>
+                            </footer>}
+                        </dialog>
+                    </li>
+                ); })}
+            </ul>
+        </main>
+        <Footer />
+    </body>
+</html>
+
+<script>
+    import { lockScrollForDialog, unlockScrollForDialog } from "../../utils/scrollLock";
+    let dispose: (() => void) | undefined;
+    document.addEventListener("astro:page-load", () => {
+        dispose?.();
+        const controller = new AbortController();
+        const { signal } = controller;
+        let active: HTMLDialogElement | null = null;
+        const release = () => {
+            if (!active) return;
+            active = null;
+            unlockScrollForDialog();
+        };
+        document.querySelectorAll<HTMLButtonElement>("[data-collection-open]").forEach((button) => {
+            const dialog = document.getElementById(button.dataset.collectionOpen!) as HTMLDialogElement;
+            const resetPreview = () => delete button.dataset.previewDismissed;
+            button.addEventListener("pointerleave", resetPreview, { signal });
+            button.addEventListener("blur", resetPreview, { signal });
+            button.addEventListener("click", () => {
+                dialog.showModal();
+                active = dialog;
+                lockScrollForDialog();
+            }, { signal });
+            dialog.querySelector("[data-collection-close]")?.addEventListener("click", () => dialog.close(), { signal });
+            dialog.addEventListener("close", release, { signal });
+            dialog.addEventListener("click", (event) => {
+                const rect = dialog.getBoundingClientRect();
+                if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
+            }, { signal });
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key !== "Escape" || active) return;
+            document.querySelectorAll<HTMLElement>("[data-collection-open]").forEach((tile) => {
+                if (tile.matches(":hover, :focus-visible")) tile.dataset.previewDismissed = "true";
+            });
+        }, { signal });
+        dispose = () => {
+            active?.close();
+            release();
+            controller.abort();
+        };
+    });
+    document.addEventListener("astro:before-swap", () => dispose?.());
+</script>
+
+<style>
+    :global(html.collection-preview-root) { --color-bg-page: #f7f3e9; --collection-tile: #eee7d7; }
+    :global(html.collection-preview-root[data-theme="dark"]) { --color-bg-page: #201f1b; --collection-tile: #2a2822; }
+    :global(html.collection-preview-root body) { background: var(--color-bg-page); background-image: none; }
+    .collection-grid { list-style: none; padding: 0; margin: 28px 12px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .collection-tile { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: hidden; isolation: isolate; padding: 0; border: 0; border-radius: 0; background: var(--collection-tile); color: var(--color-text-primary); text-align: left; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .collection-tile::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgb(24 23 20 / .94), rgb(24 23 20 / .35)); opacity: 0; transition: opacity 280ms ease; }
+    .collection-tile:focus-visible, .collection-detail__close:focus-visible { outline: 2px solid var(--color-link); outline-offset: 4px; }
+    .collection-cover { display: block; position: absolute; inset: 0; aspect-ratio: 1; }
+    .collection-logo { width: 60%; height: 60%; display: block; position: absolute; left: 50%; top: 50%; translate: -50% -50%; }
+    .collection-logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
+    .collection-logo[data-round] { border-radius: 50%; overflow: hidden; }
+    .collection-logo[data-cropped] img { position: absolute; width: var(--crop-scale); height: var(--crop-height); max-width: none; left: var(--crop-left); top: var(--crop-top); }
+    .collection-logo[data-fit="wordmark"] { width: 67%; }
+    .collection-tile__info { position: absolute; z-index: 1; inset: 0; display: flex; flex-direction: column; justify-content: end; padding: 16px; color: #fff; opacity: 0; transform: translateY(15px); transition: opacity 180ms ease, transform 320ms cubic-bezier(.2,.65,.3,1); pointer-events: none; }
+    .collection-wordlabel { display: flex; height: 100%; flex-direction: column; justify-content: center; text-align: center; gap: 8px; }
+    .collection-wordlabel small { font-size: 11px; font-weight: 400; }
+    .collection-wordlabel strong { font: 600 clamp(16px, 2.2vw, 26px)/1.15 var(--font-family-heading); overflow-wrap: anywhere; }
+    .collection-tile__brand { display: block; font-size: 10px; line-height: 1.4; color: #d1d6d3; }
+    .collection-tile__name { display: block; margin-top: 4px; font: 600 19px/1.15 var(--font-family-heading); }
+    .collection-tile__meta { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-top: 7px; font-size: 10px; line-height: 1.4; color: #eee6d6; }
+    @media (hover: hover) and (pointer: fine) {
+        .collection-tile:hover:not([data-preview-dismissed])::after { opacity: 1; }
+        .collection-tile:hover:not([data-preview-dismissed]) .collection-tile__info { opacity: 1; transform: translateY(0); transition-delay: 45ms; }
+    }
+    .collection-tile:focus-visible:not([data-preview-dismissed])::after { opacity: 1; }
+    .collection-tile:focus-visible:not([data-preview-dismissed]) .collection-tile__info { opacity: 1; transform: translateY(0); }
+    .collection-detail { position: fixed; width: min(540px, calc(100% - 40px)); max-height: calc(100dvh - 48px); margin: auto; padding: 36px; border: 0; border-radius: 3px; background: var(--color-bg-page); color: var(--color-text-primary); box-shadow: 0 24px 80px rgb(0 0 0 / .18); overscroll-behavior: contain; }
+    .collection-detail::backdrop { background: rgb(20 19 17 / .35); }
+    .collection-detail[open] { animation: collection-detail-enter 220ms cubic-bezier(.2,.65,.3,1); }
+    @keyframes collection-detail-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .collection-detail__close { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--color-text-secondary); cursor: pointer; font: 26px/1 var(--font-family-sans); }
+    .collection-detail__close:hover { color: var(--color-text-primary); background: color-mix(in srgb, var(--color-text-primary) 5%, transparent); }
+    .collection-detail__heading { display: grid; grid-template-columns: 116px minmax(0, 1fr); align-items: center; gap: 24px; padding: 14px 0 28px; }
+    .collection-detail__emblem { position: relative; width: 116px; height: 116px; }
+    .collection-detail__emblem .collection-logo { width: 100%; height: 100%; }
+    .collection-detail__brand { margin: 0 0 6px; color: var(--color-text-secondary); font-size: 13px; }
+    .collection-detail h2 { margin: 0; font: 600 28px/1.15 var(--font-family-heading); letter-spacing: -.025em; text-wrap: balance; }
+    .collection-detail__facts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; padding: 20px 0; margin: 0; border-block: 1px solid color-mix(in srgb, var(--color-text-primary) 12%, transparent); }
+    .collection-detail dt { color: var(--color-text-secondary); font-size: 11px; }
+    .collection-detail dd { margin: 6px 0 0; font-size: 15px; }
+    .collection-detail h3 { margin: 0 0 10px; color: var(--color-text-secondary); font-size: 12px; font-weight: 400; }
+    .collection-detail__about, .collection-detail__personal { margin-top: 24px; }
+    .collection-detail__about p, .collection-detail__personal :global(p) { margin: 0; font-size: 15px; line-height: 1.85; }
+    .collection-detail__sources { margin-top: 28px; color: var(--color-text-secondary); font-size: 11px; }
+    .collection-detail__sources p { margin: 0 0 8px; }
+    .collection-detail__sources div { display: flex; gap: 20px; }
+    .collection-detail__sources a { color: inherit; text-decoration: underline; text-underline-offset: 4px; }
+    @media (min-width: 601px) and (max-width: 800px) { .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 600px) {
+        .collection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .collection-tile__info { padding: 12px; }
+        .collection-tile__name { font-size: 16px; }
+        .collection-tile__meta { gap: 6px; }
+        .collection-detail { width: 100%; max-width: none; max-height: 85dvh; margin: auto 0 0; border-radius: 12px 12px 0 0; padding: 20px 24px max(24px, env(safe-area-inset-bottom)); }
+        .collection-detail__heading { grid-template-columns: 84px minmax(0, 1fr); gap: 20px; padding-top: 24px; }
+        .collection-detail__emblem { width: 84px; height: 84px; }
+        .collection-detail h2 { font-size: 25px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .collection-detail[open] { animation: none; } .collection-tile::after, .collection-tile__info { transition: none !important; transform: none; } }
+</style>

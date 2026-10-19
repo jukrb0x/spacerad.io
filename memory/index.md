@@ -16,6 +16,9 @@
 
 ---
 
+Collections data and authoring: [collections.md](collections.md).
+Global UI language and article fallback: [i18n.md](i18n.md).
+
 ## Quick Lookup — Where to Find What
 
 ### Project Structure

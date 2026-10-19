@@ -1,5 +1,8 @@
 ---
 // NavDrawer.astro - Mobile navigation drawer using <dialog> for proper iOS Safari viewport handling
+import LanguageToggle from "./LanguageToggle.astro";
+import { navChinese } from "../i18n/language";
+import CollectionsNav from "./CollectionsNav.astro";
 import { NAV_LINKS, SITE_TITLE_ALT } from "../consts";
 
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
@@ -9,7 +12,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
 <dialog
     data-nav-overlay
-    aria-label="Navigation menu"
+    aria-label="Navigation menu" data-i18n-attr="aria-label" data-i18n-en="Navigation menu" data-i18n-zh="导航菜单"
     data-pagefind-ignore
     class="nav-drawer md:hidden"
     transition:animate="none"
@@ -18,33 +21,28 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         type="button"
         class="nav-drawer__backdrop"
         data-nav-close
-        aria-label="Close navigation menu"></button>
+        aria-label="Close navigation menu" data-i18n-attr="aria-label" data-i18n-en="Close navigation menu" data-i18n-zh="关闭导航菜单"></button>
     <div
         data-nav-drawer
-        aria-label="Navigation menu"
+        aria-label="Navigation menu" data-i18n-attr="aria-label" data-i18n-en="Navigation menu" data-i18n-zh="导航菜单"
         data-scroll-container
         class="nav-drawer__panel"
     >
-        <div class="flex items-center justify-between">
-            <span
-                class="text-sm font-semibold uppercase tracking-[0.25em] text-[color-mix(in_srgb,var(--color-text-muted)_70%,transparent)]"
-            >
-                Menu
-            </span>
-            <button
-                type="button"
-                class="icon-btn icon-btn--xs icon-btn--square focus-accent"
-                data-nav-close
-                aria-label="Close navigation menu"
-            >
-                <span aria-hidden="true" class="text-xl leading-none">×</span>
-            </button>
+        <div class="nav-drawer__toolbar">
+            <span class="nav-drawer__label" data-i18n-en="Menu" data-i18n-zh="菜单">Menu</span>
+            <div class="nav-drawer__actions">
+                <LanguageToggle />
+                <button type="button" class="nav-drawer__close focus-accent" data-nav-close
+                    aria-label="Close navigation menu" data-i18n-attr="aria-label" data-i18n-en="Close navigation menu" data-i18n-zh="关闭导航菜单">
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
+                </button>
+            </div>
         </div>
         <nav class="flex flex-col gap-2 text-base" data-no-preview>
             {
                 NAV_LINKS.map((link) => (
-                    <a
-                        href={link.href}
+                    <> <a
+                        href={link.href} data-i18n-en={link.label} data-i18n-zh={navChinese[link.href] || link.label}
                         class:list={[
                             "no-underline inline-flex items-center rounded-md px-3 py-2 transition-interactive focus-accent",
                             isActive(link.href)
@@ -55,7 +53,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
                         aria-current={isActive(link.href) ? "page" : undefined}
                     >
                         {link.label}
-                    </a>
+                    </a>{link.href === "/channel" && <CollectionsNav mobile />} </>
                 ))
             }
         </nav>
@@ -66,12 +64,18 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             data-nav-phrases={JSON.stringify(SITE_TITLE_ALT)}
             aria-describedby="nav-phrase-hint"
         ><span data-nav-phrase-text></span></button>
-        <span id="nav-phrase-hint" class="sr-only">Show another phrase</span>
+        <span id="nav-phrase-hint" class="sr-only"><span data-i18n-en="Show another phrase" data-i18n-zh="换一句话">Show another phrase</span></span>
         <span class="sr-only" data-nav-phrase-status aria-live="polite" aria-atomic="true"></span>
     </div>
 </dialog>
 
 <style>
+    .nav-drawer__toolbar, .nav-drawer__actions { display: flex; align-items: center; }
+    .nav-drawer__toolbar { justify-content: space-between; }
+    .nav-drawer__label { font-size: 14px; color: var(--color-text-muted); }
+    .nav-drawer__close { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; background: transparent; color: var(--color-text-primary); cursor: pointer; border-radius: 50%; }
+    .nav-drawer__close:hover { color: var(--color-link); background: color-mix(in srgb, var(--color-link) 6%, transparent); }
+
     .nav-drawer__panel {
         padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
     }
@@ -106,6 +110,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 </style>
 
 <script>
+    import { uiLanguage } from "../i18n/client";
     import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
     // AbortController for document-level listeners so we can clean up on re-init
@@ -137,6 +142,11 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         drawerAbort = new AbortController();
         const controller = drawerAbort;
         const { signal } = controller;
+        const disposeLanguage = uiLanguage.listen((language) => {
+            const open = toggleButton?.getAttribute("aria-expanded") === "true";
+            toggleButton?.setAttribute("aria-label", language === "zh" ? (open ? "关闭导航菜单" : "打开导航菜单") : (open ? "Close navigation menu" : "Open navigation menu"));
+        });
+        signal.addEventListener("abort", disposeLanguage, { once: true });
 
         const toggleClasses = (el: Element | null | undefined, add: string[], remove: string[]) => {
             if (!el) return;
@@ -159,7 +169,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
 
             const wasOpen = toggleButton?.getAttribute("aria-expanded") === "true";
             toggleButton?.setAttribute("aria-expanded", String(open));
-            toggleButton?.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+            toggleButton?.setAttribute("aria-label", uiLanguage.get() === "zh" ? (open ? "关闭导航菜单" : "打开导航菜单") : (open ? "Close navigation menu" : "Open navigation menu"));
 
             if (open) {
                 if (!wasOpen) advancePhrase();
@@ -235,7 +245,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
             clearTimeout(closingTimer);
             overlay.classList.remove("is-open");
             toggleButton?.setAttribute("aria-expanded", "false");
-            toggleButton?.setAttribute("aria-label", "Open navigation menu");
+            toggleButton?.setAttribute("aria-label", uiLanguage.get() === "zh" ? "打开导航菜单" : "Open navigation menu");
             toggleClasses(barTop, [], ["translate-y-1.5", "rotate-45"]);
             toggleClasses(barBottom, [], ["-translate-y-1.5", "-rotate-45"]);
             toggleClasses(barMiddle, [], ["opacity-0"]);

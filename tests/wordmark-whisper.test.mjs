@@ -69,7 +69,7 @@ test("wordmark whisper is brief, stable, keyboard-friendly, touch-safe and route
         finePointer = true;
         wide = false;
         pointer();
-        assert.equal(current.whisper.visible(), false, "compact header has no decoration");
+        assert.equal(current.whisper.visible(), true, "compact header still reveals the phrase");
         wide = true;
         pointer();
         const old = current;

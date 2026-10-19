@@ -1,0 +1,4 @@
+/* Choose real, server-rendered article variants before module scripts hydrate. */
+html:not([data-ui-language="zh"]) [data-ui-lang="zh"],
+html[data-ui-language="zh"] [data-ui-lang="en"],
+[data-ui-lang][hidden] { display: none !important; }

@@ -47,8 +47,8 @@ const nestedHeadings = buildNestedHeadings(filteredHeadings);
 ---
 
 {nestedHeadings.length > 0 && (
-	<nav class="toc" data-no-preview aria-label="Table of Contents">
-		<h2 class="toc-title">Contents</h2>
+	<nav class="toc" data-no-preview aria-label="Table of Contents" data-i18n-attr="aria-label" data-i18n-en="Table of Contents" data-i18n-zh="文章目录">
+		<h2 class="toc-title"><span data-i18n-en="Contents" data-i18n-zh="目录">Contents</span></h2>
 		<ol class="toc-list">
 			{nestedHeadings.map((heading, index) => (
 				<li>

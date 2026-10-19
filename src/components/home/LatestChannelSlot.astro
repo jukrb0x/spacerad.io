@@ -2,9 +2,10 @@
 import { Icon } from "astro-icon/components";
 ---
 <div class="home-channel__content" data-latest-channel>
-    <div class="channel-fallback">Loading the latest channel notes… <a href="/channel">Read the Channel <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
+    <div class="channel-fallback"><span data-i18n-en="Loading the latest channel notes…" data-i18n-zh="正在加载最新电台动态…">Loading the latest channel notes…</span> <a href="/channel"><span data-i18n-en="Read the Channel" data-i18n-zh="进入电台">Read the Channel</span> <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
 </div>
 <script>
+    import { applyLanguage } from "../../i18n/client";
     import { registerPostPreviewLinks } from "../../scripts/post-preview";
     let thumbnails: IntersectionObserver | undefined;
     let request: AbortController | undefined;
@@ -21,6 +22,7 @@ import { Icon } from "astro-icon/components";
             const html = await response.text();
             if (!controller.signal.aborted && element.isConnected) {
                 element.innerHTML = html;
+                applyLanguage(element);
                 registerPostPreviewLinks(element);
                 // Load only visible first-photo thumbnails; hovering can load the same URL.
                 thumbnails = new IntersectionObserver((entries) => {
@@ -37,7 +39,12 @@ import { Icon } from "astro-icon/components";
         } catch {
             if (controller.signal.aborted || !element.isConnected) return;
             const fallback = element.querySelector(".channel-fallback");
-            if (fallback?.firstChild) fallback.firstChild.textContent = "The channel is temporarily unavailable. ";
+            const message = fallback?.querySelector<HTMLElement>("[data-i18n-en]");
+            if (message) {
+                message.dataset.i18nEn = "The channel is temporarily unavailable. ";
+                message.dataset.i18nZh = "电台暂时无法访问。";
+                applyLanguage(element);
+            }
         }
     }
     document.addEventListener("astro:page-load", initChannelSlot);

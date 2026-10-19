@@ -20,6 +20,6 @@ const backLabel = label ?? ({ "/": "Home", "/posts": "All writing", "/tags": "Al
 
 <div class="editorial-back">
     <a href={backHref}>
-        <span aria-hidden="true">←</span> {backLabel}
+        <span aria-hidden="true">←</span> <span data-i18n-en={backLabel} data-i18n-zh={label ?? ({ "/": "首页", "/posts": "全部文章", "/tags": "全部话题", "/channel": "全部动态" }[backHref] || "返回")}>{backLabel}</span>
     </a>
 </div>

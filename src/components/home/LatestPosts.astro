@@ -1,49 +1,12 @@
 ---
-import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
-import grassOverview from "../../content/blog/ue5-landscape-grass-memory-optimization-visibility-culling/mem-opt-overview.png";
-import { extractDescription } from "../../utils/extractDescription";
 import { type BlogPost, getPublishedPosts } from "../../utils/posts";
-import { getPostTranslation } from "../../utils/postTranslations";
-
-interface Props {
-    posts?: BlogPost[];
-}
-const allPosts = (Astro.props.posts ?? (await getPublishedPosts())).filter((post) => !post.data.draft);
-// Home leads with originals; their actual translations remain linked alongside.
-const originals = allPosts.filter((post) => post.data.lang !== "en" || !getPostTranslation(post.id, allPosts));
-const [lead, ...remaining] = originals.slice(0, 5);
-const image = lead?.data.socialImage;
-const translation = lead && getPostTranslation(lead.id, allPosts);
-const leadExcerpt =
-    lead?.id === "introducing-space-radio"
-        ? "又搭建了一个新的网站。上一次更新是在 23 年的 5 月份。我想要专注于内容，而不是在内容之外的技术框架上花费过多精力。"
-        : lead?.data.description || extractDescription(lead?.body || "", 160);
+import { getHomePosts } from "../../utils/postTranslations";
+import HomePostSelection from "./HomePostSelection.astro";
+interface Props { posts?: BlogPost[]; }
+const allPosts = (Astro.props.posts ?? await getPublishedPosts()).filter(post => !post.data.draft);
 ---
 <section class="home-writing" aria-labelledby="writing-title">
-    <div class="editorial-heading"><h2 id="writing-title"><a class="section-heading-link" href="/posts">Blog<span class="section-heading-link__wipe" aria-hidden="true">Blog</span></a></h2><a class="text-link" href="/posts">全部文章 <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
-    <div class="home-writing__grid">
-        {lead && <article class="lead-post" lang={lead.data.lang === "zh" ? "zh-CN" : "en"}>
-            <div class="post-meta"><time datetime={lead.data.published.toISOString()}>{lead.data.published.toISOString().slice(0, 10).replaceAll("-", ".")}</time><span class="mobile-post-languages"><span class="language-label">{lead.data.lang === "zh" ? "中文" : "English"}</span>{translation && <a class="mobile-translation" href={`/posts/${translation.id}`} hreflang={translation.data.lang} lang={translation.data.lang} aria-label={`${translation.data.lang === "en" ? "EN — English translation" : "中文 — 中文版"}: ${translation.data.title}`}><span class="translation-label--desktop">English <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></span><span class="translation-label--mobile">EN</span></a>}</span></div>
-            <h3><a href={`/posts/${lead.id}`} data-post-id={lead.id}>{lead.data.title}</a></h3>
-            {image && <a href={`/posts/${lead.id}`} class="lead-post__image" tabindex="-1" aria-hidden="true" data-preview="off">
-                {typeof image !== "string" ? <Image src={image} alt="" widths={[480, 720, 1000]} sizes="(max-width: 767px) calc(100vw - 48px), (max-width: 1400px) 48vw, 610px" width={1000} quality={70} loading="eager" fetchpriority="high" /> : <img src={image} alt="" width="1000" height="563" loading="eager" fetchpriority="high" />}
-            </a>}
-            <p class="lead-post__excerpt">{leadExcerpt}</p>
-            <a class="text-link lead-post__read" href={`/posts/${lead.id}`} data-preview="off">{lead.data.lang === "zh" ? "继续阅读" : "Continue reading"} <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a>
-        </article>}
-        <div class="home-writing__more">
-            {remaining.map(post => {
-                const image = post.id === "ue5-landscape-grass-memory-optimization-visibility-culling" ? grassOverview : post.data.socialImage;
-                const translation = getPostTranslation(post.id, allPosts);
-                return <article class="home-post" lang={post.data.lang === "zh" ? "zh-CN" : "en"}>
-                    <div class="post-meta"><time datetime={post.data.published.toISOString()}>{post.data.published.toISOString().slice(0, 10).replaceAll("-", ".")}</time><span class="mobile-post-languages"><span class="language-label">{post.data.lang === "zh" ? "中文" : "English"}</span>{translation && <a class="mobile-translation" href={`/posts/${translation.id}`} hreflang={translation.data.lang} lang={translation.data.lang} aria-label={`${translation.data.lang === "en" ? "EN — English translation" : "中文 — 中文版"}: ${translation.data.title}`}><span class="translation-label--desktop">{translation.data.lang === "en" ? "English" : "中文"} <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></span><span class="translation-label--mobile">{translation.data.lang === "en" ? "EN" : "中文"}</span></a>}</span></div>
-                    <div class:list={["home-post__body", { "home-post__body--image": !!image }]}>
-                        <div><h3><a href={`/posts/${post.id}`} data-post-id={post.id}>{post.data.title}</a></h3><p>{post.data.description || extractDescription(post.body || "", 90)}</p></div>
-                        {image && <a href={`/posts/${post.id}`} tabindex="-1" aria-hidden="true" class="home-post__image" data-preview="off">{typeof image !== "string" ? <Image src={image} alt="" width={200} height={128} loading="lazy" /> : <img src={image} alt="" width="200" height="128" loading="lazy" />}</a>}
-                    </div>
-                </article>;
-            })}
-        </div>
-    </div>
+    <div class="editorial-heading"><h2 id="writing-title"><a class="section-heading-link" href="/posts"><span data-i18n-en="Blog" data-i18n-zh="博客">Blog</span><span class="section-heading-link__wipe" aria-hidden="true" data-i18n-en="Blog" data-i18n-zh="博客">Blog</span></a></h2><a class="text-link" href="/posts"><span data-i18n-en="All posts" data-i18n-zh="全部文章">All posts</span> <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>
+    {(["en", "zh"] as const).map(language => <div data-ui-lang={language}><HomePostSelection posts={getHomePosts(allPosts, language)} allPosts={allPosts} /></div>)}
 </section>

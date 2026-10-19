@@ -3,8 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createContext, runInContext } from "node:vm";
 import ts from "typescript";
+import { atom } from "nanostores";
 
 function fixture() {
+    const uiLanguage = atom("en");
     const frames = new Map();
     const timers = new Map();
     let id = 0;
@@ -107,10 +109,14 @@ function fixture() {
     const source = readFileSync(new URL("../src/components/NavDrawer.astro", import.meta.url), "utf8").match(/<script>([\s\S]*?)<\/script>/)[1];
     const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
     runInContext(`(function(require, exports) { ${outputText} })`, context)(
-        () => ({
-            lockScrollForDialog: () => locks++,
-            unlockScrollForDialog: () => locks--,
-        }),
+        (specifier) => {
+            if (specifier === "../i18n/client") return { uiLanguage };
+            assert.equal(specifier, "../utils/scrollLock");
+            return {
+                lockScrollForDialog: () => locks++,
+                unlockScrollForDialog: () => locks--,
+            };
+        },
         {},
     );
     document.dispatchEvent(new Event("astro:page-load"));
@@ -148,6 +154,7 @@ function fixture() {
             document.activeElement = current.toggle;
             document.dispatchEvent(new Event("astro:page-load"));
         },
+        uiLanguage,
         selections: () => selections,
         document,
         media,
@@ -368,4 +375,26 @@ test("compiled navigation CSS clips the outer animation without disabling inner 
     assert.match(declarations("[data-scroll-container]"), /overflow-y:\s*auto;/);
     assert.match(declarations(".nav-drawer__panel"), /transform:\s*translateX\(100%\)/);
     assert.match(declarations(".nav-drawer.is-open .nav-drawer__panel"), /transform:\s*translateX\(0\)/);
+});
+
+
+test("language changes describe current drawer state and dispose with the DOM binding", () => {
+    const f = fixture();
+    assert.equal(f.uiLanguage.lc, 1);
+    f.uiLanguage.set("zh");
+    assert.equal(f.toggle.getAttribute("aria-label"), "打开导航菜单");
+    f.toggle.click();
+    assert.equal(f.toggle.getAttribute("aria-label"), "关闭导航菜单");
+    f.uiLanguage.set("en");
+    assert.equal(f.toggle.getAttribute("aria-label"), "Close navigation menu");
+    const detached = f.toggle;
+    f.document.dispatchEvent(new Event("astro:before-swap"));
+    assert.equal(f.uiLanguage.lc, 0, "swap disposes the language subscriber");
+    const labelAfterCleanup = detached.getAttribute("aria-label");
+    f.replaceDOM();
+    f.document.dispatchEvent(new Event("astro:page-load"));
+    assert.equal(f.uiLanguage.lc, 1, "reinitializing does not accumulate language subscriptions");
+    f.uiLanguage.set("zh");
+    assert.equal(f.toggle.getAttribute("aria-label"), "打开导航菜单");
+    assert.equal(detached.getAttribute("aria-label"), labelAfterCleanup, "detached control does not receive language updates");
 });

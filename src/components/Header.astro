@@ -1,5 +1,8 @@
 ---
 import { NAV_LINKS, SITE_TITLE_ALT } from "../consts";
+import LanguageToggle from "./LanguageToggle.astro";
+import { navChinese } from "../i18n/language";
+import CollectionsNav from "./CollectionsNav.astro";
 import ProfileCard from "./home/ProfileCard.astro";
 import NavDrawer from "./NavDrawer.astro";
 import SearchModal from "./SearchModal.astro";
@@ -9,21 +12,22 @@ import ThemeToggle from "./ThemeToggle.astro";
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 const isActive = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 ---
-<a class="skip-link" href="#main-content">Skip to content</a>
+<a class="skip-link" href="#main-content"><span data-i18n-en="Skip to content" data-i18n-zh="跳到正文">Skip to content</span></a>
 <header data-header data-pagefind-ignore class="header-wrapper site-header z-sticky" transition:animate="none">
-    <nav class="site-header__inner" aria-label="Main navigation">
-        <div data-reading-progress class="absolute bottom-0 left-0 w-full h-0.5 origin-left transform scale-x-0" role="progressbar" aria-label="Reading progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <nav class="site-header__inner" aria-label="Main navigation" data-i18n-attr="aria-label" data-i18n-en="Main navigation" data-i18n-zh="主导航">
+        <div data-reading-progress class="absolute bottom-0 left-0 w-full h-0.5 origin-left transform scale-x-0" role="progressbar" aria-label="Reading progress" data-i18n-attr="aria-label" data-i18n-en="Reading progress" data-i18n-zh="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         <a href="/" class="site-brand" data-wordmark-trigger data-wordmark-phrases={JSON.stringify(SITE_TITLE_ALT)} aria-label="Space Radio — Jabriel’s journal, home">
             <span class="site-brand__text">Space Radio</span>
             <span class="site-brand__whisper" data-wordmark-whisper aria-hidden="true"></span>
         </a>
         <div class="site-header__controls">
             <div class="site-header__links hidden md:flex" data-no-preview>
-                {NAV_LINKS.filter(link => !link.drawer_only).map(link => <a href={link.href} class="nav-link" aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</a>)}
+                {NAV_LINKS.filter(link => !link.drawer_only).map(link => <><a href={link.href} data-i18n-en={link.label} data-i18n-zh={navChinese[link.href] || link.label} class="nav-link" aria-current={isActive(link.href) ? "page" : undefined}>{link.label}</a>{link.href === "/channel" && <CollectionsNav />}</>)}
             </div>
             <SearchModal />
+            <LanguageToggle />
             <ThemeToggle variant="header" />
-            <button type="button" class="icon-btn icon-btn--sm icon-btn--square md:hidden" aria-label="Open navigation menu" aria-expanded="false" data-nav-toggle>
+            <button type="button" class="icon-btn icon-btn--sm icon-btn--square md:hidden" aria-label="Open navigation menu" data-i18n-attr="aria-label" data-i18n-en="Open navigation menu" data-i18n-zh="打开导航菜单" aria-expanded="false" data-nav-toggle>
                 <span aria-hidden="true" class="flex h-4 w-5 flex-col justify-between">
                     <span class="h-0.5 w-full bg-current transition-transform" data-bar-top></span>
                     <span class="h-0.5 w-full bg-current transition-opacity" data-bar-middle></span>

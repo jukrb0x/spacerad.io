@@ -257,3 +257,29 @@ font-size reduction, expansion control, or circle resizing fallback.
 The project currently uses `first-line`. No page settings UI or client-side
 state is involved. The circle-external overflow candidates were temporary
 previews only and are not part of the project.
+
+### Local Beer Collection preview
+
+`/beer-collection` is injected only for `astro dev`. Its small excluded route
+loads `collectionPages` YAML metadata and `collectionItems` Markdown records,
+then renders `components/collections/CollectionPage.astro`. See
+[collections.md](collections.md) for editing data and adding future collections.
+The title is Beer Log; its subtitle explicitly identifies beers the author has
+tried. Product summaries are sourced and separate from optional authored notes.
+
+The shared template preserves the site header, heading width and typography.
+Four square tiles on desktop, three on tablets, and two on phones use 6px gutters.
+Fine-pointer hover/focus reveals identifying facts; click opens the sourced
+entry, with a bottom panel on mobile. Escape, focus restoration, reduced motion
+and SPA cleanup use the existing dialog/scroll-lock conventions. Collection
+palette overrides are scoped to `html.collection-preview-root`.
+
+CollectionsNav is dev-only while its destination remains a preview. Desktop
+pointer hover opens the disclosure, a short close delay and pointer bridge keep
+links reachable, and clicking/keyboard activation remain supported. Mobile uses
+an inline expandable group. Published entries come from `COLLECTION_LINKS`.
+Active/hover navigation uses the shared blue link token. Page and item strings
+participate in the global UI-language preference without translating authored
+personal Markdown notes. Private log fields are not part of the content schema.
+
+The wordmark easter egg is available to mouse hover and keyboard focus at all widths. Below 1100px its phrase sits beneath the brand instead of being hidden; touch still follows the home link directly.

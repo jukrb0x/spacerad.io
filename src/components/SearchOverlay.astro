@@ -6,14 +6,14 @@
     data-pagefind-ignore
     data-search-overlay
     class="search-dialog"
-    aria-label="Site Search"
+    aria-label="Site Search" data-i18n-attr="aria-label" data-i18n-en="Site Search" data-i18n-zh="站内搜索"
 >
     <!-- Backdrop close button -->
     <button
         type="button"
         class="search-dialog__backdrop"
         data-search-close
-        aria-label="Close Search"
+        aria-label="Close Search" data-i18n-attr="aria-label" data-i18n-en="Close Search" data-i18n-zh="关闭搜索"
     ></button>
 
     <!-- Search Container -->
@@ -37,11 +37,11 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.3-4.3"></path>
             </svg>
-            <label for="search-input" class="sr-only">Search the journal</label>
+            <label for="search-input" class="sr-only"><span data-i18n-en="Search the journal" data-i18n-zh="搜索博客">Search the journal</span></label>
             <input
                 id="search-input"
                 type="search"
-                placeholder="Search the journal…"
+                placeholder="Search the journal…" data-i18n-attr="placeholder" data-i18n-en="Search the journal…" data-i18n-zh="搜索博客…"
                 class="w-full bg-transparent text-lg text-primary placeholder:text-muted focus-accent rounded"
                 data-search-input
                 autocomplete="off"
@@ -56,7 +56,7 @@
                 type="button"
                 class="icon-btn icon-btn--sm icon-btn--square focus-accent sm:hidden"
                 data-search-close
-                aria-label="Close Search"
+                aria-label="Close Search" data-i18n-attr="aria-label" data-i18n-en="Close Search" data-i18n-zh="关闭搜索"
             >
                 <span aria-hidden="true" class="text-xl leading-none">&times;</span>
             </button>
@@ -72,24 +72,24 @@
         >
             <!-- Empty state -->
             <div data-search-empty class="py-8 text-center text-muted">
-                <p>Enter keywords to search</p>
-                <p class="mt-2 text-sm">Search all posts</p>
+                <p><span data-i18n-en="Enter keywords to search" data-i18n-zh="输入关键词开始搜索">Enter keywords to search</span></p>
+                <p class="mt-2 text-sm"><span data-i18n-en="Search all posts" data-i18n-zh="搜索全部文章">Search all posts</span></p>
             </div>
             <div data-search-loading class="hidden py-8 text-center text-muted">
-                <p>Searching…</p>
-                <p class="mt-2 text-sm">Looking through all posts</p>
+                <p><span data-i18n-en="Searching…" data-i18n-zh="搜索中…">Searching…</span></p>
+                <p class="mt-2 text-sm"><span data-i18n-en="Looking through all posts" data-i18n-zh="正在搜索全部文章">Looking through all posts</span></p>
             </div>
             <!-- No results state (hidden by default) -->
             <div data-search-no-results class="hidden py-8 text-center text-muted">
-                <p>No results found</p>
-                <p class="mt-2 text-sm">Try different keywords</p>
+                <p><span data-i18n-en="No results found" data-i18n-zh="没有找到结果">No results found</span></p>
+                <p class="mt-2 text-sm"><span data-i18n-en="Try different keywords" data-i18n-zh="试试其他关键词">Try different keywords</span></p>
             </div>
             <div data-search-error class="hidden py-8 text-center text-muted">
-                <p>Search is unavailable</p>
-                <p class="mt-2 text-sm">Edit your search to try again</p>
+                <p><span data-i18n-en="Search is unavailable" data-i18n-zh="搜索暂不可用">Search is unavailable</span></p>
+                <p class="mt-2 text-sm"><span data-i18n-en="Edit your search to try again" data-i18n-zh="修改关键词后重试">Edit your search to try again</span></p>
             </div>
             <!-- Results list -->
-            <ul data-search-list class="hidden space-y-2" role="listbox" aria-label="Search Results">
+            <ul data-search-list class="hidden space-y-2" role="listbox" aria-label="Search Results" data-i18n-attr="aria-label" data-i18n-en="Search Results" data-i18n-zh="搜索结果">
             </ul>
         </div>
 
@@ -99,12 +99,12 @@
         <div class="flex items-center justify-between border-t border-subtle pt-3 text-xs text-muted">
             <span>
                 <kbd class="rounded border border-subtle bg-page px-1.5 py-0.5">↵</kbd>
-                Select
+                <span data-i18n-en="Select" data-i18n-zh="选择">Select</span>
                 <kbd class="ml-2 rounded border border-subtle bg-page px-1.5 py-0.5">↑↓</kbd>
-                Navigate
+                <span data-i18n-en="Navigate" data-i18n-zh="移动">Navigate</span>
             </span>
             <span class="flex items-center gap-1">
-                <span>Powered by</span>
+                <span data-i18n-en="Powered by" data-i18n-zh="搜索技术">Powered by</span>
                 <a
                     href="https://pagefind.app/"
                     target="_blank"
@@ -119,6 +119,7 @@
 </dialog>
 
 <script>
+    import { uiLanguage } from "../i18n/client";
     import { loadSearchIndex } from "../lib/search-index";
     import { lockScrollForDialog, unlockScrollForDialog } from "../utils/scrollLock";
 
@@ -231,7 +232,9 @@
             }
             if (state !== "results") searchList?.replaceChildren();
             if (searchStatus) {
-                searchStatus.textContent = {
+                searchStatus.textContent = uiLanguage.get() === "zh" ? {
+                    idle: "", loading: "搜索中…", "no-results": "没有找到结果", error: "搜索暂不可用，请修改关键词后重试。", results: `找到 ${count} 条结果`,
+                }[state] : {
                     idle: "",
                     loading: "Searching…",
                     "no-results": "No results found",
