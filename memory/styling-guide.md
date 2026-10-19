@@ -225,11 +225,14 @@ The fade reaches 80%, 40%, and 10% of its initial strength at 45, 95, and 140px.
 `body::before` replaces the former dots and covers the desktop header's collapsed
 32px margin (mobile has no top margin).
 
-`--page-wash-top` is also the solid `html`/`body` background color, so Safari's
-browser chrome canvas fallback matches the wash at the top edge. An opaque,
-uniform page-base background image on `body` preserves the visible page base
-beneath `body::before`; keep this layer on collections too. This is CSS-driven,
-so theme changes and ClientRouter collection changes use the current root tokens.
+`--browser-canvas-color` is the solid `html`/`body` background color, so Safari's
+browser chrome canvas fallback follows the current top edge. The header's existing
+scroll RAF interpolates `--browser-canvas-strength` over the same stop positions
+and levels that define the static wash in CSS, reading those parameters once per
+page load. The color reaches the page base at 170px and restores the wash at 0px.
+An opaque, uniform page-base background image on `body` preserves its visible
+paint beneath `body::before`; keep this layer on collections too. Theme and Beer
+palette changes resolve through the current root tokens without extra JS effects.
 Safari controls its own chrome tint and blur; desktop browser tests can verify
 the canvas colors and unchanged page paint, but cannot verify real iOS chrome.
 
@@ -239,11 +242,19 @@ transforms and the profile backdrop's negative inset. It uses the existing RAF a
 SPA cleanup lifecycle; past 170px, paint alignment skips geometry reads. Profile
 content clipping and navigation interaction stay unchanged.
 
-The floating navigation keeps the same solid `--page-wash-top` sampling color as
-the root canvas, including after scrolling away and returning. A second, uniform
+The floating navigation keeps the same solid `--browser-canvas-color` as the
+root canvas, including after scrolling away and returning. A second, uniform
 page-base image under its aligned wash preserves its visible color below the
 wash. Safari can sample a fixed element's solid background instead of the root;
-keeping these inputs identical avoids changing its fallback to the page base.
+these inputs must agree with the current page edge rather than retaining the
+initial wash color. While the navigation drawer dialog is open, a root `:has()`
+override uses its opaque page-base panel color for all canvas inputs. Closing it
+restores the current scroll color. This override intentionally targets the nav
+drawer; Beer detail dialogs keep their own sheet tint. Safari owns the content
+extension behind its floating toolbar, which desktop WebKit cannot verify.
+The nav panel's opaque background also makes its former backdrop blur redundant;
+the editorial override removes that extra compositing filter. This does not claim
+to change Safari's native toolbar transparency or extend dialog content under it.
 
 Beer Log passes `collectionId="beer"` to CollectionPage, setting
 `html[data-collection="beer"]`. Only that root overrides `--page-wash-ink` and

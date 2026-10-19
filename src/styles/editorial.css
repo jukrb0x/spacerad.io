@@ -12,22 +12,52 @@ body {
     letter-spacing: 0;
     font-family: var(--font-family-sans);
     /* Safari samples the solid canvas color; keep the visible page base above it. */
-    background-color: var(--page-wash-top);
+    background-color: var(--browser-canvas-color);
     background-image: linear-gradient(var(--color-bg-page), var(--color-bg-page));
     position: relative;
     isolation: isolate;
 }
 :root {
+    --page-wash-stop-1: 45px;
+    --page-wash-level-1: 0.8;
+    --page-wash-stop-2: 95px;
+    --page-wash-level-2: 0.4;
+    --page-wash-stop-3: 140px;
+    --page-wash-level-3: 0.1;
     --page-wash-top: color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) var(--page-wash-strength), var(--color-bg-page));
-    background-color: var(--page-wash-top);
+    --browser-canvas-strength: 1;
+    --browser-canvas-color: color-mix(
+        in srgb,
+        var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * var(--browser-canvas-strength)),
+        var(--color-bg-page)
+    );
+    background-color: var(--browser-canvas-color);
     --page-wash-gradient: linear-gradient(
         to bottom,
         var(--page-wash-top) 0px,
-        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.8), var(--color-bg-page)) 45px,
-        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.4), var(--color-bg-page)) 95px,
-        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.1), var(--color-bg-page)) 140px,
+        color-mix(
+                in srgb,
+                var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * var(--page-wash-level-1)),
+                var(--color-bg-page)
+            )
+            var(--page-wash-stop-1),
+        color-mix(
+                in srgb,
+                var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * var(--page-wash-level-2)),
+                var(--color-bg-page)
+            )
+            var(--page-wash-stop-2),
+        color-mix(
+                in srgb,
+                var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * var(--page-wash-level-3)),
+                var(--color-bg-page)
+            )
+            var(--page-wash-stop-3),
         var(--color-bg-page) 170px
     );
+}
+:root:has(dialog[data-nav-overlay][open]) {
+    --browser-canvas-color: var(--color-bg-page);
 }
 h1,
 h2,
@@ -146,8 +176,8 @@ header.site-header[data-header].is-scrolled {
     background-position: 0 var(--page-wash-nav-offset, -170px);
 }
 .site-header[data-nav-floating] .site-header__inner {
-    /* Keep Safari's fixed-bar sampling color consistent with the root canvas. */
-    background-color: var(--page-wash-top);
+    /* Match the current edge color; opaque images preserve the visible paint. */
+    background-color: var(--browser-canvas-color);
     background-image: var(--page-wash-gradient), linear-gradient(var(--color-bg-page), var(--color-bg-page));
     background-size:
         100% 170px,
@@ -931,6 +961,8 @@ body.article-page [data-like-count] {
 }
 .nav-drawer__panel {
     background: var(--color-bg-page);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     box-shadow: none;
     gap: 20px;
 }

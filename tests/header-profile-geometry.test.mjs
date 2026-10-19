@@ -56,7 +56,18 @@ function fixture(navigationHeight = 70, profileHeight = 90, headerInset = 0) {
     const context = createContext({
         window,
         document,
-        getComputedStyle: () => ({ paddingTop: `${headerInset}px` }),
+        getComputedStyle: () => ({
+            paddingTop: `${headerInset}px`,
+            getPropertyValue: (name) =>
+                ({
+                    "--page-wash-stop-1": "45px",
+                    "--page-wash-level-1": "0.8",
+                    "--page-wash-stop-2": "95px",
+                    "--page-wash-level-2": "0.4",
+                    "--page-wash-stop-3": "140px",
+                    "--page-wash-level-3": "0.1",
+                })[name] ?? "",
+        }),
         requestAnimationFrame(callback) {
             frames.set(++frameId, callback);
             return frameId;

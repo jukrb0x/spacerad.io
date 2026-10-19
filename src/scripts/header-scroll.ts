@@ -15,11 +15,29 @@ let hidden = false;
 let pointerInput = false;
 let navigationPaintOffset = "";
 let profilePaintOffset = "";
+let canvasStrength = "";
+let washStops: [number, number][] = [];
 const REVEAL_DISTANCE = 32;
 const HIDE_DISTANCE = 24;
 const MIN_SCROLL_DISTANCE_VH = 1.5;
 // Matches the static page wash in editorial.css.
 const PAGE_WASH_HEIGHT = 170;
+
+function updateCanvasPaint(scrollY: number) {
+    let strength = 0;
+    for (let index = 1; index < washStops.length; index++) {
+        const [end, endLevel] = washStops[index];
+        if (scrollY > end) continue;
+        const [start, startLevel] = washStops[index - 1];
+        strength = startLevel + ((scrollY - start) / (end - start)) * (endLevel - startLevel);
+        break;
+    }
+    const value = String(strength);
+    if (value !== canvasStrength) {
+        document.documentElement.style.setProperty("--browser-canvas-strength", value);
+        canvasStrength = value;
+    }
+}
 
 function updateBackgroundPaint(scrollY: number, profileInset: number) {
     if (!header || !navigation || !floating) return;
@@ -52,6 +70,7 @@ function updateHeader() {
     frame = undefined;
     if (!header || !navigation) return;
     const scrollY = Math.max(0, window.scrollY);
+    updateCanvasPaint(scrollY);
     // Dialogs restore focus to their trigger for every input method. Only
     // keyboard focus should hold the bar open once pointer reading resumes.
     const focused = !pointerInput && navigation.contains(document.activeElement);
@@ -144,6 +163,16 @@ function initHeader() {
     hidden = false;
     navigationPaintOffset = "";
     profilePaintOffset = "";
+    canvasStrength = "";
+    const washStyle = getComputedStyle(document.documentElement);
+    washStops = [
+        [0, 1],
+        ...[1, 2, 3].map((stop): [number, number] => [
+            Number.parseFloat(washStyle.getPropertyValue(`--page-wash-stop-${stop}`)),
+            Number.parseFloat(washStyle.getPropertyValue(`--page-wash-level-${stop}`)),
+        ]),
+        [PAGE_WASH_HEIGHT, 0],
+    ];
     directionAnchor = Math.max(0, window.scrollY);
     measureNavigation();
     // Only the navigation bar occupies the viewport during reading.
