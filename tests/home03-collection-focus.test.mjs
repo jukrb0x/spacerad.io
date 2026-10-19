@@ -13,6 +13,7 @@ test("Beer Log touch opens and closes details without focus frames while keyboar
         assert.equal(await close.evaluate((el) => el === document.activeElement), true);
         assert.equal(await close.evaluate((el) => getComputedStyle(el).outlineStyle), "none");
         await close.tap();
+        await page.waitForFunction(() => document.activeElement === document.querySelector("main"));
         assert.equal(await page.locator("main").evaluate((el) => el === document.activeElement), true);
         assert.equal(await page.locator("main").evaluate((el) => getComputedStyle(el).outlineStyle), "none");
 

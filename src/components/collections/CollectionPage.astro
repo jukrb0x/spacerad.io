@@ -87,7 +87,10 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
                 lockScrollForDialog();
             }, { signal });
             dialog.querySelector("[data-collection-close]")?.addEventListener("click", () => dialog.close(), { signal });
-            dialog.addEventListener("close", release, { signal });
+            dialog.addEventListener("close", () => {
+                release();
+                if (document.documentElement.dataset.collectionInput === "pointer") document.querySelector<HTMLElement>("#main-content")?.focus({ preventScroll: true });
+            }, { signal });
             dialog.addEventListener("click", (event) => {
                 const rect = dialog.getBoundingClientRect();
                 if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
