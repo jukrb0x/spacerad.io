@@ -65,6 +65,7 @@ export default defineConfig({
             include: {
                 // Only include icons we actually use to reduce bundle size
                 ri: [
+                    "loader-4-line",
                     "arrow-left-line",
                     "twitter-fill",
                     "telegram-fill",

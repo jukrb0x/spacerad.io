@@ -1,0 +1,11 @@
+---
+import { Icon } from "astro-icon/components";
+import "../styles/navigation-feedback.css";
+---
+<div class="navigation-feedback" data-navigation-feedback transition:persist="navigation-feedback" aria-hidden="true">
+    <Icon name="ri:loader-4-line" class="navigation-feedback__spinner" is:inline />
+</div>
+<div class="sr-only" data-navigation-status role="status" aria-live="polite" transition:persist="navigation-status"></div>
+<script>
+    import "../scripts/navigation-feedback";
+</script>

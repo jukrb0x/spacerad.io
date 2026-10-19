@@ -20,3 +20,16 @@ test("draft article stays absent from production pages and sitemap", async () =>
         assert.doesNotMatch(await readFile(resolve(output, file), "utf8"), /\/posts\/introducing-space-radio(?:\/|<)/);
     }
 });
+
+test("production pages include both navigation feedback modes", async () => {
+    const html = await readFile(resolve(output, "posts/index.html"), "utf8");
+    assert.match(html, /class="motion-track"/);
+    assert.match(html, /data-navigation-feedback/);
+    assert.match(html, /data-navigation-status/);
+    const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map((match) => match[1]).filter((path) => path.startsWith("/_astro/"));
+    const code = (await Promise.all(scripts.map((path) => readFile(resolve(output, path.slice(1)), "utf8")))).join("\n");
+    assert.match(code, /astro:before-preparation/);
+    const inline = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map((match) => match[1]).join("\n");
+    assert.match(code + inline, /data-navigation-status/);
+    assert.match(code + inline, /completing/);
+});

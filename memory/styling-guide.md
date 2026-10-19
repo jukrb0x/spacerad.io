@@ -291,3 +291,27 @@ an active Blog preview.
 The home About intro uses Cabin 400 at 24px on desktop and 20px on mobile.
 The bundled font supports weights 400–700. Preserve the 39.2px/32.2px line boxes
 and 48px/42px minimum row heights; the inline greeting scales at 0.78em.
+
+### SPA navigation feedback
+
+The Header uses a 104px full-width translucent wash with
+9px backdrop blur, masked to fade smoothly at the bottom. It uses the existing
+page-wash color and Remix `loader-4-line`; spinner and wash translate together.
+
+Logo clicks never show the wash. The white runner spans 44% of the logo width.
+At completion, `navigation-motion.ts` snapshots its computed position and width,
+then transitions to the full track over 300ms before the blue wipes left-to-right.
+Hover reveals blue left-to-right; clicking preserves an already-filled hover state.
+The hidden clip resets without a transition before hover re-entry.
+
+`NavigationFeedback.astro` and the Header runner are included in production on
+desktop and mobile. `navigation-feedback.ts` starts at before-preparation,
+carries the logo state into the swapped Header and finishes on the matching after-swap without
+delaying navigation. Other SPA navigation shows the wash after 180ms; aborts and
+loader failures clear state. Persistent module listeners bind once; navigation
+revision guards prevent aborted requests from clearing a newer indicator.
+Completion uses the matching swap signal, not uncorrelated page-load events: an
+older route can emit page-load late while its arriving scripts finish.
+Reduced motion disables scanning, spinning and transitions. Browser coverage in
+`tests/home03-navigation-feedback.test.mjs` includes desktop/touch SPA completion
+and interruption handling.

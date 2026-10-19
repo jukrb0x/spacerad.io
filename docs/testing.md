@@ -168,3 +168,12 @@ The smoke suite checks the core route and modal flows, Beer Log focus, navigatio
 scroll locking and Safari canvas color. The full suite keeps real Pagefind,
 the article translation matrix, carousel, accessibility and repeated SPA stress
 cases. Unit tests continue to cover deterministic search, content and state logic.
+
+### Navigation loading feedback
+
+`tests/home03-navigation-feedback.test.mjs` covers desktop/touch SPA completion,
+logo versus canopy isolation, hover re-entry, repeated interrupted navigation
+and hash links.
+Run it with `pnpm test:browser tests/home03-navigation-feedback.test.mjs`; it is
+also discovered by the full browser profile. The release tests verify that
+production posts include the runner, canopy and client lifecycle code.

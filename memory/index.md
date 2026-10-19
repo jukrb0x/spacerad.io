@@ -112,6 +112,7 @@ Global UI language and article fallback: [i18n.md](i18n.md).
 | Header | `Header.astro` | Sticky, search, theme toggle, reading progress, neon glow |
 | Footer | `Footer.astro` | Social links, copyright |
 | NavDrawer | `NavDrawer.astro` | Mobile navigation |
+| NavigationFeedback | `NavigationFeedback.astro` | Logo-only loading or fixed gradient/spinner for other SPA navigation, desktop and mobile |
 
 ### Content
 | Component | Purpose |
@@ -178,6 +179,7 @@ Global UI language and article fallback: [i18n.md](i18n.md).
 | Script | Purpose | SPA Pattern |
 |--------|---------|-------------|
 | `theme.ts` | Theme toggle bindings — wrapper around `stores/theme` nanostores | Imports nanostores, exports `bindThemeToggles`, `onThemeChange` |
+| `navigation-feedback.ts` | Exclusive logo / top-wash loading, abort cleanup and smooth completion | Persistent module listeners; seeds replacement Header before swap |
 | `header-scroll.ts` | Header hide/show, reading progress | `astro:page-load` re-query refs, persistent scroll guard |
 | `code-blocks.ts` | Copy button, language labels | Uses `autoInit()` helper |
 | `blog-interactive.ts` | TOC, responsive tables, iframe embeds, sidebar positioning | Uses `autoInit()`, persistent listener guard |

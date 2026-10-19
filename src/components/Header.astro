@@ -5,6 +5,7 @@ import CollectionsNav from "./CollectionsNav.astro";
 import ProfileCard from "./home/ProfileCard.astro";
 import LanguageToggle from "./LanguageToggle.astro";
 import NavDrawer from "./NavDrawer.astro";
+import NavigationFeedback from "./NavigationFeedback.astro";
 import SearchModal from "./SearchModal.astro";
 import SearchOverlay from "./SearchOverlay.astro";
 import ThemeToggle from "./ThemeToggle.astro";
@@ -18,6 +19,7 @@ const isActive = (href: string) => pathname === href || (href !== "/" && pathnam
         <div data-reading-progress class="absolute bottom-0 left-0 w-full h-0.5 origin-left transform scale-x-0" role="progressbar" aria-label="Reading progress" data-i18n-attr="aria-label" data-i18n-en="Reading progress" data-i18n-zh="阅读进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         <a href="/" class="site-brand" data-wordmark-trigger data-wordmark-phrases={JSON.stringify(SITE_TITLE_ALT)} aria-label="Space Radio — Jabriel’s journal, home">
             <span class="site-brand__text">Space Radio</span>
+            <span class="motion-track" aria-hidden="true"><i></i></span>
             <span class="site-brand__whisper" data-wordmark-whisper aria-hidden="true"></span>
         </a>
         <div class="site-header__controls">
@@ -38,6 +40,7 @@ const isActive = (href: string) => pathname === href || (href !== "/" && pathnam
     </nav>
     {pathname === "/" && <ProfileCard />}
 </header>
+<NavigationFeedback />
 <NavDrawer />
 <SearchOverlay />
 <script>
