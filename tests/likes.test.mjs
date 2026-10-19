@@ -27,8 +27,19 @@ class Button extends EventTarget {
         super();
         this.dataset = { slug };
         this.attributes = new Set();
-        this.classList = { add() {}, remove() {} };
-        this.count = { textContent: "" };
+        this.classList = {
+            add() {},
+            remove() {},
+            contains() {
+                return false;
+            },
+        };
+        const properties = new Map();
+        this.style = {
+            setProperty: (name, value) => properties.set(name, value),
+            getPropertyValue: (name) => properties.get(name) || "",
+        };
+        this.count = { textContent: "", hasAttribute: () => false };
     }
     setAttribute(name) {
         this.attributes.add(name);
@@ -38,6 +49,9 @@ class Button extends EventTarget {
     }
     hasAttribute(name) {
         return this.attributes.has(name);
+    }
+    closest() {
+        return null;
     }
     querySelectorAll(selector) {
         assert.equal(selector, "[data-like-count]");
@@ -257,4 +271,45 @@ test("an earlier POST cannot roll back a later POST on the same article", async 
     await respond(app.requests[1], 11, 1);
     assert.equal(button.count.textContent, "12");
     assert.deepEqual(app.storage(), { target: 2 });
+});
+
+test("liquid progress follows personal likes, restores on load, and stays optimistic on request failure", async () => {
+    const s = setup();
+    const [button] = s.show("article");
+    await respond(s.requests[0], 160, 0);
+    assert.equal(button.style.getPropertyValue("--like-progress"), "0", "other readers' total never fills personal progress");
+    const status = s.likes.fetchLikeStatus("article");
+    await respond(s.requests[1], 168, 8);
+    await status;
+    assert.equal(button.style.getPropertyValue("--like-progress"), "0.5");
+    const vote = s.likes.addLike("article");
+    assert.equal(button.style.getPropertyValue("--like-progress"), "0.5625");
+    s.requests[2].reject(Error("offline"));
+    await vote;
+    assert.equal(button.style.getPropertyValue("--like-progress"), "0.5625");
+    assert.equal(s.storage().article, 9);
+});
+
+test("article-end totals update both language fragments outside the like button", async () => {
+    const app = setup();
+    const [button, other] = app.show("target", "other");
+    const counts = [0, 1].map(() => ({ textContent: "", hasAttribute: (name) => name === "data-like-count-show-zero" }));
+    button.closest = (selector) => {
+        assert.equal(selector, "[data-share-mobile]");
+        return { querySelectorAll: () => counts };
+    };
+    await respond(app.requests[0], 0, 0);
+    assert.deepEqual(
+        counts.map((count) => count.textContent),
+        ["0", "0"],
+    );
+    const status = app.likes.fetchLikeStatus("target");
+    await respond(app.requests[1], 160, 8);
+    await status;
+    assert.deepEqual(
+        counts.map((count) => count.textContent),
+        ["160", "160"],
+    );
+    assert.equal(other.count.textContent, "");
+    assert.equal(button.style.getPropertyValue("--like-progress"), "0.5");
 });

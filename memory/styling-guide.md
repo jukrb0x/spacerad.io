@@ -185,7 +185,7 @@ In dark mode, avoid solid gray fills. Use `color-mix()` tinted backgrounds for g
 
 ### Mobile article tools
 
-The return arrow and label use an 8px gap. The reading shortcut appears only while the prose fills the viewport, after the header has left and before the article-end actions arrive. It is a blue 44px-high pill with a route-node mark and an explicit Contents label. The article-end action band sits after prose and before comments on mobile: Like stays visible in a pale red cell and fills with the site's language red after a like, while Share expands into labeled rows for social links and copy link. The band's top rule and outline reuse structural blue; imagery stays clear of share overlays.
+The return arrow and label use an 8px gap. The reading shortcut appears only while the prose fills the viewport, after the header has left and before the article-end actions arrive. It is a blue 44px-high pill with a route-node mark and an explicit Contents label, sized naturally for English or Chinese. Opening the native dialog replaces the pill with a matching control that collapses toward the same bottom-right anchor into a 44px close circle; closing reverses the motion. The article-end actions sit after prose and before comments on mobile as the selected centered capsule pair: a neutral gray Like outline and content before liking, a blue Share outline, and transparent page backgrounds, 132×50px buttons with a 26px radius, 15px medium labels, 19px icons, and a 16px gap (124px buttons and a 12px gap below 360px). The bilingual invitation sits above; the total likes received appears below both buttons, never as a count of people. Like fills from the bottom according to personal likes out of 16, independently of the displayed total: pale red liquid, readable red content and matching red outline, and a brief settling wave on each click; full personal progress becomes red with white content. The frame stays fixed and reduced motion uses a static fill. Share becomes blue with white content while its existing labeled social/copy actions are expanded in one centered row, then returns to its clean surface. Imagery stays clear of share overlays.
 
 ---
 
@@ -224,7 +224,7 @@ Custom 6px width, rounded, themed colors (`--c-scrollbar` / `--c-scrollbar-hover
 
 `editorial.css` paints a static 170px page-top wash from the invariant structure
 blue `#0819ae` into the existing page base. `--page-wash-strength` in `_tokens.scss`
-is 6% light / 8% dark; dark uses the same ink rather than the brighter link color.
+is 7% light / 8% dark; dark uses the same ink rather than the brighter link color.
 The fade reaches 80%, 40%, and 10% of its initial strength at 45, 95, and 140px.
 `body::before` replaces the former dots and covers the desktop header's collapsed
 32px margin (mobile has no top margin).
@@ -271,8 +271,19 @@ The footer has a full-width upward wash painted by an absolute `body::after`
 behind content, using the same page-wash ink and page-base tokens. It fades over
 110px at 5% strength on desktop, and 80px at 4% on mobile. Beer Log retains its
 warm ink, with 8% desktop / 6% mobile strength in dark mode. This decoration has
-no pointer events and does not change footer geometry, fixed controls, or the
-Safari canvas color mechanism.
+no pointer events. The real footer is full width with its original content gutter
+and divider preserved. `position: sticky; top: 0` makes it eligible for WebKit's
+independent bottom-edge sampling; as the last flow element it stays at its natural
+position rather than pinning to the viewport bottom. Its solid background is the
+wash's bottom color, while matching gradient/base image layers preserve visible
+paint. The root canvas continues following the top edge. The nav-menu override
+also resets the footer sampling color to the panel base.
+
+WebKit's `LocalFrameView::fixedContainerEdges()` requires a fixed/sticky element
+spanning at least 90% of the sampled viewport edge; it does not require the sticky
+box to be currently stuck. The source applies colors separately to each edge.
+This is a local experiment with geometry and sampling inputs checked in desktop
+WebKit/Chromium; actual iOS toolbar tint and blur still require device verification.
 - Sticky with z-index `--z-sticky` (20)
 - `.is-scrolled` — backdrop-filter blur(12px) saturate(180%), semi-transparent bg
 - `.header--hidden` — translateY(-100%)
@@ -326,3 +337,6 @@ older route can emit page-load late while its arriving scripts finish.
 Reduced motion disables scanning, spinning and transitions. Browser coverage in
 `tests/home03-navigation-feedback.test.mjs` includes desktop/touch SPA completion
 and interruption handling.
+
+
+Header search, theme, and menu use matching 20px line icons with a 1.7px rounded stroke and the same tinted hover circle. The navigation drawer uses its own stable 24px inset (respecting safe areas), with Menu, language, and the 44px close button on one flex row. Its layout stays consistent when opened from either the full or floating header; menu links retain 44px touch targets with a 4px list gap.

@@ -145,6 +145,7 @@ body {
 
 // TOC drawer
 .toc-drawer {
+  overflow: clip;
   &__backdrop {
     position: absolute;
     inset: 0;
@@ -175,6 +176,27 @@ body {
     transform: translateX(0) !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
+
+  &__header {
+    flex: none;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+
+    h2 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__list {
+    flex: 1;
+    min-height: 0;
+    padding: 1rem 1.5rem calc(5.5rem + env(safe-area-inset-bottom));
+  }
+
 }
 
 // Search dialog
@@ -1349,6 +1371,13 @@ a {
 
   .toc-link {
     font-size: 0.9375rem;
+    padding: 0.5rem 0;
+    line-height: 1.55;
+    gap: 0.5rem;
+  }
+
+  .toc-sublist .toc-link {
+    font-size: 0.875rem;
     padding: 0.375rem 0;
   }
 
@@ -1811,13 +1840,4 @@ a {
 
 .animate-shake {
   animation: shake 0.3s ease-out;
-}
-
-// Like button golden effect when maxed
-[data-like-button][data-max-reached] {
-  border-color: #f59e0b !important;
-
-  svg {
-    color: #f59e0b !important;
-  }
 }

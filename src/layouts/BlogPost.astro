@@ -179,6 +179,9 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 				<button
 					data-toc-mobile-toggle
 					class="article-toc-toggle"
+					type="button"
+					aria-controls="article-contents"
+					aria-expanded="false"
 					aria-label="Open table of contents"
 					data-i18n-attr="aria-label"
 					data-i18n-en="Open table of contents"
@@ -187,12 +190,13 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 					inert
 				>
 					<span class="article-toc-toggle__node" aria-hidden="true"></span>
-					<span data-i18n-en="Contents" data-i18n-zh="目录">Contents</span>
+					<span class="article-toc-toggle__label" data-i18n-en="Contents" data-i18n-zh="目录">Contents</span>
 				</button>
 
 				<!-- Mobile: Drawer (dialog for proper iOS Safari viewport handling) -->
 				<dialog
 					data-toc-mobile-drawer
+					id="article-contents"
 					aria-label="Table of contents"
 					class="toc-drawer min-[1400px]:hidden"
 				>
@@ -209,27 +213,31 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 					>
 						<div class="flex h-full flex-col">
 							<!-- Header -->
-							<div class="flex items-center justify-between border-b border-subtle px-6 py-4">
-								<h2 class="text-lg font-semibold text-primary">Contents</h2>
-								<button
-									data-toc-mobile-close
-									class="flex h-8 w-8 items-center justify-center rounded-full hover:bg-muted transition-colors"
-									aria-label="Close"
-								>
-									<svg class="h-5 w-5 text-muted" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-										<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-									</svg>
-								</button>
+							<div class="toc-drawer__header">
+								<h2 data-i18n-en="Contents" data-i18n-zh="目录">Contents</h2>
 							</div>
 
 							<!-- TOC content -->
-							<div class="flex-1 overflow-y-auto px-6 pt-4 pb-8" data-scroll-container>
+							<div class="toc-drawer__list" data-scroll-container>
 								<div class="toc-mobile">
 									<TableOfContents headings={headings} />
 								</div>
 							</div>
 						</div>
 					</div>
+					<button
+						type="button"
+						data-toc-mobile-close
+						class="article-toc-toggle article-toc-toggle--close"
+						aria-label="Close table of contents"
+						data-i18n-attr="aria-label"
+						data-i18n-en="Close table of contents"
+						data-i18n-zh="关闭目录"
+						autofocus
+					>
+						<span class="article-toc-toggle__node" aria-hidden="true"></span>
+						<span class="article-toc-toggle__label" aria-hidden="true" data-i18n-en="Contents" data-i18n-zh="目录">Contents</span>
+					</button>
 				</dialog>
 			</>
 		)}

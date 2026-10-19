@@ -30,11 +30,7 @@ const isActive = (href: string) => pathname === href || (href !== "/" && pathnam
             <LanguageToggle />
             <ThemeToggle variant="header" />
             <button type="button" class="icon-btn icon-btn--sm icon-btn--square md:hidden" aria-label="Open navigation menu" data-i18n-attr="aria-label" data-i18n-en="Open navigation menu" data-i18n-zh="打开导航菜单" aria-expanded="false" data-nav-toggle>
-                <span aria-hidden="true" class="flex h-4 w-5 flex-col justify-between">
-                    <span class="h-0.5 w-full bg-current transition-transform" data-bar-top></span>
-                    <span class="h-0.5 w-full bg-current transition-opacity" data-bar-middle></span>
-                    <span class="h-0.5 w-full bg-current transition-transform" data-bar-bottom></span>
-                </span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
             </button>
         </div>
     </nav>

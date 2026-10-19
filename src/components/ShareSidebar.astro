@@ -104,19 +104,25 @@ const shareLinks = [
 
 <!-- Mobile: a visible article-end action pair before comments. -->
 <aside data-share-mobile class="article-share min-[1400px]:hidden" aria-label="Article actions" data-i18n-attr="aria-label" data-i18n-en="Article actions" data-i18n-zh="文章操作">
-    <div class="article-share__eyebrow" data-i18n-en="End of article" data-i18n-zh="文章结尾">End of article</div>
+    <h2 class="article-share__invitation" data-i18n-en="Enjoyed this article?" data-i18n-zh="喜欢这篇文章？">Enjoyed this article?</h2>
     <div class="article-share__actions">
         <button type="button" data-like-button data-slug={slug} class="article-share__like group">
-            <Icon name="ri:heart-line" class="group-data-[liked]:hidden" aria-hidden="true" />
-            <Icon name="ri:heart-fill" class="hidden group-data-[liked]:block" aria-hidden="true" />
-            <span data-i18n-en="Like" data-i18n-zh="点赞">Like</span>
-            <span data-like-count></span>
+            <span class="article-share__like-liquid" aria-hidden="true"></span>
+            <span class="article-share__like-content">
+                <Icon name="ri:heart-line" class="group-data-[liked]:hidden" aria-hidden="true" />
+                <Icon name="ri:heart-fill" class="hidden group-data-[liked]:block" aria-hidden="true" />
+                <span data-i18n-en="Like" data-i18n-zh="喜欢">Like</span>
+            </span>
         </button>
         <button type="button" data-share-mobile-toggle class="article-share__toggle" aria-expanded="false" aria-controls="article-share-menu">
             <Icon name="ri:share-line" aria-hidden="true" />
             <span data-i18n-en="Share" data-i18n-zh="分享">Share</span>
         </button>
     </div>
+    <p class="article-share__count" aria-live="polite">
+        <span data-ui-lang="en"><span data-like-count data-like-count-show-zero>0</span> likes received</span>
+        <span data-ui-lang="zh" hidden>累计 <span data-like-count data-like-count-show-zero>0</span> 次赞</span>
+    </p>
     <div id="article-share-menu" data-share-menu aria-hidden="true" inert hidden>
         {shareLinks.map((link) => (
             <a href={link.href} target="_blank" rel="noopener noreferrer" data-share-menu-item aria-label={link.label}>
@@ -157,13 +163,6 @@ const shareLinks = [
     .animate-pop { animation: pop 0.2s ease-out; }
     .animate-shake { animation: shake 0.3s ease-out; }
 
-    /* 点满后的金色效果 */
-    [data-like-button][data-max-reached] {
-        border-color: #f59e0b !important;
-    }
-    [data-like-button][data-max-reached] svg {
-        color: #f59e0b !important;
-    }
 </style>
 
 <script>

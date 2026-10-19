@@ -61,6 +61,7 @@ function fixture() {
             phraseStatus: Object.assign(new Element(), { textContent: "" }),
             overlay: Object.assign(new Element(), {
                 open: false,
+                style: { setProperty() {} },
                 querySelectorAll: () => [current.link],
                 showModal() {
                     this.open = true;
@@ -74,6 +75,7 @@ function fixture() {
     let current = elements();
     const document = Object.assign(new EventTarget(), {
         activeElement: current.toggle,
+        documentElement: { clientWidth: 390 },
         querySelector: (selector) =>
             ({
                 "[data-nav-toggle]": current.toggle,

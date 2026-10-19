@@ -10,6 +10,7 @@ const MAX_LIKES = 16;
 let routeRevision = 0;
 let readRevision = 0;
 let writeRevision = 0;
+const likeAnimationTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 
 interface LikeData {
     [slug: string]: number;
@@ -49,6 +50,13 @@ function getLikeButtons(slug: string): HTMLElement[] {
     return Array.from(document.querySelectorAll<HTMLElement>("[data-like-button]")).filter((btn) => btn.dataset.slug === slug);
 }
 
+function updateLikeProgress(button: HTMLElement, userLikes: number): void {
+    const progress = Math.min(1, Math.max(0, userLikes / MAX_LIKES));
+    button.style.setProperty("--like-progress", String(progress));
+    if (progress === 1) button.setAttribute("data-like-full", "");
+    else button.removeAttribute("data-like-full");
+}
+
 /**
  * Update like UI for the requested article
  */
@@ -56,6 +64,7 @@ function updateLikeUI(slug: string, count: number, userLikes: number, maxReached
     const likeButtons = getLikeButtons(slug);
 
     likeButtons.forEach((btn) => {
+        updateLikeProgress(btn, userLikes);
         if (userLikes > 0) {
             btn.setAttribute("data-liked", "");
         } else {
@@ -66,8 +75,9 @@ function updateLikeUI(slug: string, count: number, userLikes: number, maxReached
         } else {
             btn.removeAttribute("data-max-reached");
         }
-        btn.querySelectorAll<HTMLElement>("[data-like-count]").forEach((el) => {
-            el.textContent = count > 0 ? String(count) : "";
+        const countContainer = btn.closest("[data-share-mobile]") || btn;
+        countContainer.querySelectorAll<HTMLElement>("[data-like-count]").forEach((el) => {
+            el.textContent = count > 0 || el.hasAttribute("data-like-count-show-zero") ? String(count) : "";
         });
     });
 }
@@ -130,8 +140,22 @@ async function addLike(slug: string): Promise<void> {
     const likeButtons = getLikeButtons(slug);
     likeButtons.forEach((btn) => {
         btn.setAttribute("data-liked", "");
+        updateLikeProgress(btn, newLikes);
         btn.classList.add("animate-pop");
-        setTimeout(() => btn.classList.remove("animate-pop"), 200);
+        if (btn.classList.contains("article-share__like")) {
+            btn.querySelector(".article-share__like-liquid")
+                ?.getAnimations({ subtree: true })
+                .forEach((animation) => {
+                    if (animation instanceof CSSAnimation) animation.currentTime = 0;
+                });
+            clearTimeout(likeAnimationTimers.get(btn));
+            likeAnimationTimers.set(
+                btn,
+                setTimeout(() => btn.classList.remove("animate-pop"), 800),
+            );
+        } else {
+            setTimeout(() => btn.classList.remove("animate-pop"), 200);
+        }
     });
 
     try {

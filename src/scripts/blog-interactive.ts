@@ -228,12 +228,13 @@ let disposeMobileTocDrawer: (() => void) | undefined;
 function initMobileTocDrawer() {
     disposeMobileTocDrawer?.();
     disposeMobileTocDrawer = undefined;
-    const toggleBtn = document.querySelector("[data-toc-mobile-toggle]");
+    const toggleBtn = document.querySelector<HTMLButtonElement>("[data-toc-mobile-toggle]");
     const dialog = document.querySelector<HTMLDialogElement>("[data-toc-mobile-drawer]");
     if (!toggleBtn || !dialog) return;
 
     const controller = new AbortController();
     const options = { signal: controller.signal };
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let locked = false;
     let frame: number | undefined;
     let closeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -241,12 +242,17 @@ function initMobileTocDrawer() {
     const openDrawer = () => {
         if (locked || controller.signal.aborted) return;
         clearTimeout(closeTimer);
+        dialog.style.setProperty("--article-toc-width", `${toggleBtn.getBoundingClientRect().width}px`);
+        toggleBtn.setAttribute("aria-expanded", "true");
         if (!dialog.open) dialog.showModal();
         locked = true;
         lockScrollForDialog();
         frame = requestAnimationFrame(() => {
             frame = undefined;
-            if (locked && !controller.signal.aborted) dialog.classList.add("is-open");
+            if (locked && !controller.signal.aborted) {
+                dialog.classList.add("is-open");
+                dialog.querySelector<HTMLButtonElement>(".article-toc-toggle--close")?.focus({ preventScroll: true });
+            }
         });
     };
     const closeDrawer = (immediate = false) => {
@@ -254,15 +260,19 @@ function initMobileTocDrawer() {
         if (frame !== undefined) cancelAnimationFrame(frame);
         frame = undefined;
         dialog.classList.remove("is-open");
+        toggleBtn.setAttribute("aria-expanded", "false");
         if (locked) {
             locked = false;
             unlockScrollForDialog();
         }
         if (immediate) dialog.close();
         else
-            closeTimer = setTimeout(() => {
-                if (!locked && dialog.isConnected) dialog.close();
-            }, 300);
+            closeTimer = setTimeout(
+                () => {
+                    if (!locked && dialog.isConnected) dialog.close();
+                },
+                reducedMotion.matches ? 0 : 300,
+            );
     };
 
     toggleBtn.addEventListener("click", openDrawer, options);
