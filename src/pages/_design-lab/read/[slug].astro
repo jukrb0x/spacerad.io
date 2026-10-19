@@ -29,13 +29,13 @@ const contents = headings.filter((heading) => heading.depth === 2);
 <LabHeader />
 <main id="lab-main" class="lab-main" tabindex="-1">
     <article class="lab-reading">
-        <a class="lab-reading__back" href="/design-lab">← Space Radio</a>
+        <a class="lab-reading__back" href="/design-lab"><Icon name="ri:arrow-left-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /> Space Radio</a>
         <header class="lab-reading__header"><h1>{post.data.title}</h1><div class="lab-meta"><span>Jabriel</span><time datetime={post.data.published.toISOString()}><FormattedDate date={post.data.published} /></time><span>{calculateReadingTime(post.body || "")}</span></div><p class="lab-reading__original"><a href={`/posts/${post.id}`}>Open original article with comments & sharing <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></p></header>
         {contents.length > 0 && <details class="lab-contents"><summary>Contents</summary><ol>{contents.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></details>}
         <div class="lab-reading__body"><Prose><Content /></Prose></div>
         <Lightbox id="lab-lightbox" selector=".lab-reading .prose img:not([data-lightbox-skip])" />
     </article>
-    <footer class="lab-foot"><a href="/design-lab">← Back to Space Radio</a><a href="/posts">All writing <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></footer>
+    <footer class="lab-foot"><a href="/design-lab"><Icon name="ri:arrow-left-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /> Back to Space Radio</a><a href="/posts">All writing <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></footer>
 </main>
 <script>import "../../../scripts/code-blocks";</script>
 </body></html>

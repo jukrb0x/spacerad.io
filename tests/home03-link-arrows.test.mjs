@@ -11,8 +11,8 @@ after(async () => {
     await browser?.close();
 });
 
-async function assertArrow(link) {
-    const icon = link.locator('svg[data-icon="ri:arrow-right-up-line"]');
+async function assertArrow(link, name = "ri:arrow-right-up-line") {
+    const icon = link.locator(`svg[data-icon="${name}"]`);
     assert.equal(await icon.count(), 1, "UI arrow is a library SVG instead of an emoji glyph");
     assert.equal(await icon.getAttribute("aria-hidden"), "true");
     assert.equal(await icon.getAttribute("focusable"), "false");
@@ -35,7 +35,7 @@ async function assertArrow(link) {
     assert.ok(Math.abs(geometry.width - geometry.fontSize) < 1);
     assert.ok(Math.abs(geometry.height - geometry.fontSize) < 1);
     assert.ok(geometry.contained, "arrow stays aligned inside its link");
-    assert.doesNotMatch(await link.textContent(), /↗\uFE0F?/u);
+    assert.doesNotMatch(await link.textContent(), /[↗←]\uFE0F?/u);
 }
 
 for (const width of [320, 390, 1440]) {
@@ -74,6 +74,8 @@ for (const width of [320, 390, 1440]) {
                 }
                 await page.goto(new URL("/posts", baseURL).href);
                 if (width >= 768) await assertArrow(page.locator(".post-item__translation").first());
+                await page.goto(new URL("/posts/introducing-space-radio", baseURL).href);
+                await assertArrow(page.locator(".editorial-back a"), "ri:arrow-left-line");
                 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                 assert.equal(await page.locator("html").getAttribute("data-theme"), theme);
             } finally {
@@ -96,6 +98,8 @@ test("local study UI and cached Channel fallbacks use the same decorative SVG", 
         await lightButton.waitFor();
         await assertArrow(lightButton);
         await page.goto(new URL("/design-lab/read/introducing-space-radio", baseURL).href);
+        await assertArrow(page.locator(".lab-reading__back"), "ri:arrow-left-line");
+        await assertArrow(page.locator('.lab-foot a[href="/design-lab"]'), "ri:arrow-left-line");
         await assertArrow(page.getByRole("link", { name: "Open original article with comments & sharing", exact: true }));
         await assertArrow(page.getByRole("link", { name: "All writing", exact: true }));
     } finally {

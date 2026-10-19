@@ -75,6 +75,7 @@ export default defineConfig({
             include: {
                 // Only include icons we actually use to reduce bundle size
                 ri: [
+                    "arrow-left-line",
                     "twitter-fill",
                     "telegram-fill",
                     "github-fill",
