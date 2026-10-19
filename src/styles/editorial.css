@@ -145,6 +145,17 @@ header.site-header[data-header].is-scrolled {
     background-repeat: no-repeat;
     background-position: 0 var(--page-wash-nav-offset, -170px);
 }
+.site-header[data-nav-floating] .site-header__inner {
+    /* Keep Safari's fixed-bar sampling color consistent with the root canvas. */
+    background-color: var(--page-wash-top);
+    background-image: var(--page-wash-gradient), linear-gradient(var(--color-bg-page), var(--color-bg-page));
+    background-size:
+        100% 170px,
+        100% 100%;
+    background-position:
+        0 var(--page-wash-nav-offset, -170px),
+        0 0;
+}
 .site-header[data-profile-return] .home-profile::before {
     background-position: 0 var(--page-wash-profile-offset, -170px);
 }

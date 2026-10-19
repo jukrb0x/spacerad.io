@@ -58,6 +58,32 @@ test("browser canvas matches the page wash through theme changes and Beer Log SP
                 assert.notEqual(paint.top, paint.base, "the wash must remain distinct from the page base");
                 assert.equal(paint.image, `linear-gradient(${paint.base}, ${paint.base})`, "the visible body keeps its opaque page base");
                 assert.ok(paint.wash.startsWith(`linear-gradient(${paint.top} 0px,`), "page wash shares the canvas color");
+                for (let cycle = 0; cycle < 2; cycle++) {
+                    for (const top of [200, 160, 100, 33, 0]) {
+                        await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), top);
+                        await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+                        await waitForPageAnimations(page);
+                        const navigation = await page.locator(".site-header__inner").evaluate((el) => ({
+                            floating: el.closest("[data-header]").hasAttribute("data-nav-floating"),
+                            color: getComputedStyle(el).backgroundColor,
+                            image: getComputedStyle(el).backgroundImage,
+                            root: getComputedStyle(document.documentElement).backgroundColor,
+                        }));
+                        assert.equal(navigation.root, paint.top, "scrolling must preserve the root canvas color");
+                        assert.equal(navigation.floating, top !== 0, `${path} ${theme}: exercise the floating navigation handoff`);
+                        if (navigation.floating) {
+                            assert.equal(
+                                navigation.color,
+                                paint.top,
+                                `${path} ${theme} at ${top}: fixed navigation must keep the same Safari sampling color`,
+                            );
+                            assert.ok(
+                                navigation.image.endsWith(`, linear-gradient(${paint.base}, ${paint.base})`),
+                                "the navigation keeps its opaque page base beneath the aligned wash",
+                            );
+                        }
+                    }
+                }
             }
         }
     } finally {

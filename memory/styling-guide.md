@@ -239,6 +239,12 @@ transforms and the profile backdrop's negative inset. It uses the existing RAF a
 SPA cleanup lifecycle; past 170px, paint alignment skips geometry reads. Profile
 content clipping and navigation interaction stay unchanged.
 
+The floating navigation keeps the same solid `--page-wash-top` sampling color as
+the root canvas, including after scrolling away and returning. A second, uniform
+page-base image under its aligned wash preserves its visible color below the
+wash. Safari can sample a fixed element's solid background instead of the root;
+keeping these inputs identical avoids changing its fallback to the page base.
+
 Beer Log passes `collectionId="beer"` to CollectionPage, setting
 `html[data-collection="beer"]`. Only that root overrides `--page-wash-ink` and
 `--page-wash-strength`: warm gray-brown `#766249` at 6% in light mode, deep brown
