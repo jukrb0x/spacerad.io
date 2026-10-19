@@ -35,6 +35,24 @@ test("Beer Log sheet rises gently and keeps the lower Safari pocket the same col
         const dialog = page.locator(".collection-detail[open]");
         const duration = await dialog.evaluate((element) => Number.parseFloat(getComputedStyle(element).animationDuration) * 1000);
         assert(duration >= 400, `sheet entrance is only ${duration}ms`);
+        const opening = await dialog.evaluate((element) => {
+            const animation = element.getAnimations().find((item) => item.animationName === "collection-detail-enter");
+            return animation?.effect?.getKeyframes()[0];
+        });
+        assert.equal(opening?.opacity ?? "1", "1", "sheet must be opaque throughout its entrance");
+        assert(
+            Number.parseFloat(opening?.transform?.match(/translateY\((\d+)px\)/)?.[1] ?? "0") <= 12,
+            "sheet lift must stay within its rounded edge",
+        );
+        const earlyLift = await dialog.evaluate((element) => {
+            const animation = element.getAnimations().find((item) => item.animationName === "collection-detail-enter");
+            animation.pause();
+            animation.currentTime = 120;
+            const lift = new DOMMatrix(getComputedStyle(element).transform).m42;
+            animation.play();
+            return lift;
+        });
+        assert(earlyLift > 5, `sheet has already settled after 120ms (${earlyLift}px remaining)`);
         const backdropDuration = await dialog.evaluate(
             (element) => Number.parseFloat(getComputedStyle(element, "::backdrop").animationDuration) * 1000,
         );

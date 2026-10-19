@@ -153,9 +153,9 @@ const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await
     .collection-tile:focus-visible:not([data-preview-dismissed]) .collection-tile__info { opacity: 1; transform: translateY(0); }
     .collection-detail { position: fixed; width: min(540px, calc(100% - 40px)); max-height: calc(100dvh - 48px); margin: auto; padding: 36px; border: 0; border-radius: 3px; background: var(--color-bg-page); color: var(--color-text-primary); box-shadow: 0 24px 80px rgb(0 0 0 / .18); overscroll-behavior: contain; }
     .collection-detail::backdrop { background: rgb(20 19 17 / .35); }
-    .collection-detail[open] { animation: collection-detail-enter 480ms cubic-bezier(.22,.75,.2,1) both; }
-    .collection-detail[open]::backdrop { animation: collection-backdrop-enter 320ms ease-out both; }
-    @keyframes collection-detail-enter { from { opacity: .75; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+    .collection-detail[open] { animation: collection-detail-enter 420ms ease-in-out both; }
+    .collection-detail[open]::backdrop { animation: collection-backdrop-enter 320ms ease-in-out both; }
+    @keyframes collection-detail-enter { from { transform: translateY(12px); } to { transform: translateY(0); } }
     @keyframes collection-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
     .collection-detail__close { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--color-text-secondary); cursor: pointer; font: 26px/1 var(--font-family-sans); }
     .collection-detail__close:hover { color: var(--color-text-primary); background: color-mix(in srgb, var(--color-text-primary) 5%, transparent); }
