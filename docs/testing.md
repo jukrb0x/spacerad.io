@@ -13,11 +13,11 @@ pnpm test:browser
 
 `pnpm test` runs the unit suite. It includes the SPA, translation, theme, likes, search and runner regressions, and requires no browser installation. Its runner tests use temporary fixture servers and do not start Astro or contact production services.
 
-`pnpm test:browser` runs five representative `home03` browser files sequentially with Node's test runner. `pnpm test:browser:full` discovers and runs every `tests/home03*.test.mjs` file when a wider regression check is needed. The runner starts a local Astro dev server on `http://127.0.0.1:4321`, waits for `/posts` to return success, and stops its server process group after success, failure or interruption. Readiness has a 45-second deadline; each browser test has a 60-second deadline. An occupied default port is an error, so the runner cannot silently reuse another server. If running a build and browser checks together, finish the build first to avoid changes to a watched server during assertions.
+`pnpm test:browser` runs four representative `home03` browser files sequentially with Node's test runner. `pnpm test:browser:full` discovers and runs every `tests/home03*.test.mjs` file when a wider regression check is needed. The runner starts a local Astro dev server on `http://127.0.0.1:4321`, waits for `/posts` to return success, and stops its server process group after success, failure or interruption. Readiness has a 45-second deadline; each browser test has a 60-second deadline. An occupied default port is an error, so the runner cannot silently reuse another server. Build before the full suite so its real Pagefind tests can load the generated index; never build while the watched browser server is running.
 
 For a focused change, pass the affected test file to `pnpm test:browser` instead of running the whole smoke suite. Use the full suite only for broad changes to shared navigation or browser lifecycle behavior. Browser runs need a stable checkout: edits from another session trigger Astro hot reload and can invalidate assertions mid-run.
 
-The default browser is Playwright's bundled headless Chromium. GitHub Actions runs type, lint, unit, build and release checks in `checks`, independently of the `browser` job. The browser job uses `mcr.microsoft.com/playwright:v1.58.1-noble`, verifies its version and Chromium launch, then runs the five-file browser smoke suite. Keep the image tag and preflight version aligned with `pnpm-lock.yaml`. Browser failures fail the workflow. The workflow does not deploy the site; the test command itself never downloads a browser.
+The default browser is Playwright's bundled headless Chromium. GitHub Actions runs type, lint, unit, build and release checks in `checks`, independently of the `browser` job. The browser job uses `mcr.microsoft.com/playwright:v1.58.1-noble`, verifies its version and Chromium launch, then runs the four-file browser smoke suite. Keep the image tag and preflight version aligned with `pnpm-lock.yaml`. Browser failures fail the workflow. The workflow does not deploy the site; the test command itself never downloads a browser.
 
 For a fresh Mac browser installation, use Node 24 for provisioning, then the project Node 26.11.0 for checks. Playwright 1.58.1's ZIP extractor stalls on the Chromium archive under Node 26.11.0; the same archive extracts under Node 24. The preinstalled CI image avoids this installation path. With `NODE24` pointing to a Node 24 executable:
 
@@ -143,10 +143,12 @@ neither fixture routes nor design-lab routes; release checks enforce that bounda
 ## Explicit browser profiles
 
 `pnpm test:browser` and `pnpm test:browser:pr` run the same short suite in CI
-and locally: acceptance, Beer Log focus, navigation lock, page canvas and search.
-The PR profile keeps four SPA swaps in its search test. `pnpm test:browser:full`
+and locally: acceptance, Beer Log focus, navigation lock and page canvas.
+`pnpm test:browser:full`
 runs every browser file with the full stress budgets (10 search swaps and 20
-stacked-modal swaps). Use it when a change affects shared navigation or browser
+stacked-modal swaps). The short page-canvas check probes three scroll positions
+once and two menu positions; full keeps two five-position passes and three menu
+positions. Use it when a change affects shared navigation or browser
 lifecycle behavior across pages. The build-output-only `test:release` remains
 part of the regular CI checks.
 
@@ -163,6 +165,6 @@ only for those direct invocations may `BROWSER_TEST_PROFILE=pr` select the short
 loops. Invalid profile values fail rather than silently reducing coverage.
 
 The smoke suite checks the core route and modal flows, Beer Log focus, navigation
-scroll locking, Safari canvas color and Pagefind navigation. The full suite keeps
+scroll locking and Safari canvas color. The full suite keeps real Pagefind,
 the article translation matrix, carousel, accessibility and repeated SPA stress
-cases. Unit tests continue to cover deterministic content and state logic.
+cases. Unit tests continue to cover deterministic search, content and state logic.

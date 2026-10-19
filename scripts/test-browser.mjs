@@ -8,13 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const defaultURL = "http://127.0.0.1:4321";
-const smokeFiles = [
-    "home03-acceptance.test.mjs",
-    "home03-collection-focus.test.mjs",
-    "home03-navigation.test.mjs",
-    "home03-page-canvas.test.mjs",
-    "home03-search.test.mjs",
-];
+const smokeFiles = ["home03-acceptance.test.mjs", "home03-collection-focus.test.mjs", "home03-navigation.test.mjs", "home03-page-canvas.test.mjs"];
 
 export async function stopChild(child) {
     if (!child || child.exitCode !== null || child.signalCode !== null) return;

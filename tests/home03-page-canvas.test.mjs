@@ -3,6 +3,10 @@ import test from "node:test";
 import { baseURL, waitForPageAnimations } from "./helpers/browser.mjs";
 import { launchNavigationBrowser } from "./helpers/navigation-browser.mjs";
 
+const shortProfile = process.env.BROWSER_TEST_PROFILE === "pr";
+const scrollPositions = shortProfile ? [0, 100, 200] : [200, 160, 100, 33, 0];
+const menuPositions = shortProfile ? [0, 200] : [0, 100, 200];
+
 test("browser canvas matches the page wash through theme changes and Beer Log SPA navigation", async () => {
     const browser = await launchNavigationBrowser();
     try {
@@ -58,8 +62,8 @@ test("browser canvas matches the page wash through theme changes and Beer Log SP
                 assert.notEqual(paint.top, paint.base, "the wash must remain distinct from the page base");
                 assert.equal(paint.image, `linear-gradient(${paint.base}, ${paint.base})`, "the visible body keeps its opaque page base");
                 assert.ok(paint.wash.startsWith(`linear-gradient(${paint.top} 0px,`), "page wash shares the canvas color");
-                for (let cycle = 0; cycle < 2; cycle++) {
-                    for (const top of [200, 160, 100, 33, 0]) {
+                for (let cycle = 0; cycle < (shortProfile ? 1 : 2); cycle++) {
+                    for (const top of scrollPositions) {
                         await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), top);
                         await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
                         await waitForPageAnimations(page);
@@ -96,7 +100,7 @@ test("browser canvas matches the page wash through theme changes and Beer Log SP
                         }
                     }
                 }
-                for (const top of [0, 100, 200]) {
+                for (const top of menuPositions) {
                     await page.evaluate((y) => scrollTo({ top: y + 100, behavior: "instant" }), top);
                     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
                     await page.evaluate((y) => scrollTo({ top: y, behavior: "instant" }), top);
