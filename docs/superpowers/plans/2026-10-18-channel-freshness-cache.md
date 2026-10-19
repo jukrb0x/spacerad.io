@@ -29,7 +29,7 @@ Review focus: no per-visitor retry storm during outages; timeout covers body con
 
 ## Local continuation — 2026-10-18
 
-- Original checkout was clean at the exact base `85f7b7a18ea90f3d247e147b923678e8a4163c78`. Read root `AGENTS.md`; no repository `.agents/` directory exists. Verified the patch at `[local path]`, passed `git apply --check` before applying in the managed worktree `[local path]`. Original checkout remains clean; no unrelated task was contacted or modified.
+- Original checkout was clean at the exact base `85f7b7a18ea90f3d247e147b923678e8a4163c78`. Read root `AGENTS.md`; no repository `.agents/` directory exists. Verified the patch at `[local worktree]`, passed `git apply --check` before applying in the managed worktree `[local worktree]`. Original checkout remains clean; no unrelated task was contacted or modified.
 - Reused installed dependencies through ignored worktree-local links; no dependency download was needed. Initial pnpm script invocations attempted automatic dependency verification and could not install into the directory symlink; their scripts still ran successfully. Subsequent checks invoke installed binaries directly to avoid automatic installation.
 - The actual RSS regression exposed an outdated assertion expecting HTTP 200 on upstream failure. Updated it to the approved HTTP 503/no-store contract and asserted no-cache for successful XML.
 - Added a regression for a fallback crossing the one-hour cutoff while awaiting failure-marker storage. Observed failure before changing production code, then passed after rechecking age immediately before serving fallback. Added a streaming-body regression proving the parser propagates abort while consuming the response.

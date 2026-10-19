@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createContext, runInContext } from "node:vm";
-import ts from "typescript";
 import { atom } from "nanostores";
+import ts from "typescript";
 
 function fixture() {
     const uiLanguage = atom("en");
@@ -61,6 +61,7 @@ function fixture() {
             phraseStatus: Object.assign(new Element(), { textContent: "" }),
             overlay: Object.assign(new Element(), {
                 open: false,
+                querySelectorAll: () => [current.link],
                 showModal() {
                     this.open = true;
                 },
@@ -82,7 +83,7 @@ function fixture() {
                 "[data-nav-phrase-text]": current.phraseText,
                 "[data-nav-phrase-status]": current.phraseStatus,
             })[selector],
-        querySelectorAll: (selector) => (selector === "[data-nav-close]" ? [current.close] : [current.link]),
+        querySelectorAll: (selector) => (selector === "[data-nav-close]" ? [current.close] : []),
     });
     const media = new EventTarget();
     const context = createContext({
@@ -108,17 +109,14 @@ function fixture() {
     });
     const source = readFileSync(new URL("../src/components/NavDrawer.astro", import.meta.url), "utf8").match(/<script>([\s\S]*?)<\/script>/)[1];
     const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } });
-    runInContext(`(function(require, exports) { ${outputText} })`, context)(
-        (specifier) => {
-            if (specifier === "../i18n/client") return { uiLanguage };
-            assert.equal(specifier, "../utils/scrollLock");
-            return {
-                lockScrollForDialog: () => locks++,
-                unlockScrollForDialog: () => locks--,
-            };
-        },
-        {},
-    );
+    runInContext(`(function(require, exports) { ${outputText} })`, context)((specifier) => {
+        if (specifier === "../i18n/client") return { uiLanguage };
+        assert.equal(specifier, "../utils/scrollLock");
+        return {
+            lockScrollForDialog: () => locks++,
+            unlockScrollForDialog: () => locks--,
+        };
+    }, {});
     document.dispatchEvent(new Event("astro:page-load"));
     const flush = (queue) => {
         const callbacks = [...queue.values()];
@@ -376,7 +374,6 @@ test("compiled navigation CSS clips the outer animation without disabling inner 
     assert.match(declarations(".nav-drawer__panel"), /transform:\s*translateX\(100%\)/);
     assert.match(declarations(".nav-drawer.is-open .nav-drawer__panel"), /transform:\s*translateX\(0\)/);
 });
-
 
 test("language changes describe current drawer state and dispose with the DOM binding", () => {
     const f = fixture();

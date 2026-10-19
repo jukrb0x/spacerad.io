@@ -52,18 +52,18 @@ for (const width of [320, 390, 1440]) {
             const page = await context.newPage();
             try {
                 await page.goto(new URL("/", baseURL).href);
-                const archive = page.getByRole("link", { name: "全部文章", exact: true });
+                const archive = page.getByRole("link", { name: "All posts", exact: true });
                 await assertArrow(archive);
                 assert.equal(await archive.getAttribute("href"), "/posts");
-                const lead = page.locator(".lead-post");
+                const lead = page.locator(".lead-post:visible");
                 const read = lead.locator(".lead-post__read");
-                const label = (await lead.getAttribute("lang")) === "zh-CN" ? "继续阅读" : "Continue reading";
+                const label = "Continue reading";
                 assert.equal(await lead.getByRole("link", { name: label, exact: true }).count(), 1);
                 assert.equal(await read.getAttribute("href"), await lead.locator("h3 a").getAttribute("href"));
                 await assertArrow(read);
                 await assertArrow(page.getByRole("link", { name: "Read the Channel", exact: true }));
                 if (width >= 768) {
-                    await assertArrow(page.locator(".mobile-translation").first());
+                    await assertArrow(page.locator(".mobile-translation:visible").first());
                     await archive.hover();
                     await assertArrow(archive);
                     await archive.focus();

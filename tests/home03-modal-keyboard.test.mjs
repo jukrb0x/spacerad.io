@@ -242,7 +242,7 @@ test("search over navigation retains lower focus, input modality and scroll lock
     try {
         await page.locator("[data-nav-toggle]").click();
         await waitForPageAnimations(page);
-        const link = page.locator("[data-nav-link]").first();
+        const link = page.locator("[data-nav-overlay] [data-nav-link]").first();
         await link.focus();
         await search(page);
         const modality = await page.locator("[data-nav-overlay]").getAttribute("data-nav-input");

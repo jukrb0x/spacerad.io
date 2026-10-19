@@ -910,10 +910,26 @@ body.article-page [data-like-count] {
 .site-header [data-theme-toggle] {
     border-radius: 50%;
 }
-.toc-drawer__panel { background: var(--color-bg-surface); box-shadow: none; }
-.nav-drawer__panel { background: var(--color-bg-page); box-shadow: none; gap: 20px; }
-.nav-drawer__panel a { position: relative; border-radius: 0; font-size: 18px; padding: 10px 0; min-height: 44px; border-bottom: 0; }
-.nav-drawer__panel a[aria-current="page"] { color: var(--color-link); }
+.toc-drawer__panel {
+    background: var(--color-bg-surface);
+    box-shadow: none;
+}
+.nav-drawer__panel {
+    background: var(--color-bg-page);
+    box-shadow: none;
+    gap: 20px;
+}
+.nav-drawer__panel a {
+    position: relative;
+    border-radius: 0;
+    font-size: 18px;
+    padding: 10px 0;
+    min-height: 44px;
+    border-bottom: 0;
+}
+.nav-drawer__panel a[aria-current="page"] {
+    color: var(--color-link);
+}
 .search-dialog__container button[data-search-close] {
     display: inline-flex;
     width: 44px;

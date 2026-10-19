@@ -13,7 +13,7 @@ test("wordmark whisper is brief, stable, keyboard-friendly, touch-safe and route
         const attributes = new Set();
         const whisper = {
             textContent: "",
-            hasAttribute: key => attributes.has(key),
+            hasAttribute: (key) => attributes.has(key),
             getBoundingClientRect: () => ({ right: 350 }),
             setAttribute: (key) => attributes.add(key),
             removeAttribute: (key) => attributes.delete(key),
@@ -37,7 +37,10 @@ test("wordmark whisper is brief, stable, keyboard-friendly, touch-safe and route
     let current = header();
     document.querySelector = () => current.trigger;
     globalThis.document = document;
-    globalThis.ResizeObserver = class { observe() {} disconnect() {} };
+    globalThis.ResizeObserver = class {
+        observe() {}
+        disconnect() {}
+    };
     globalThis.window = { addEventListener() {}, matchMedia: (query) => ({ matches: query.includes("min-width") ? wide : finePointer }) };
     globalThis.setTimeout = (callback, delay) => {
         assert.equal(delay, 2500);

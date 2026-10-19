@@ -160,9 +160,8 @@ export const bindThemeToggles = (root: ParentNode = document) => {
         const description = describeState(state);
         const { nextPreference } = description;
         const labels = { system: "跟随系统", light: "浅色", dark: "深色" };
-        const message = uiLanguage.get() === "zh"
-            ? `当前主题：${labels[state.preference]}。点击切换为${labels[nextPreference]}`
-            : description.message;
+        const message =
+            uiLanguage.get() === "zh" ? `当前主题：${labels[state.preference]}。点击切换为${labels[nextPreference]}` : description.message;
         toggles.forEach((toggle) => {
             toggle.dataset.themePreference = state.preference;
             toggle.dataset.themeState = state.theme;

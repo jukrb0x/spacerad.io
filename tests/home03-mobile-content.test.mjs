@@ -57,7 +57,7 @@ for (const width of [320, 390, 430, 768, 1440]) {
                 assert.equal(await page.locator("html").getAttribute("data-theme"), theme);
                 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                 if (width < 768) {
-                    assert.equal(await page.locator(".lead-post h3").evaluate((el) => getComputedStyle(el).textWrap), "wrap");
+                    assert.equal(await page.locator(".lead-post h3:visible").evaluate((el) => getComputedStyle(el).textWrap), "wrap");
                     const section = await page.locator(".home-channel").boundingBox();
                     const identity = await page.locator(".home-channel__identity").boundingBox();
                     assert.ok(Math.abs(section.x - identity.x) < 1);

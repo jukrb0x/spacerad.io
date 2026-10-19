@@ -17,7 +17,7 @@ async function fixture(theme = "dark", reducedMotion = "reduce", isMobile = true
     const page = await context.newPage();
     await page.goto(new URL("/posts", baseURL).href, { waitUntil: "networkidle" });
     const toggle = page.locator("[data-nav-toggle]");
-    const first = page.locator("[data-nav-link]").first();
+    const first = page.locator("[data-nav-overlay] [data-nav-link]").first();
     const close = async (method = "escape") => {
         if (method === "button") await page.locator("[data-nav-drawer] [data-nav-close]").tap();
         else if (method === "backdrop") await page.touchscreen.tap(16, 180);
@@ -27,7 +27,7 @@ async function fixture(theme = "dark", reducedMotion = "reduce", isMobile = true
     };
     const open = async () => {
         await toggle.tap();
-        await page.waitForFunction(() => document.activeElement === document.querySelector("[data-nav-link]"));
+        await page.waitForFunction(() => document.activeElement === document.querySelector("[data-nav-overlay] [data-nav-link]"));
         await waitForPageAnimations(page);
         assert.equal(await page.getByRole("dialog", { name: "Navigation menu" }).count(), 1);
         assert.equal(await first.evaluate((el) => document.activeElement === el), true, "initial focus stays inside the named modal");
@@ -148,7 +148,7 @@ test("wheel reading after keyboard Escape retracts navigation without a click or
         await scroll(636);
         await f.toggle.focus();
         await f.page.keyboard.press("Enter");
-        await f.page.waitForFunction(() => document.activeElement === document.querySelector("[data-nav-link]"));
+        await f.page.waitForFunction(() => document.activeElement === document.querySelector("[data-nav-overlay] [data-nav-link]"));
         await f.close("escape");
         await scroll(716);
         assert.equal(await navHidden(f.page), false, "keyboard return focus holds the control visible");

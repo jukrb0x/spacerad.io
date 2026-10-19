@@ -55,7 +55,7 @@ test("mobile drawer stays right-anchored throughout first/repeated opens and rou
                         assert.ok(Math.abs(last.right - last.viewport) <= 1, "settled panel aligns with viewport right edge");
                         assert.equal(
                             await page
-                                .locator("[data-nav-link]")
+                                .locator("[data-nav-overlay] [data-nav-link]")
                                 .first()
                                 .evaluate((el) => document.activeElement === el),
                             true,

@@ -7,17 +7,13 @@ export const launchOptions = {
 
 export async function waitForPageAnimations(page) {
     await page.evaluate(async () => {
-        const animations = document.getAnimations().filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity);
-        let timeout;
-        try {
-            await Promise.race([
-                Promise.all(animations.map((animation) => animation.finished.catch(() => {}))),
-                new Promise((_, reject) => {
-                    timeout = setTimeout(() => reject(new Error("Page animations did not finish within 4 seconds")), 4000);
-                }),
-            ]);
-        } finally {
-            clearTimeout(timeout);
+        const animations = document
+            .getAnimations()
+            .filter((animation) => animation.playState !== "idle" && animation.effect?.getComputedTiming().iterations !== Infinity);
+        const deadline = performance.now() + 4000;
+        while (animations.some((animation) => animation.playState === "running" || animation.playState === "pending")) {
+            if (performance.now() >= deadline) throw new Error("Page animations did not finish within 4 seconds");
+            await new Promise(requestAnimationFrame);
         }
     });
 }

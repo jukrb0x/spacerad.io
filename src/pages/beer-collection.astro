@@ -1,9 +1,11 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import CollectionPage from "../components/collections/CollectionPage.astro";
+
 const page = await getEntry("collectionPages", "beer");
 if (!page) throw new Error("Missing Beer Log collection configuration");
-const entries = (await getCollection("collectionItems", entry => entry.data.collection === "beer"))
-    .sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
+const entries = (await getCollection("collectionItems", (entry) => entry.data.collection === "beer")).sort(
+    (a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id),
+);
 ---
 <CollectionPage page={page.data} entries={entries} />

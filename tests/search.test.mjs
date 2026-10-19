@@ -95,8 +95,11 @@ function fixture(pagefind = { init: async () => {}, search: async () => ({ resul
         cancelAnimationFrame: (id) => timers.delete(id),
         setTimeout: schedule,
         clearTimeout: (id) => timers.delete(id),
-        require: (path) =>
-            path.includes("scrollLock") ? { lockScrollForDialog: () => locked++, unlockScrollForDialog: () => locked-- } : { loadSearchIndex: load },
+        require: (path) => {
+            if (path.includes("scrollLock")) return { lockScrollForDialog: () => locked++, unlockScrollForDialog: () => locked-- };
+            if (path.includes("i18n/client")) return { uiLanguage: { get: () => "en" } };
+            return { loadSearchIndex: load };
+        },
         exports: {},
         module: { exports: {} },
     });

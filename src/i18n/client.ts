@@ -3,7 +3,11 @@ import { LANGUAGE_STORAGE_KEY, resolveLanguage, type UILanguage } from "./langua
 
 function browserLanguage(): UILanguage {
     let stored: string | null = null;
-    try { stored = localStorage.getItem(LANGUAGE_STORAGE_KEY); } catch { /* Storage can be disabled. */ }
+    try {
+        stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    } catch {
+        /* Storage can be disabled. */
+    }
     return resolveLanguage(stored, navigator.languages ?? [navigator.language]);
 }
 export const uiLanguage = atom<UILanguage>(browserLanguage());
@@ -11,10 +15,14 @@ export const uiLanguage = atom<UILanguage>(browserLanguage());
 export function applyLanguage(root: ParentNode = document, language = uiLanguage.get()) {
     if (root instanceof Document) root.documentElement.dataset.uiLanguage = language;
     root.querySelectorAll<HTMLElement>("[data-i18n-en][data-i18n-zh]").forEach((element) => {
-        const text = language === "zh" ? element.dataset.i18nZh! : element.dataset.i18nEn!;
+        const text = language === "zh" ? element.dataset.i18nZh : element.dataset.i18nEn;
+        if (text === undefined) return;
         const attribute = element.dataset.i18nAttr;
         if (attribute) element.setAttribute(attribute, text);
-        else { element.textContent = text; element.lang = language; }
+        else {
+            element.textContent = text;
+            element.lang = language;
+        }
     });
     root.querySelectorAll<HTMLButtonElement>("[data-language-toggle]").forEach((button) => {
         button.lang = language === "zh" ? "en" : "zh";
@@ -29,7 +37,11 @@ export function applyLanguage(root: ParentNode = document, language = uiLanguage
 }
 
 export function setUILanguage(language: UILanguage) {
-    try { localStorage.setItem(LANGUAGE_STORAGE_KEY, language); } catch { /* In-memory preference still works. */ }
+    try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+        /* In-memory preference still works. */
+    }
     uiLanguage.set(language);
 }
 uiLanguage.subscribe(() => {

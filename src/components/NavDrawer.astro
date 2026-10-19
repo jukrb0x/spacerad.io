@@ -1,9 +1,9 @@
 ---
-// NavDrawer.astro - Mobile navigation drawer using <dialog> for proper iOS Safari viewport handling
-import LanguageToggle from "./LanguageToggle.astro";
+import { NAV_LINKS, SITE_TITLE_ALT } from "../consts";
 import { navChinese } from "../i18n/language";
 import CollectionsNav from "./CollectionsNav.astro";
-import { NAV_LINKS, SITE_TITLE_ALT } from "../consts";
+// NavDrawer.astro - Mobile navigation drawer using <dialog> for proper iOS Safari viewport handling
+import LanguageToggle from "./LanguageToggle.astro";
 
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
 const subpath = pathname.match(/[^/]+/g);
@@ -122,7 +122,7 @@ const isActive = (href: string) => href === pathname || href === `/${subpath?.[0
         const overlay = document.querySelector<HTMLDialogElement>("[data-nav-overlay]");
         const drawer = document.querySelector<HTMLElement>("[data-nav-drawer]");
         const closeButtons = document.querySelectorAll<HTMLButtonElement>("[data-nav-close]");
-        const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
+        const navLinks = overlay?.querySelectorAll<HTMLAnchorElement>("[data-nav-link]") ?? [];
         const phrase = document.querySelector<HTMLButtonElement>("[data-nav-phrase]");
         const phraseText = document.querySelector<HTMLElement>("[data-nav-phrase-text]");
         const phraseStatus = document.querySelector<HTMLElement>("[data-nav-phrase-status]");

@@ -8,6 +8,7 @@ const mobile = css.slice(css.indexOf("@media (max-width: 767px)"));
 const desktop = css.slice(0, css.indexOf("@media (max-width: 767px)"));
 const row = await read("../src/components/PostItem.astro");
 const home = await read("../src/components/home/LatestPosts.astro");
+const homeSelection = await read("../src/components/home/HomePostSelection.astro");
 
 test("home uses a reading stream and a compact horizontal Channel identity", () => {
     assert.match(desktop, /\.lead-post h3\s*\{[^}]*text-wrap: wrap;/);
@@ -30,7 +31,7 @@ test("desktop archive columns, hover, language labels and counterpart text remai
         /<a href=\{`\/posts\/\$\{post.id\}`\} class="post-item"[\s\S]*<time[\s\S]*<span class="language-label">[\s\S]*<span class="post-item__title">/,
     );
     assert.match(row, /class="post-item__translation"[^>]*>\{translation.data.lang === "en" \? "English" : "中文"\}/);
-    assert.match(home, /class="translation-label--desktop">English /);
+    assert.match(homeSelection, /class="translation-label--desktop">\{translation.data.lang === "en" \? "English" : "中文"\}/);
 });
 
 test("mobile metadata groups quiet counterpart links alongside the current red label", () => {

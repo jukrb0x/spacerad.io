@@ -1,9 +1,12 @@
 ---
 import { COLLECTION_LINKS } from "../consts";
-interface Props { mobile?: boolean }
+
+interface Props {
+    mobile?: boolean;
+}
 const { mobile = false } = Astro.props;
 const pathname = Astro.url.pathname.replace(/\/$/, "");
-const active = COLLECTION_LINKS.some(link => pathname === link.href);
+const active = COLLECTION_LINKS.some((link) => pathname === link.href);
 ---
 <details class:list={["collections-nav", { "collections-nav--mobile": mobile }]} data-collections-nav data-mobile={mobile} open={mobile && active}>
     <summary class="nav-link" data-active={active || undefined} aria-expanded={mobile && active ? "true" : "false"}>

@@ -29,7 +29,9 @@ function initWordmarkWhisper() {
     if (controls) observer.observe(controls);
     window.addEventListener("resize", place, { signal: controller.signal });
     document.addEventListener("ui:language-change", place, { signal: controller.signal });
-    document.fonts?.ready.then(() => { if (!controller.signal.aborted) place(); });
+    document.fonts?.ready.then(() => {
+        if (!controller.signal.aborted) place();
+    });
     const reveal = () => {
         if (phrases.length === 0) return;
         hide();

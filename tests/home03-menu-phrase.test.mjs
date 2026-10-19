@@ -34,7 +34,7 @@ test("mobile menu advances on activation and opening, and remembers the last phr
             assert.notEqual(current, previous);
             assert.equal(
                 await page
-                    .locator("[data-nav-link]")
+                    .locator("[data-nav-overlay] [data-nav-link]")
                     .first()
                     .evaluate((el) => document.activeElement === el),
                 true,

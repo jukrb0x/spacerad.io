@@ -113,6 +113,7 @@ for (const width of [320, 390, 1440]) {
         test(`article counterpart geometry and focus${interaction ? " with complete SPA journey" : ""} at ${width}px in ${theme}`, async () => {
             const context = await openContext({ viewport: { width, height: 960 }, isMobile: width < 768, hasTouch: width < 768 });
             await context.addInitScript((value) => localStorage.setItem("theme-preference", value), theme);
+            await context.addInitScript(() => localStorage.setItem("ui-language", "zh"));
             const page = await context.newPage();
             try {
                 if (interaction) {
@@ -154,7 +155,7 @@ for (const width of [320, 390, 1440]) {
                 assert.equal(await entrance(page).count(), 0, "SPA swap removes old language control");
                 assert.equal(await page.locator("html").getAttribute("data-theme"), theme);
                 await followSPA(page, page.locator('header a[href="/"]').first(), "/");
-                await followSPA(page, page.locator(`.home-writing a[data-post-id="${optimization}"]`), `/posts/${optimization}`);
+                await followSPA(page, page.locator(`.home-writing a[data-post-id="${optimization}"]:visible`), `/posts/${optimization}`);
                 assert.equal(await entrance(page).count(), 1, "Home entry restores the counterpart once");
             } finally {
                 await context.close();

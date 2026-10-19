@@ -3,8 +3,11 @@ import { Icon } from "astro-icon/components";
 import { type BlogPost, getPublishedPosts } from "../../utils/posts";
 import { getHomePosts } from "../../utils/postTranslations";
 import HomePostSelection from "./HomePostSelection.astro";
-interface Props { posts?: BlogPost[]; }
-const allPosts = (Astro.props.posts ?? await getPublishedPosts()).filter(post => !post.data.draft);
+
+interface Props {
+    posts?: BlogPost[];
+}
+const allPosts = (Astro.props.posts ?? (await getPublishedPosts())).filter((post) => !post.data.draft);
 ---
 <section class="home-writing" aria-labelledby="writing-title">
     <div class="editorial-heading"><h2 id="writing-title"><a class="section-heading-link" href="/posts"><span data-i18n-en="Blog" data-i18n-zh="博客">Blog</span><span class="section-heading-link__wipe" aria-hidden="true" data-i18n-en="Blog" data-i18n-zh="博客">Blog</span></a></h2><a class="text-link" href="/posts"><span data-i18n-en="All posts" data-i18n-zh="全部文章">All posts</span> <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a></div>

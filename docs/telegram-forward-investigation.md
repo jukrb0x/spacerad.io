@@ -85,7 +85,7 @@
 ## 可复核附件
 
 完整原始响应、独立 article/message DOM、headers、红绿日志、渲染脚本及最终补丁在
-`[local path]`。
+`[local evidence archive]`。
 解压后 `render-cards.mjs` 可从本 worktree 用 `node /解压路径/render-cards.mjs` 运行；
 脚本将渲染结果写入 `/tmp/spaceradio-handoff-evidence/`（需先创建该目录）。
 该辅助验证不启动服务或 watch；Node 原生 TS stripping 会输出实验性警告。

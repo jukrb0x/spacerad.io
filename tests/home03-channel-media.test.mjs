@@ -93,7 +93,7 @@ test("late Channel data preserves an active Blog preview", async () => {
         await route.continue();
     });
     await page.goto(baseURL, { waitUntil: "domcontentloaded" });
-    await page.locator(".lead-post h3 a").hover();
+    await page.locator(".lead-post h3 a:visible").hover();
     await page.locator(".post-preview-card.visible").waitFor();
     const title = await page.locator(".post-preview-card__title").innerText();
     release();

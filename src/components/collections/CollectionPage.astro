@@ -1,13 +1,17 @@
 ---
 import "virtual:uno.css";
 import { Image } from "astro:assets";
-import { render, type CollectionEntry } from "astro:content";
+import { type CollectionEntry, render } from "astro:content";
 import BaseHead from "../BaseHead.astro";
-import Header from "../Header.astro";
 import Footer from "../Footer.astro";
-interface Props { page: CollectionEntry<"collectionPages">["data"]; entries: CollectionEntry<"collectionItems">[] }
+import Header from "../Header.astro";
+
+interface Props {
+    page: CollectionEntry<"collectionPages">["data"];
+    entries: CollectionEntry<"collectionItems">[];
+}
 const { page, entries } = Astro.props;
-const items = await Promise.all(entries.map(async entry => ({ entry, ...(await render(entry)) })));
+const items = await Promise.all(entries.map(async (entry) => ({ entry, ...(await render(entry)) })));
 ---
 <!doctype html>
 <html lang="en" class="collection-root">

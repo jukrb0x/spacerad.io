@@ -1,52 +1,52 @@
 [
-  {
-    "id": "pale",
-    "source": "https://thepubclub.beer/admin_assets/content/content_files/public/covid_information/COVID_On_Trade_Support.pdf",
-    "note": "AB InBev trade support, page 31. Original image and alpha extracted from PDF."
-  },
-  {
-    "id": "hells",
-    "source": "https://thepubclub.beer/admin_assets/content/content_files/public/covid_information/COVID_On_Trade_Support.pdf",
-    "note": "AB InBev trade support, page 31. Original image and alpha extracted from PDF."
-  },
-  {
-    "id": "guinness",
-    "source": "https://gulppp.com/products/guinness-badge-lens",
-    "note": "Actual tap lens photograph. CSS crops the lens, without redrawing the mark."
-  },
-  {
-    "id": "spitfire",
-    "source": "https://www.shepherdneame.co.uk/beers/spitfire-amber-ale",
-    "note": "Official transparent pump clip artwork."
-  },
-  {
-    "id": "electric",
-    "source": "https://www.nationalmobilebars.co.uk/products/electric-eye-pale-ale-30l-keykeg",
-    "note": "Distributor beer badge artwork."
-  },
-  {
-    "id": "1906",
-    "source": "https://estrellagalicia.com/mx/producto/1906-reserva-especial/",
-    "note": "Official brand wordmark, explicitly labelled as such rather than a product-specific tap badge."
-  },
-  {
-    "id": "flight-mode-tap",
-    "source": "https://www.bigsmokebrew.co.uk/airports",
-    "note": "Official tap photograph; rendered with a round CSS crop, no logo redrawing."
-  },
-  {
-    "id": "stella-label",
-    "source": "https://www.shopify.com/blog/logo-design",
-    "note": "Transparent Stella Artois emblem used in the article."
-  },
-  {
-    "id": "estrella-label",
-    "source": "https://www.martinservera.se/produkter/104134/estrella-galicia-fat-30l",
-    "note": "Keg product badge artwork, rendered with a round CSS crop."
-  },
-  {
-    "id": "turia-label",
-    "source": "https://caferoyalezaragoza.com/",
-    "note": "Full transparent Turia Cerveza Tostada label artwork."
-  }
+    {
+        "id": "pale",
+        "source": "https://thepubclub.beer/admin_assets/content/content_files/public/covid_information/COVID_On_Trade_Support.pdf",
+        "note": "AB InBev trade support, page 31. Original image and alpha extracted from PDF."
+    },
+    {
+        "id": "hells",
+        "source": "https://thepubclub.beer/admin_assets/content/content_files/public/covid_information/COVID_On_Trade_Support.pdf",
+        "note": "AB InBev trade support, page 31. Original image and alpha extracted from PDF."
+    },
+    {
+        "id": "guinness",
+        "source": "https://gulppp.com/products/guinness-badge-lens",
+        "note": "Actual tap lens photograph. CSS crops the lens, without redrawing the mark."
+    },
+    {
+        "id": "spitfire",
+        "source": "https://www.shepherdneame.co.uk/beers/spitfire-amber-ale",
+        "note": "Official transparent pump clip artwork."
+    },
+    {
+        "id": "electric",
+        "source": "https://www.nationalmobilebars.co.uk/products/electric-eye-pale-ale-30l-keykeg",
+        "note": "Distributor beer badge artwork."
+    },
+    {
+        "id": "1906",
+        "source": "https://estrellagalicia.com/mx/producto/1906-reserva-especial/",
+        "note": "Official brand wordmark, explicitly labelled as such rather than a product-specific tap badge."
+    },
+    {
+        "id": "flight-mode-tap",
+        "source": "https://www.bigsmokebrew.co.uk/airports",
+        "note": "Official tap photograph; rendered with a round CSS crop, no logo redrawing."
+    },
+    {
+        "id": "stella-label",
+        "source": "https://www.shopify.com/blog/logo-design",
+        "note": "Transparent Stella Artois emblem used in the article."
+    },
+    {
+        "id": "estrella-label",
+        "source": "https://www.martinservera.se/produkter/104134/estrella-galicia-fat-30l",
+        "note": "Keg product badge artwork, rendered with a round CSS crop."
+    },
+    {
+        "id": "turia-label",
+        "source": "https://caferoyalezaragoza.com/",
+        "note": "Full transparent Turia Cerveza Tostada label artwork."
+    }
 ]

@@ -13,6 +13,7 @@ after(async () => {
 
 async function open(width = 1440, options = {}, fixture) {
     const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce", serviceWorkers: "block", ...options });
+    if (fixture === "with-image") await context.addInitScript(() => localStorage.setItem("ui-language", "zh"));
     await context.route("**/*", (route) => (["GET", "HEAD", "OPTIONS"].includes(route.request().method()) ? route.continue() : route.abort()));
     await context.route("**/api/latest-channel", (route) =>
         route.fulfill({
@@ -56,10 +57,10 @@ for (const width of [1440, 390, 320])
                 assert.equal(await about.locator("h1").count(), 1);
                 assert.equal(await about.locator(".home-profile__name").textContent(), "Jabriel");
                 assert.equal(await about.locator("a").count(), 0);
-                assert.equal(await page.locator(".lead-post,.home-post").count(), 5);
+                assert.equal(await page.locator(".lead-post:visible,.home-post:visible").count(), 5);
                 await page.locator(".channel-entry:nth-child(3)").waitFor();
                 assert.equal(await page.locator(".channel-entry").count(), 3);
-                assert.equal(await page.locator(".home-writing__grid").evaluate((el) => getComputedStyle(el).display), "block");
+                assert.equal(await page.locator(".home-writing__grid:visible").evaluate((el) => getComputedStyle(el).display), "block");
                 let initial;
                 for (let index = 0; index < 6; index++) {
                     await settledWord(page, index);
@@ -199,7 +200,9 @@ for (const fixture of ["with-image", "without-image"])
                 const { context, page } = await open(width, { colorScheme }, fixture);
                 try {
                     assert.deepEqual(
-                        await page.locator(".lead-post h3 a, .home-post h3 a").evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
+                        await page
+                            .locator(".lead-post h3 a:visible, .home-post h3 a:visible")
+                            .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
                         [
                             "/posts/fixture-lead",
                             "/posts/fixture-image-one",
@@ -208,24 +211,24 @@ for (const fixture of ["with-image", "without-image"])
                             "/posts/fixture-text-two",
                         ],
                     );
-                    assert.equal(await page.locator("main img").count(), fixture === "with-image" ? 3 : 2);
-                    assert.equal(await page.locator(".home-post__image").count(), 2);
-                    assert.equal(await page.locator(".home-post__body--image").count(), 2);
+                    assert.equal(await page.locator("main img:visible").count(), fixture === "with-image" ? 3 : 2);
+                    assert.equal(await page.locator(".home-post__image:visible").count(), 2);
+                    assert.equal(await page.locator(".home-post__body--image:visible").count(), 2);
                     const label = fixture === "with-image" ? "继续阅读" : "Continue reading";
                     assert.equal(
-                        await page.locator(".lead-post").getByRole("link", { name: label, exact: true }).getAttribute("href"),
+                        await page.locator(".lead-post:visible").getByRole("link", { name: label, exact: true }).getAttribute("href"),
                         "/posts/fixture-lead",
                     );
-                    assert.equal(await page.locator(".home-writing__grid").evaluate((el) => getComputedStyle(el).display), "block");
-                    const leadImage = page.locator(".lead-post__image");
+                    assert.equal(await page.locator(".home-writing__grid:visible").evaluate((el) => getComputedStyle(el).display), "block");
+                    const leadImage = page.locator(".lead-post__image:visible");
                     assert.equal(await leadImage.count(), fixture === "with-image" ? 1 : 0);
                     if (fixture === "with-image") {
                         const image = await leadImage.boundingBox();
                         assert.equal(image.width, width >= 768 ? 520 : Math.min(300, (await page.locator("main").boundingBox()).width - 12));
                         assert.equal(await leadImage.locator("img").getAttribute("fetchpriority"), "high");
                     } else {
-                        const title = await page.locator(".lead-post h3").boundingBox();
-                        const excerpt = await page.locator(".lead-post__excerpt").boundingBox();
+                        const title = await page.locator(".lead-post h3:visible").boundingBox();
+                        const excerpt = await page.locator(".lead-post__excerpt:visible").boundingBox();
                         assert.ok(excerpt.y >= title.y + title.height);
                         assert.ok(excerpt.y - title.y - title.height < 60, "no empty cover space before the excerpt");
                     }

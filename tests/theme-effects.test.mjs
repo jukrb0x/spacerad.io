@@ -229,7 +229,6 @@ test("binding an already bound root adds no second update listener", () => {
     assert.equal(effects.getThemeState().preference, "light");
 });
 
-
 test("theme labels follow UI language and release subscriptions before navigation", () => {
     const { document, effects, uiLanguage, mountComponent } = fixture();
     mountComponent();
@@ -246,12 +245,16 @@ test("theme labels follow UI language and release subscriptions before navigatio
     const detached = document.toggles;
     document.dispatchEvent(new Event("astro:before-swap"));
     assert.equal(uiLanguage.lc, 0);
-    const writes = detached.map(toggle => toggle.writes);
+    const writes = detached.map((toggle) => toggle.writes);
     document.toggles = [new Toggle(), new Toggle()];
     document.dispatchEvent(new Event("astro:page-load"));
     document.dispatchEvent(new Event("astro:page-load"));
     assert.equal(uiLanguage.lc, 1, "repeated page-load retains a single language subscription");
     uiLanguage.set("en");
     assert.match(document.toggles[0].label.textContent, /Current theme: Light Mode/);
-    assert.deepEqual(detached.map(toggle => toggle.writes), writes, "detached controls never receive language updates");
+    assert.deepEqual(
+        detached.map((toggle) => toggle.writes),
+        writes,
+        "detached controls never receive language updates",
+    );
 });

@@ -11,5 +11,10 @@ export function resolveLanguage(stored: string | null, languages: readonly strin
 }
 
 export const navChinese: Record<string, string> = {
-    "/": "首页", "/posts": "博客", "/channel": "电台", "/tags": "话题", "/friends": "友链", "/me": "关于",
+    "/": "首页",
+    "/posts": "博客",
+    "/channel": "电台",
+    "/tags": "话题",
+    "/friends": "友链",
+    "/me": "关于",
 };
