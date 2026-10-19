@@ -11,14 +11,18 @@
 body {
     letter-spacing: 0;
     font-family: var(--font-family-sans);
-    background: var(--color-bg-page);
+    /* Safari samples the solid canvas color; keep the visible page base above it. */
+    background-color: var(--page-wash-top);
+    background-image: linear-gradient(var(--color-bg-page), var(--color-bg-page));
     position: relative;
     isolation: isolate;
 }
 :root {
+    --page-wash-top: color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) var(--page-wash-strength), var(--color-bg-page));
+    background-color: var(--page-wash-top);
     --page-wash-gradient: linear-gradient(
         to bottom,
-        color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) var(--page-wash-strength), var(--color-bg-page)) 0px,
+        var(--page-wash-top) 0px,
         color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.8), var(--color-bg-page)) 45px,
         color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.4), var(--color-bg-page)) 95px,
         color-mix(in srgb, var(--page-wash-ink, var(--color-structure)) calc(var(--page-wash-strength) * 0.1), var(--color-bg-page)) 140px,

@@ -225,6 +225,14 @@ The fade reaches 80%, 40%, and 10% of its initial strength at 45, 95, and 140px.
 `body::before` replaces the former dots and covers the desktop header's collapsed
 32px margin (mobile has no top margin).
 
+`--page-wash-top` is also the solid `html`/`body` background color, so Safari's
+browser chrome canvas fallback matches the wash at the top edge. An opaque,
+uniform page-base background image on `body` preserves the visible page base
+beneath `body::before`; keep this layer on collections too. This is CSS-driven,
+so theme changes and ClientRouter collection changes use the current root tokens.
+Safari controls its own chrome tint and blur; desktop browser tests can verify
+the canvas colors and unchanged page paint, but cannot verify real iOS chrome.
+
 Floating navigation and the Home return backdrop share the same opaque gradient.
 `header-scroll.ts` aligns their paint in document coordinates, including navigation
 transforms and the profile backdrop's negative inset. It uses the existing RAF and
