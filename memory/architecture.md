@@ -282,4 +282,4 @@ Active/hover navigation uses the shared blue link token. Page and item strings
 participate in the global UI-language preference without translating authored
 personal Markdown notes. Private log fields are not part of the content schema.
 
-The wordmark easter egg is available to mouse hover and keyboard focus at all widths. Below 1100px its phrase sits beneath the brand instead of being hidden; touch still follows the home link directly.
+The wordmark easter egg is available to mouse hover and keyboard focus at all widths. The actual phrase width and space before the header controls determine placement: right with 20px clearance, otherwise beneath the brand, aligned to its left edge with a 6px gap. Resize, language changes and font loading refresh placement; touch still follows the home link directly.

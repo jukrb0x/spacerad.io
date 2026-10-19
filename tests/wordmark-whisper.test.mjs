@@ -13,6 +13,8 @@ test("wordmark whisper is brief, stable, keyboard-friendly, touch-safe and route
         const attributes = new Set();
         const whisper = {
             textContent: "",
+            hasAttribute: key => attributes.has(key),
+            getBoundingClientRect: () => ({ right: 350 }),
             setAttribute: (key) => attributes.add(key),
             removeAttribute: (key) => attributes.delete(key),
             visible: () => attributes.has("data-visible"),
@@ -21,10 +23,12 @@ test("wordmark whisper is brief, stable, keyboard-friendly, touch-safe and route
             dataset: { wordmarkPhrases: JSON.stringify(phrases) },
             querySelector: () => whisper,
             matches: () => focusVisible,
+            closest: () => ({ querySelector: () => ({ getBoundingClientRect: () => ({ left: 500 }) }) }),
         });
         return { trigger, whisper };
     }
     const oldGlobals = {
+        ResizeObserver: globalThis.ResizeObserver,
         document: globalThis.document,
         window: globalThis.window,
         setTimeout: globalThis.setTimeout,
@@ -33,7 +37,8 @@ test("wordmark whisper is brief, stable, keyboard-friendly, touch-safe and route
     let current = header();
     document.querySelector = () => current.trigger;
     globalThis.document = document;
-    globalThis.window = { matchMedia: (query) => ({ matches: query.includes("min-width") ? wide : finePointer }) };
+    globalThis.ResizeObserver = class { observe() {} disconnect() {} };
+    globalThis.window = { addEventListener() {}, matchMedia: (query) => ({ matches: query.includes("min-width") ? wide : finePointer }) };
     globalThis.setTimeout = (callback, delay) => {
         assert.equal(delay, 2500);
         timers.set(++timerId, callback);

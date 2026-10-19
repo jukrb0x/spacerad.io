@@ -22,7 +22,15 @@ test('wordmark hover survives compact desktop widths without overlapping navigat
             const bounds = await phrase.boundingBox();
             const controls = await page.locator('.site-header__controls').boundingBox();
             assert(bounds.x >= 0 && bounds.x + bounds.width <= width);
-            if (width < 1100) assert(bounds.y >= wordmark.y + wordmark.height);
+            const placement = await phrase.getAttribute('data-placement');
+            if (placement === 'below') {
+                assert(Math.abs(bounds.x - wordmark.x) < 1, 'fallback aligns to the wordmark left edge');
+                assert(Math.abs(bounds.y - wordmark.y - wordmark.height - 6) < 1, 'fallback keeps a 6px gap');
+            } else {
+                assert(bounds.x >= wordmark.x + wordmark.width);
+                assert(bounds.x + bounds.width + 19 <= controls.x, 'right placement leaves navigation clearance');
+            }
+            if (width === 1019) assert.equal(placement, 'right', 'screenshot width has room beside the brand');
             assert(bounds.x + bounds.width <= controls.x || bounds.y >= controls.y + controls.height || bounds.y + bounds.height <= controls.y);
         }
     } finally { await browser.close(); }

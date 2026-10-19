@@ -153,7 +153,7 @@ header.site-header[data-header].is-scrolled {
     inset-inline-start: calc(100% + 22px);
     top: 50%;
     transform: translateY(-50%);
-    width: 140px;
+    width: max-content;
     font-family: var(--font-family-sans);
     font-size: 15px;
     font-weight: 400;
@@ -166,15 +166,14 @@ header.site-header[data-header].is-scrolled {
 .site-brand__whisper[data-visible] {
     opacity: 0.8;
 }
-@media (max-width: 1099px) {
-    .site-brand__whisper {
-        inset-inline-start: 0;
-        top: calc(100% + 6px);
-        transform: none;
-        width: max-content;
-        max-width: calc(100vw - 48px);
-        font-size: 12px;
-    }
+.site-brand__whisper[data-placement="below"] {
+    inset-inline-start: 0;
+    top: calc(100% + 6px);
+    transform: none;
+    max-width: calc(100vw - 48px);
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0;
 }
 @media (prefers-reduced-motion: reduce) {
     .site-brand__whisper {
