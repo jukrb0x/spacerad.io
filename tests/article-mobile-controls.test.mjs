@@ -95,6 +95,15 @@ test("mobile article ends with visible like and share actions, then expands labe
         const like = share.locator("[data-like-button]");
         assert.equal(await like.isVisible(), true);
         assert.match(await like.innerText(), /Like/i);
+        assert.equal(await like.evaluate((el) => getComputedStyle(el).touchAction), "manipulation");
+        assert.deepEqual(
+            await page.evaluate(() =>
+                [...document.querySelectorAll("body.article-page a, body.article-page button")]
+                    .filter((el) => getComputedStyle(el).touchAction !== "manipulation")
+                    .map((el) => el.tagName),
+            ),
+            [],
+        );
         const beforeColor = await like.evaluate((el) => getComputedStyle(el).backgroundColor);
         assert.notEqual(beforeColor, "rgb(223, 32, 27)");
         const beforeInk = await like.evaluate((el) => getComputedStyle(el).color);

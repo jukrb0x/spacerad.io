@@ -894,6 +894,9 @@ body.article-page {
     --article-control-ink: var(--color-text-primary);
     --article-control-border: var(--color-border-strong);
 }
+body.article-page :is(a, button) {
+    touch-action: manipulation;
+}
 html[data-theme="dark"] body.article-page {
     --article-control-surface: var(--color-bg-surface);
     --article-control-ink: var(--color-text-primary);
