@@ -17,6 +17,17 @@ body {
     position: relative;
     isolation: isolate;
 }
+@media (min-width: 768px) {
+    body {
+        /* Keep the neutral page base over the tinted browser canvas on short pages. */
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    body > main {
+        flex: 1;
+    }
+}
 :root {
     --footer-wash-strength: 5%;
     --footer-wash-height: 110px;
