@@ -58,52 +58,8 @@ const shareLinks = [
 ];
 ---
 
-<!-- Desktop: Fixed sidebar on left -->
-<aside
-    data-share-sidebar
-    class="hidden min-[1400px]:flex fixed flex-col gap-3 opacity-0 transition-opacity duration-200 mt-[5px]"
-    style="right: calc(50% + 25rem + 2rem); top: 6rem;"
-    aria-label="Share article" data-i18n-attr="aria-label" data-i18n-en="Share article" data-i18n-zh="分享文章"
->
-    {shareLinks.map((link) => (
-        <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface shadow-sm transition-all hover:border-accent hover:text-accent hover:shadow-md focus-accent"
-            aria-label={link.label}
-        >
-            <Icon name={link.icon} class="h-6 w-6" aria-hidden="true" />
-        </a>
-    ))}
-    <button
-        type="button"
-        class="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface shadow-sm transition-all hover:border-accent hover:text-accent hover:shadow-md focus-accent"
-        aria-label="Copy link" data-i18n-attr="aria-label" data-i18n-en="Copy link" data-i18n-zh="复制链接"
-        data-copy-link
-        data-url={url}
-    >
-        <Icon name="ri:link" class="h-6 w-6" aria-hidden="true" />
-    </button>
-    <!-- Like button -->
-    <button
-        type="button"
-        class="relative flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface shadow-sm transition-all hover:border-accent hover:shadow-md focus-accent group"
-        aria-label="Like" data-i18n-attr="aria-label" data-i18n-en="Like" data-i18n-zh="喜欢"
-        data-like-button
-        data-slug={slug}
-    >
-        <Icon name="ri:heart-line" class="h-6 w-6 group-data-[liked]:hidden" aria-hidden="true" />
-        <Icon name="ri:heart-fill" class="h-6 w-6 hidden group-data-[liked]:block text-red-500" aria-hidden="true" />
-        <span
-            class="absolute -bottom-1 -right-1 min-w-5 h-5 flex items-center justify-center rounded-full bg-surface border border-border text-xs text-muted"
-            data-like-count
-        ></span>
-    </button>
-</aside>
-
-<!-- Mobile: a visible article-end action pair before comments. -->
-<aside data-share-mobile class="article-share min-[1400px]:hidden" aria-label="Article actions" data-i18n-attr="aria-label" data-i18n-en="Article actions" data-i18n-zh="文章操作">
+<!-- Article-end actions before comments at every viewport width. -->
+<aside data-share-mobile class="article-share" aria-label="Article actions" data-i18n-attr="aria-label" data-i18n-en="Article actions" data-i18n-zh="文章操作">
     <h2 class="article-share__invitation" data-i18n-en="Enjoyed this article?" data-i18n-zh="喜欢这篇文章？">Enjoyed this article?</h2>
     <div class="article-share__actions">
         <button type="button" data-like-button data-slug={slug} class="article-share__like group">

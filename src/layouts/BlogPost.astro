@@ -143,7 +143,7 @@ const showToc = headings.filter((heading) => heading.depth >= 2 && heading.depth
 						<slot />
 					</Prose>
 
-					<!-- Article-end actions sit before comments on mobile; desktop rail remains fixed. -->
+					<!-- Article-end actions sit before comments at every viewport width. -->
 					<ShareSidebar title={title} description={description} tags={tags} slug={slug} />
 
 					<div class="mt-10">

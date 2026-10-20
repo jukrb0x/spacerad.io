@@ -64,9 +64,8 @@ for (const width of [1440, 390])
             const { context, page, errors } = await open(width, theme);
             try {
                 await go(page, "/posts/introducing-space-radio");
-                if (width < 1400) await page.locator("[data-share-mobile-toggle]").click();
-                const selector = width < 1400 ? "[data-share-menu-item]" : "[data-share-sidebar] > a, [data-share-sidebar] > button";
-                const buttons = page.locator(selector);
+                await page.locator("[data-share-mobile-toggle]").click();
+                const buttons = page.locator("[data-share-menu-item]");
                 const token = await page.locator("body").evaluate((el) => getComputedStyle(el).getPropertyValue("--article-control-ink").trim());
                 assert.notEqual(token, "", "article control ink must be defined");
                 const expected = await page.locator("body").evaluate((el) => {
@@ -77,8 +76,9 @@ for (const width of [1440, 390])
                     probe.remove();
                     return ink;
                 });
-                assert.ok((await buttons.count()) >= (width < 1400 ? 3 : 4), "share controls must be present");
-                if (width < 1400) assert.equal(await page.locator("[data-share-mobile] [data-like-button]").isVisible(), true);
+                assert.ok((await buttons.count()) >= 3, "share controls must be present");
+                assert.equal(await page.locator("[data-share-mobile] [data-like-button]").isVisible(), true);
+                assert.equal(await page.locator("[data-share-sidebar]").count(), 0);
                 for (let i = 0; i < (await buttons.count()); i++) {
                     const button = buttons.nth(i);
                     await button.hover();

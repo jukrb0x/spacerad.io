@@ -309,21 +309,19 @@ document.addEventListener("astro:before-swap", () => {
     disposeMobileTocDrawer = undefined;
 });
 
-// ============ Sidebar Positioning (TOC + Share Bar) ============
+// ============ Sidebar Positioning (TOC) ============
 // Dynamically calculate sidebar starting position, implementing scroll floating effect
 let sidebarPositionRAF: number | null = null;
 let sidebarsInitialized = false;
 
 // Cache DOM elements to avoid repeated queries
 let cachedTocSidebar: HTMLElement | null = null;
-let cachedShareSidebar: HTMLElement | null = null;
 let cachedArticleHeader: HTMLElement | null = null;
 let cachedArticleBody: HTMLElement | null = null;
 let cachedMobileTocToggle: HTMLElement | null = null;
 
 function initSidebarCache(): void {
     cachedTocSidebar = document.querySelector<HTMLElement>("[data-toc-sidebar]");
-    cachedShareSidebar = document.querySelector<HTMLElement>("[data-share-sidebar]");
     cachedArticleHeader = document.querySelector<HTMLElement>("[data-article-header]");
     cachedArticleBody = document.querySelector<HTMLElement>("main > article .prose");
     cachedMobileTocToggle = document.querySelector<HTMLElement>("[data-toc-mobile-toggle]");
@@ -358,15 +356,11 @@ function adjustSidebarPositions(): void {
         if (cachedTocSidebar) {
             cachedTocSidebar.style.top = topValue;
         }
-        if (cachedShareSidebar) {
-            cachedShareSidebar.style.top = topValue;
-        }
 
         // Only set opacity once on first position update
         if (!sidebarsInitialized) {
             sidebarsInitialized = true;
             if (cachedTocSidebar) cachedTocSidebar.style.opacity = "1";
-            if (cachedShareSidebar) cachedShareSidebar.style.opacity = "1";
         }
     });
 }

@@ -24,7 +24,7 @@ src/
 ├── data/                # Static data files (friends list, etc.)
 ├── layouts/
 │   ├── Page.astro       # Generic page layout (about, friends, etc.)
-│   └── BlogPost.astro   # Blog article layout (TOC, share sidebar, comments)
+│   └── BlogPost.astro   # Blog article layout (TOC, article-end actions, comments)
 ├── lib/                 # Utility libraries
 ├── pages/               # File-based routing (see Routing below)
 ├── scripts/             # Client-side JS modules (see tech-stack.md)
@@ -155,7 +155,7 @@ require removal and re-adding on the actual device. No PWA manifest is needed.
 | Component | Purpose |
 |-----------|---------|
 | `TableOfContents.astro` | TOC with nested lists and numbering |
-| `ShareSidebar.astro` | Share buttons + like counter (~411 lines) |
+| `ShareSidebar.astro` | Article-end like and share buttons with total count |
 | `Comments.astro` | Routes to Cusdis or Remark42 |
 | `CusdisComments.astro` | Cusdis widget |
 | `Remark42Comments.astro` | Remark42 widget |

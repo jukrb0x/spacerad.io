@@ -1274,22 +1274,6 @@ body.article-page [data-share-menu-item] svg {
     width: 20px;
     height: 20px;
 }
-[data-share-sidebar] > a,
-[data-share-sidebar] > button {
-    border-radius: 50%;
-    box-shadow: none;
-    color: var(--article-control-ink);
-    border-color: var(--article-control-border);
-    background: var(--article-control-surface);
-}
-[data-share-sidebar] > a:hover,
-[data-share-sidebar] > button:hover {
-    color: var(--article-control-ink);
-    background: color-mix(in srgb, var(--article-control-ink) 12%, var(--article-control-surface));
-    border-color: var(--article-control-ink);
-}
-[data-share-sidebar] > a:focus-visible,
-[data-share-sidebar] > button:focus-visible,
 body.article-page [data-share-menu-item]:focus-visible {
     color: var(--article-control-ink);
     outline: 2px solid var(--article-control-ink);
