@@ -695,7 +695,7 @@ header.site-header[data-header].is-scrolled {
 }
 .post-item {
     display: grid;
-    grid-template-columns: 88px 60px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
     gap: 20px;
     align-items: baseline;
     padding: 16px 12px;
@@ -1783,7 +1783,6 @@ html {
         gap: 4px 16px;
     }
     .post-item > time,
-    .post-item > .language-label,
     .post-item__translation {
         display: none;
     }

@@ -21,7 +21,6 @@ const translation = getPostTranslation(post.id, posts);
     </div>
     <a href={`/posts/${post.id}`} class="post-item" data-post-id={post.id}>
         <time datetime={post.data.published.toISOString()}>{post.data.published.toISOString().slice(0, 10).replaceAll("-", ".")}</time>
-        <span class="language-label">{lang === "zh" ? "中文" : "English"}</span>
         <span class="post-item__title">{draft && <span class="draft-badge">Draft · </span>}{post.data.title}</span>
     </a>
     {translation && <a class="post-item__translation" href={`/posts/${translation.id}`} hreflang={translation.data.lang} data-preview="off">{translation.data.lang === "en" ? "English" : "中文"} <Icon name="ri:arrow-right-up-line" class="link-arrow" aria-hidden="true" focusable="false" is:inline /></a>}
