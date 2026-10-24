@@ -13,14 +13,8 @@ facts:
     value:
       en: House Pale Ale
       zh: 店家自有淡色艾尔
-  - label:
-      en: ABV
-      zh: 酒精度
-    value:
-      en: Not confirmed
-      zh: 未核实
 summary:
-  en: Recorded as a house pale ale. The brewer, ABV and a verified badge are still unidentified.
-  zh: 记录为 House Pale Ale；酿造商、酒精度和可靠酒标尚未确认。
+  en: House pale ale.
+  zh: 店家自有淡色艾尔。
 sources: []
 ---

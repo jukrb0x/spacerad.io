@@ -26,7 +26,7 @@ const entries = readdirSync(folder)
         return { url, data: yaml.load(frontmatter), body: body.trim() };
     });
 test("collection entries have bilingual public data, valid available artwork and no invented notes", () => {
-    assert.equal(entries.length, 12);
+    assert.equal(entries.length, 16);
     for (const { url, data, body } of entries) {
         const parsed = schema.parse(data);
         assert.equal(parsed.collection, "beer");

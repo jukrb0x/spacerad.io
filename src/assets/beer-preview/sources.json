@@ -48,5 +48,20 @@
         "id": "turia-label",
         "source": "https://caferoyalezaragoza.com/",
         "note": "Full transparent Turia Cerveza Tostada label artwork."
+    },
+    {
+        "id": "tsingtao-brand-logo",
+        "source": "https://www.tsingtao.com.cn/TsingTao/images/pcweb/welcome-logo.png",
+        "note": "Official Tsingtao logo."
+    },
+    {
+        "id": "asahi-super-dry-family",
+        "source": "https://www.asahisuperdry.com/static/assets/logos/logo-asahi-super-dry.png",
+        "note": "Official Asahi Super Dry logo."
+    },
+    {
+        "id": "1664-rose-wordmark",
+        "source": "https://www.blanc.1664.co.uk/media/y0ukz3e3/1664_sapphire_variant_mark_rose_rgb-removebg-preview.png",
+        "note": "Official 1664 Rosé wordmark."
     }
 ]
